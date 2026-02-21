@@ -321,8 +321,8 @@ function sEnd(e){e.preventDefault();document.getElementById('sbtn').style.transf
 // ======= SCENE CONFIG (ASCII only - hyphens not em-dashes) =======
 const SC = {
   village:     { name:'Chapter I -- The Village',                sub:'Tepeyac, Mexico -- December 1531',                st:0x3A1E06, sb:0x9B6828, fg:0xAA7830, fd:0.011, ac:0xFFD080, ai:0.55, dc:0xFFE8A0, di:2.6, dp:[18,32,12],  gc:0x3D6A18, sp:[0,0,6],  bn:19 },
-  hill:        { name:'Chapter II -- The Apparition',            sub:'Tepeyac Hill -- Before Dawn, December 9',         st:0x020914, sb:0x0E1E3C, fg:0x182A4A, fd:0.009, ac:0x90B8E8, ai:0.38, dc:0xFFAA50, di:1.9, dp:[-12,22,16], gc:0x5A6A40, sp:[0,0,11], bn:20 },
-  bishop:      { name:"Chapter III -- The Bishop's Palace",      sub:'Mexico City -- December 9 to 11, 1531',           st:0x120900, sb:0x2C1A0A, fg:0x382010, fd:0.016, ac:0xFFB870, ai:0.52, dc:0xFFD090, di:2.1, dp:[10,28,14],  gc:0x8B6840, sp:[0,0,10], bn:14 },
+  hill:        { name:'Chapter II -- The Apparition on Tepeyac', sub:'Tepeyac Hill -- Four Apparitions, December 9-12, 1531',         st:0x020914, sb:0x0E1E3C, fg:0x182A4A, fd:0.009, ac:0x90B8E8, ai:0.38, dc:0xFFAA50, di:1.9, dp:[-12,22,16], gc:0x5A6A40, sp:[0,0,11], bn:20 },
+  bishop:      { name:"Chapter III -- The Bishop's Palace",      sub:'Mexico City -- Juan Diego Seeks the Bishop, December 9 to 11, 1531',           st:0x120900, sb:0x2C1A0A, fg:0x382010, fd:0.016, ac:0xFFB870, ai:0.52, dc:0xFFD090, di:2.1, dp:[10,28,14],  gc:0x8B6840, sp:[0,0,10], bn:14 },
   miracle:     { name:'Chapter IV -- The Roses and the Tilma',   sub:'Tepeyac Summit -- December 12, 1531',             st:0x1A0500, sb:0x3A0E00, fg:0x5A2408, fd:0.010, ac:0xFF9840, ai:0.58, dc:0xFFAA30, di:2.9, dp:[0,36,6],    gc:0x506035, sp:[0,0,11], bn:19 },
   church:      { name:'Chapter V -- The Church is Built',        sub:'Tepeyac -- 1533 A.D.',                            st:0x0A1C34, sb:0x1E3E62, fg:0x2E5080, fd:0.009, ac:0xB0CCFF, ai:0.53, dc:0xFFD890, di:2.2, dp:[14,30,10],  gc:0x4A3A22, sp:[0,0,10], bn:20 },
   philippines: { name:'Chapter VI -- The Philippines, 1601 A.D.',sub:'Makati, Manila -- The Faith Crosses the Pacific', st:0x0A2040, sb:0x1050A0, fg:0x1A60A0, fd:0.007, ac:0x90D8FF, ai:0.58, dc:0xFFEE70, di:2.9, dp:[12,38,6],   gc:0x2A5A1A, sp:[0,0,8],  bn:21 },
@@ -349,8 +349,9 @@ const NPCS = {
       {sp:'Xochitl',t:"My children ask -- who is this new God? I tell them: He is the God of mercy, who took flesh in a woman's womb. They say: then He understands mothers. I think they are right."},
     ]},
     {id:'cousin',pos:[-7,0,-7],col:0x6A3820,nm:'Juan Bernardino',lines:[
-      {sp:'Juan Bernardino -- Your Cousin',t:"Juan Diego... I am not feeling well today. The fever has come. My bones ache. You know this fever -- it has taken so many of our people. Please, go to your Mass. Pray for me, cousin."},
-      {sp:'Juan Bernardino',t:"Do not worry about me. If it is God's will that I recover, I will recover. If it is His will that I join our ancestors, then pray for a good priest to reach me in time."},
+      {sp:'Juan Bernardino -- Your Cousin, Early December 1531',t:"Juan Diego... I am not well. The fever came in the night. My bones ache and I cannot eat. You know this fever -- it has taken so many of our people since the Spanish arrived. Go to your Mass. Pray for me, cousin. I will be here when you return."},
+      {sp:'Juan Bernardino',t:"Do not worry about me. If it is God's will that I recover, I will recover. If it is His will that I join our ancestors in heaven, then pray for a good priest to reach me in time. Either way I am in God's hands. Go, Juan Diego."},
+      {sp:'Juan Bernardino -- December 11, Growing Worse',t:"Cousin... the fever is worse. I think I am dying now. I need a priest to hear my confession before I go. Please -- take the road that goes east, around Tepeyac Hill. I do not want you delayed by the Lady on the hill. I know she is real. But I am dying. Please go the long way. Promise me."},
     ]},
     {id:'friar',pos:[5,0,-9],col:0x4A4A6A,nm:'Fray Tomas, OFM',lines:[
       {sp:'Fray Tomas -- Franciscan Friar',t:"Praised be Jesus Christ! Juan Diego -- your devotion, your willingness to walk fifteen miles before sunrise, is spoken of with admiration among the friars. You are among the first fruits of this New World mission."},
@@ -363,28 +364,46 @@ const NPCS = {
       {sp:'Our Lady of Guadalupe',t:"I very much want and ardently desire that my hermitage be erected in this place. Here I will show, give, and offer all my love, compassion, help, and protection to the people. I am your merciful mother, the mother of all who live in this land."},
       {sp:'Our Lady of Guadalupe',t:"I will hear their weeping, their sorrow, and will remedy and alleviate all their multiple sufferings, necessities, and misfortunes. Go to the dwelling of the Bishop of Mexico -- tell him I sent you to manifest my desire."},
       {sp:'Our Lady of Guadalupe',t:"Tell him all you have seen and admired and heard. Be certain that I will be grateful and will repay you. I will make you joyful. You have heard my word -- now go, and put forth all your effort."},
+      {sp:'Our Lady of Guadalupe -- December 9 Evening, After the Bishop Refused',t:"My little son -- you have come back to me. Do not be troubled. The Bishop is a good man. He needs time. He has never heard anything like what you told him today. He is asking himself: is this real? Is this from God? Return to him tomorrow. Tell him again. And this time, tell him that it is I who send you -- say my name."},
+      {sp:'Our Lady of Guadalupe',t:"I know the weight you carry. You think he will not believe you because you are poor, because you are indigenous, because you walk to Mass in poor sandals before any light shows in the sky. But that is exactly why I chose you. Go home. Sleep. You are not alone on this hill and you have never been alone on this hill. Be at peace."},
     ]},
     {id:'shepherd',pos:[10,0,4],col:0x4A3818,nm:'Shepherd Tlacatzin',lines:[
-      {sp:'Shepherd Tlacatzin',t:"Juan Diego! You look pale as a spirit. I was on this hill before dawn -- I heard singing. Like birds I have never known in all my years on this mountain. Sweeter than any sound I have ever heard."},
-      {sp:'Shepherd Tlacatzin',t:"Whatever you witnessed -- your eyes are different now. Like a man who has touched something eternal. Go safely, friend. I will pray for you."},
+      {sp:'Shepherd Tlacatzin -- Shepherd of Tepeyac',t:"Juan Diego! You look pale as a spirit. I was on this hill before dawn watching my flock on the lower slope -- I heard singing from above. Not birds I know. Something I have never heard in forty years on this mountain. Sweeter than any sound. And then a light, soft and golden, on the summit where nothing burns."},
+      {sp:'Shepherd Tlacatzin',t:"When you came down from the hill your face looked different. Like a man who has put down a burden he has carried his whole life. Your eyes were full of something I cannot name. I am a simple man with sheep. But I know what I heard, and I know what I saw on your face."},
+      {sp:'Shepherd Tlacatzin',t:"Go safely to Mexico City, Juan Diego. Whatever she asked of you -- do it. I will be here. If anyone asks me whether something happened on Tepeyac Hill this morning, I will tell them the truth: I heard heaven open."},
+    ]},
+    {id:'spy_servant',pos:[-6,0,8],col:0x4A3830,nm:"Bishop's Servant Diego",lines:[
+      {sp:"Bishop's Servant Diego -- December 9 Evening",t:"I will tell you something strange. The Bishop sent three of us to follow that Indian when he left the palace. Discreetly. He needed to know if the story was genuine or a fabrication. We followed Juan Diego all the way to the causeway across the lagoon at Tlatelolco."},
+      {sp:'Servant Diego',t:"And then he was simply not there. We were twenty paces behind him on the causeway -- a man walking alone, nowhere to hide. And then he was gone. We searched both banks. We reported back to the Bishop: the man vanished. I am a soldier of twenty years. I do not believe in tricks on the road. I believe in what I saw -- or rather, what I could not find."},
+      {sp:'Servant Diego',t:"The Bishop did not speak for a moment when we told him. Then he said: I see. Thank you. That was all. But I have never seen his face look quite like that before or since. Something had shifted in him. Whatever we did not find on that causeway -- the Bishop believed it told him something important."},
+    ]},
+    {id:'tepeyac_elder',pos:[5,0,8],col:0x5A4020,nm:'Elder Cuauhtemoc',lines:[
+      {sp:'Elder Cuauhtemoc -- Keeper of Memory, Tepeyac',t:"This hill has been sacred since before your grandfather was born. We called her Tonantzin -- Our Mother. She was the mother of the gods in our old faith. We came here to pray to her, to leave offerings. The Spanish closed her shrine when they came. They tore it down. They said: no more."},
+      {sp:'Elder Cuauhtemoc',t:"And now a woman appears on this same hill. She speaks Nahuatl -- our language, not the conquerors'. She wears our colors. Her skin is our color. She calls herself the Mother of the true God. My people ask: is this Tonantzin come back in a new way? I say: she is someone entirely new. But she chose this hill. She knew what this hill means to us. She chose it on purpose."},
+      {sp:'Elder Cuauhtemoc',t:"The Spanish priests worry that people confuse her with Tonantzin. But the people who come here weeping with sorrow and leaving in peace -- they are not confused. Something real is meeting them on this hill. Something that meets you where you are. That is not confusion. That is mercy."},
     ]},
   ],
   bishop:[
-    {id:'doorman',pos:[0,0,11],col:0x3A2818,nm:"Bishop's Doorman",lines:[
-      {sp:'Doorman -- Rodrigo',t:"Hold there. You cannot simply present yourself at the Bishop's door. This is the residence of His Excellency the first Bishop of Mexico. State your name and your business."},
-      {sp:'Rodrigo',t:"An Indian claiming to have seen a vision on Tepeyac Hill... The Bishop is a good man. He has instructed us to receive all who come in good faith. Wait here. I will announce you."},
+    {id:'doorman',pos:[0,0,11],col:0x3A2818,nm:"Doorman Rodrigo",lines:[
+      {sp:'Doorman Rodrigo -- First Arrival',t:"Hold there. You cannot simply present yourself at the Bishop's door. This is the official residence of His Excellency the first Bishop of Mexico. State your name and your business clearly. You have a letter from a Franciscan friar? Then wait here. I will announce you."},
+      {sp:'Rodrigo',t:"He will see you. The Bishop is a thorough man -- he hears everyone, decides carefully, and rarely makes hasty judgments. Whatever you tell him, tell it plainly. He respects plain speech. Do not embellish."},
+      {sp:'Rodrigo -- On Your Second Visit',t:"You are back already. The Bishop told me: if the Indian returns, admit him at once and bring him directly to my study. I do not know what you said to him, but he has not stopped thinking about it. Go in. He is waiting."},
     ]},
     {id:'bishop',pos:[0,0,-10],col:0x800000,nm:'Bishop Zumarraga',isBishop:true,lines:[
-      {sp:'Bishop Juan de Zumarraga',t:"My son, I have heard your words attentively. You say the Most Holy Virgin Mother of God appeared on the hill of Tepeyac and desires that I build her a sacred house there. This is a weighty claim. I must reflect carefully."},
-      {sp:'Bishop Zumarraga',t:"Come again another time and I will hear you with all patience. Tell the Lady who sent you that I am grateful for her intention. But I will need a sign -- a token from the Lady herself -- before I can act."},
-      {sp:'Bishop Zumarraga',t:"My child, I cannot authorize a church on one man's testimony alone, however sincere. Bring me a sign she herself provides -- that I may know this is truly God's will. Then I will believe with all my heart."},
+      {sp:'Bishop Juan de Zumarraga OFM -- First Audience, December 9, 1531',t:"My son, I have heard your words attentively. You say the Most Holy Virgin Mother of God, the ever-virgin Holy Mary, appeared to you on the hill of Tepeyac and desires that I build her a sacred house there. You are sincere. I can see that. But this is a very serious claim."},
+      {sp:'Bishop Zumarraga',t:"I am a friar. I have read the mystics -- Teresa of Avila, Catherine of Siena, Bridget of Sweden. I know authentic visions are real and I know how to test them. An indigenous man walking to Mass before dawn, alone on a cold hill, hearing music and seeing light -- this is not impossible. But I must be careful for the Church's sake."},
+      {sp:'Bishop Zumarraga',t:"Come again another time and I will hear you with all my patience. Tell the Lady who sent you that I am grateful for her intention. But before I can authorize anything, I will need a sign -- a token from the Lady herself that I may know with certainty this is truly God's will. Then I will believe with all my heart."},
+      {sp:'Bishop Zumarraga -- Second Audience, After the Tilma Miracle',t:"Juan Diego -- when you opened that cloak and the roses fell and I saw Her image blazing on the cloth -- I could not speak. I could not stand. I fell to my knees and wept. I am not a man who weeps easily. I have been a Franciscan friar for forty years."},
+      {sp:'Bishop Zumarraga',t:"I took the tilma from your hands with my own hands. I carried it to my chapel and knelt before it all that night. This morning I went to Tepeyac with architects and we chose the site. Construction begins this week. Everything she asked for -- everything -- will be done."},
     ]},
-    {id:'guard',pos:[-9,0,4],col:0x505060,nm:'Palace Guard',lines:[
-      {sp:'Palace Guard -- Luis',t:"Move along. The Bishop receives important visitors today. If you have business, state it to the doorman."},
-      {sp:'Palace Guard',t:"...They say you have come before and came back again. That takes courage -- or deep faith. Either way the Bishop has agreed to hear you. Good luck to you."},
+    {id:'guard',pos:[-9,0,4],col:0x505060,nm:'Palace Guard Luis',lines:[
+      {sp:'Palace Guard Luis -- First Day',t:"Stop there. The Bishop's palace is not a market. State your name and your business to the doorman. An Indian, alone, asking for the Bishop... I have seen stranger things since coming to New Spain. The doorman will decide."},
+      {sp:'Palace Guard Luis -- Second Day',t:"You again. The Indian who claims a vision on Tepeyac. The Bishop's secretary told me: if he comes back, let him wait in the courtyard. That means the Bishop is actually considering what you said. That almost never happens. Whatever you told him -- it made an impression."},
+      {sp:'Palace Guard Luis -- The Day of the Miracle',t:"I was at my post when you opened that cloak. I saw the roses fall. I saw the image appear. I have been a soldier for twenty-two years and I have seen things that cannot be explained -- but never anything like that. I went home and told my wife. We both prayed the Rosary. I am not a very devout man. I was that night."},
     ]},
-    {id:'official',pos:[9,0,2],col:0x5A4838,nm:'Church Official',lines:[
-      {sp:'Church Official -- Don Pedro',t:"So you are the one who claims to have seen Our Lady on Tepeyac Hill. Bring the sign the Bishop requests -- something that cannot be made by human hands. Then even the most skeptical among us will believe."},
+    {id:'official',pos:[9,0,2],col:0x5A4838,nm:'Church Official Don Pedro',lines:[
+      {sp:'Church Official Don Pedro -- Before the Miracle',t:"So you are the one who claims to have seen Our Lady on Tepeyac Hill. I have read the theological literature on apparitions. Most are delusions or pious fabrications. The tests the Church applies are very strict. Bring a sign that cannot be made by human hands -- then even the most skeptical will listen."},
+      {sp:'Church Official Don Pedro -- After the Miracle',t:"I owe you an apology, Juan Diego. I was one of the skeptics. I believed you were sincere but mistaken. When I saw the image on your tilma -- I understood that I had been applying human standards to something outside human categories entirely. I have written a formal account of what I witnessed. I have signed my name to every word."},
     ]},
   ],
   miracle:[
@@ -394,15 +413,21 @@ const NPCS = {
       {sp:'Our Lady of Guadalupe',t:"This is the sign and token I send to the Bishop. Tell him in my name that he should see in it what I ask, and carry out my wish. You are my trusted ambassador. For this I will reward you. Go now, with all your heart."},
     ]},
     {id:'cousin2',pos:[-10,0,5],col:0x8A5030,nm:'Juan Bernardino -- Healed!',lines:[
-      {sp:'Juan Bernardino -- Miraculously Healed!',t:"Juan Diego! I am completely well! The fever has left me entirely! A magnificent young woman appeared here -- radiant with light. She told me she had just sent my nephew Juan Diego to the Bishop with her holy image!"},
-      {sp:'Juan Bernardino',t:"She told me her name -- she said: I am Santa Maria de Guadalupe. She spoke in Nahuatl, just as you said! Cousin -- I feel stronger than I have in years. God and His Holy Mother be praised forever!"},
+      {sp:'Juan Bernardino -- Miraculously Healed!',t:"Juan Diego! I am completely well! The fever has left me entirely! I was preparing to die -- I even asked you on December eleventh to go the long way around Tepeyac to fetch a priest, so you would not be delayed by Her. You obeyed me. And She found you anyway."},
+      {sp:'Juan Bernardino',t:"While you were gone that morning She appeared to me also, here in this very room. A magnificent young woman, radiant with light. She healed me instantly and completely. She told me she had just sent you, my nephew, to the Bishop with her holy image on your tilma."},
+      {sp:'Juan Bernardino',t:"She told me her name in Nahuatl: I am Santa Maria de Guadalupe. That is what she called herself -- Guadalupe. She spoke our language, cousin. Not Spanish. Ours. I am stronger now than I have been in years. God and His Holy Mother be praised forever and ever."},
+    ]},
+    {id:'rose_witness',pos:[-8,0,0],col:0x6A5040,nm:'Witness Tlacaelel',lines:[
+      {sp:'Tlacaelel -- On the Path Below the Summit, December 12, 1531',t:"I was on the path below the summit that morning. I saw Juan Diego coming down from the hill carrying something in his tilma -- holding the cloth closed with both hands. His face looked like a man carrying something that weighs nothing at all and everything at once."},
+      {sp:'Tlacaelel',t:"When he passed me on the path I smelled roses. I stopped walking. It was December. There are no roses in December on this hill. There are no roses on this hill in any month -- it grows only cactus and mountain herbs. I turned and watched him walk down toward Mexico City. I have thought about that smell every December since. Every single one."},
     ]},
   ],
   church:[
     {id:'bishopChurch',pos:[0,0,-10],col:0x800000,nm:'Bishop Zumarraga',isBishop:true,lines:[
-      {sp:'Bishop Juan de Zumarraga',t:"Juan Diego -- I knelt before the image when it appeared on your tilma, and I wept. There was no doubt this was the work of God, made by no human painter. I ordered the chapel built at Tepeyac immediately, just as Our Lady desired."},
-      {sp:'Bishop Zumarraga',t:"The tilma is the greatest marvel I have ever witnessed. A coarse cloth of ayate fiber -- and yet upon it rests an image no master painter in all of Europe could have made. Her eyes contain a reflection of the room, as if they are alive."},
-      {sp:'Bishop Zumarraga',t:"Juan Diego -- you are blessed above all men of this age. What God has done through you will be remembered as long as this world stands. Nine million of your people will come to the faith because of this day."},
+      {sp:'Bishop Juan de Zumarraga',t:"Juan Diego -- when you opened your tilma and the roses fell, I fell to my knees. When I looked up and saw her image blazing on your cloth -- I could not speak for a long time. All my household knelt with me. We all wept together."},
+      {sp:'Bishop Zumarraga',t:"I took the tilma from you with my own hands and carried it to my private chapel. I kept it there all that night in prayer. The next morning I rode to Tepeyac with Juan Diego to show the site to the architects. We broke ground for the hermitage within a week."},
+      {sp:'Bishop Zumarraga',t:"The tilma is the greatest marvel I have ever witnessed. A coarse cloth of cactus fiber -- and yet upon it rests an image no master painter in Europe could have made. Her eyes reflect the room around her as if alive. I ordered the chapel built exactly as Our Lady desired."},
+      {sp:'Bishop Zumarraga',t:"Juan Diego -- you are blessed above all men of this age. What God has done through you will be remembered as long as this world stands. Nine million of your people will come to the faith because of this day. I am not worthy to have witnessed it."},
     ]},
     {id:'pilgrim',pos:[8,0,3],col:0x5A3020,nm:'Pilgrim Citlali',lines:[
       {sp:'Pilgrim Citlali -- First Pilgrim',t:"I walked four days to be here. When I heard that the Mother of God appeared to one of our own people, spoke in Nahuatl, chose a Nahua man -- I fell to my knees in the road and wept with joy."},
@@ -411,6 +436,15 @@ const NPCS = {
     {id:'juanOld',pos:[-8,0,0],col:0x7A5030,nm:'Juan Diego -- Elder',lines:[
       {sp:'Juan Diego -- Guardian of the Shrine',t:"I have lived here at the chapel every day since it was built. I sweep the floors, light the candles, guide the pilgrims. People come from every part of New Spain. Nine million baptized in seven years."},
       {sp:'Juan Diego',t:"The tilma -- Her image -- I look at it every day. It has not faded. The cloth should have rotted long ago, but it has not. I am nothing -- a poor old weaver. But She chose me. Because She loves the small ones."},
+    ]},
+    {id:'palace_witness',pos:[8,0,4],col:0x403050,nm:"Catalina -- Eyewitness",lines:[
+      {sp:"Catalina -- Servant in the Bishop's Household",t:"I was in the outer room when Juan Diego opened his cloak. I was bringing water. The roses fell. I saw them fall -- Castilian roses, fresh and perfect, in December. The room went completely silent. I turned to look at the Bishop. He was already on his knees."},
+      {sp:'Catalina',t:"I knelt too. When I saw the image on the cloth I put my face on the floor. I am not a woman who does that easily. I have been in service eleven years. I am practical. When I lifted my face from the floor, the room smelled of roses and of something else I cannot name. Something clean. The Bishop stayed in that room for six hours after Juan Diego left. He did not eat. He did not call for anyone."},
+      {sp:'Catalina',t:"When he came out, his face showed he had been weeping. He looked at us all standing in the corridor and said: Call the architects. We are building a chapel at Tepeyac. And then he went to his desk and began writing. He wrote for the rest of the night. I brought him candles three times."},
+    ]},
+    {id:'architect_chapel',pos:[-8,0,4],col:0x384A30,nm:'Fray Martin -- Architect',lines:[
+      {sp:'Fray Martin de la Coruna OFM -- First Chapel Architect, 1532',t:"I designed the first hermitage on Tepeyac in January 1532. One room, stone walls, thatched roof. We finished in eight days. The Bishop said: we cannot make Our Lady wait. I have been a friar for thirty years. I had never heard a bishop say something quite like that."},
+      {sp:'Fray Martin',t:"When we placed the tilma in the hermitage for the first time, a crowd appeared immediately. I do not know how they knew. Indigenous people came from as far as Xochimilco and Chalco -- a half-day walk -- to see it. They came in silence and left in silence. Many wept. I watched all day. By evening I understood: we had not built a chapel. We had built a destination."},
     ]},
   ],
   philippines:[
@@ -428,7 +462,8 @@ const NPCS = {
       {sp:'Dona Maria',t:"On December 12 we will bring sampaguita, champaca, ilang-ilang -- our native flowers for Her altar. She belongs to the Philippines now. She is the mother of the poor, and we are the poor."},
     ]},
     {id:'governor',pos:[9,0,-5],col:0x5A4828,nm:'Gobernador Tello',lines:[
-      {sp:'Gobernador Francisco Tello de Guzman',t:"Friar -- I have approved the land grant for the church of Our Lady of Guadalupe at Makati. The devotion has spread remarkably fast. Build it well. Let it be worthy of the image it will hold."},
+      {sp:'Gobernador Francisco Tello de Guzman -- Granting the Land, Manila 1601',t:"Friar -- I have approved the land grant for the church of Our Lady of Guadalupe at Makati. The devotion has spread remarkably fast here in the Philippines. The indigenous people recognize her immediately -- the same response as in Mexico seventy years ago. She speaks to people without words."},
+      {sp:'Gobernador Francisco Tello de Guzman',t:"Build it well. Build it to last. The image of Guadalupe crossed the Pacific on a Spanish galleon, but what carries it now is something no galleon was built for. Build the church worthy of that. I will send stonecutters."},
     ]},
     {id:'singer',pos:[0,0,-12],col:0x7A4A20,nm:'Cantora Rosa Mendoza',lines:[
       {sp:'Cantora Rosa Mendoza',t:"Fray Miguel -- listen! We have composed a Tagalog hymn: Ina ng Guadalupe, Ina namin, Ipanalangin mo kami -- Mother of Guadalupe, our mother, pray for us. Three hundred voices will sing it in the procession."},
@@ -456,7 +491,8 @@ const NPCS = {
       {sp:'Brother Scribe',t:"Valeriano describes the moment the Bishop opened Juan Diego's tilma: At that very instant she painted herself -- the Precious Image of the Perfect Virgin Holy Mary, Mother of God our Lord, appeared, in the same form and figure as she is now kept and preserved in her precious home, in her hermitage of Tepeyac, which is called Guadalupe."},
     ]},
     {id:'scholar_lasso',pos:[7,0,-5],col:0x5A4838,nm:'Don Fernando de Alva Ixtlilxochitl',lines:[
-      {sp:'Don Fernando de Alva Ixtlilxochitl -- Nahua Historian',t:"Antonio Valeriano was the greatest Nahuatl scholar of his generation. He studied under the Franciscans at Tlatelolco -- the same college where Juan Diego heard Mass. He wrote the Nican Mopohua in the elevated classical Nahuatl of the Aztec court. This is not legend written long after. This is testimony recorded within living memory of the event."},
+      {sp:'Don Fernando de Alva Ixtlilxochitl -- Nahua Historian, c.1600',t:"Antonio Valeriano was the greatest Nahuatl scholar of his generation. He studied under the Franciscans at Tlatelolco -- the same college where Juan Diego heard Mass. He wrote the Nican Mopohua in the elevated classical Nahuatl of the Aztec court. This is not legend written long after. This is testimony recorded within living memory."},
+      {sp:'Don Fernando de Alva Ixtlilxochitl',t:"I have read everything written about the apparition in both Spanish and Nahuatl. The Spanish accounts are careful and institutional. But the Nahuatl account -- Valeriano's account -- is something different. It reads like a man transcribing something he already knows is true, from witnesses who knew it was true, in a language that makes it truer still. The Nahuatl word for her tenderness toward Juan Diego has no exact Spanish equivalent."},
     ]},
   ],
   tilma_study:[
@@ -480,10 +516,12 @@ const NPCS = {
       {sp:'Prof. Francisco Camps-Ribera',t:"The ayate cloth should have rotted within twenty years. Similar cloths from the same period are dust. Yet this cloth is supple after nearly five centuries. The Nobel laureate Richard Kuhn analyzed fiber samples in 1936 without being told their origin, and reported: the pigments correspond to no known mineral, vegetable, or animal dye. When told the source, he was silent for a long time."},
     ]},
     {id:'bishop_montufar',pos:[-5,0,-7],col:0x804040,nm:'Archbishop Alonso de Montufar',lines:[
-      {sp:'Archbishop Alonso de Montufar -- First Formal Investigation, 1556',t:"Twenty-five years after the apparition, I commissioned the first formal investigation into the tilma. I heard from the greatest indigenous painter of New Spain, Marcus Cipac de Aquino. I asked him: could you paint this image? He examined it at length. He said: No. He was not being modest. He was being honest."},
+      {sp:'Archbishop Alonso de Montufar -- First Formal Investigation, 1556',t:"Twenty-five years after the apparition, I commissioned the first formal investigation into the tilma. I heard from Marcus Cipac de Aquino, the greatest indigenous painter of New Spain. I asked him: could you paint this image? He examined it at length. He said: No. He was not being modest. He was being honest about something beyond his skill."},
+      {sp:'Archbishop Alonso de Montufar',t:"I also ordered the cloth measured and documented. The image is precisely positioned so that neither seam nor thread distorts it. The colors are unlike any pigment in our workshops. The cloth has been exposed to incense smoke, candle soot, and the hands of pilgrims for twenty-five years -- and it is unchanged. I wrote all of this in my report. I signed my name to every word."},
     ]},
     {id:'microscopist',pos:[5,0,-8],col:0x384858,nm:'Research Scientist',lines:[
-      {sp:'Research Scientist -- 1936 Nobel Commission',t:"The 1936 commission asked Nobel laureate Richard Kuhn to analyze fiber samples without telling him their origin. He analyzed them and reported: the pigments correspond to no known mineral, vegetable, or animal dye of any period. He was then told the source. He said nothing for a long time. Then he said: I do not have a scientific explanation for this image. Neither do I."},
+      {sp:'Research Scientist -- 1936 Nobel Commission',t:"The 1936 commission asked Nobel laureate Richard Kuhn to analyze fiber samples without telling him their origin. He reported: the pigments correspond to no known mineral, vegetable, or animal dye of any period. He was then told the source. He said nothing for a long time. Then he said: I do not have a scientific explanation for this image."},
+      {sp:'Research Scientist',t:"I think about what that means for a scientist. Richard Kuhn was one of the greatest analytical chemists alive. He received the Nobel Prize in 1938. He analyzed the dyes in Vermeer paintings, in Byzantine icons, in Roman murals. When he said the Guadalupe pigments have no known origin -- he meant it with the full weight of his career and his Nobel Prize behind it. We have not found an explanation since."},
     ]},
   ],
   conversions:[
@@ -497,17 +535,20 @@ const NPCS = {
       {sp:'Cacique Tlapalteotl',t:"I looked at the image for a long time. I thought: if this God sent His mother to us in our own form, speaking our own language -- then perhaps this God is different from the god of the men who destroyed my father. I was baptized the next morning. I brought my whole village the week after. Not because soldiers stood behind me. Because of a woman on a cloth."},
     ]},
     {id:'midwife_convert',pos:[8,0,3],col:0x7A3A30,nm:'Dona Xochicueitl',lines:[
-      {sp:'Dona Xochicueitl -- Midwife, Baptized 1534',t:"I attended fifty births before the smallpox came. After the smallpox there were no births for two years. The villages were silent. A third of our people were dead. When the image was enshrined at Tepeyac, I went. I prayed the way I prayed at the old shrines. Something listened. I cannot prove it. But I went home lighter than I had been in years."},
+      {sp:'Dona Xochicueitl -- Midwife of Tlatelolco, Baptized 1534',t:"I attended fifty births before the smallpox came. After the smallpox there were no births for two years. The villages were silent. A third of our people were dead. When the image was enshrined at Tepeyac, I went. I prayed the way I had prayed at the old shrines -- speaking aloud, leaving something. Something listened. I cannot prove it. But I went home lighter than I had been in years."},
+      {sp:'Dona Xochicueitl',t:"I became a catechist. I teach the children. I tell them: she came to us when we had lost everything. She came in our language to a suffering people. She did not come in triumph or with soldiers behind her. She came to a poor man on a cold hill at dawn and called him by a tender name. That is the God this faith believes in. That is why I am in this faith."},
     ]},
     {id:'friar_witness',pos:[-7,0,-4],col:0x4A4A6A,nm:'Bishop Zumarraga -- Final Years',lines:[
       {sp:'Bishop Juan de Zumarraga -- Final Testimony, c.1547',t:"I am an old man now. I have been Bishop of New Spain for twenty years. I have seen much that was terrible -- cruelties I tried to stop and often could not. But I have also seen this: nine million people freely choosing baptism, after everything that was done to their people. They did not choose because soldiers stood behind them. Many came from distant mountains with no soldiers anywhere near."},
       {sp:'Bishop Zumarraga',t:"They came because of a woman on a cloth. I know what I saw when that tilma opened. I know what I did -- I knelt on the floor of my own audience chamber and wept. And I know what has happened since. I have no adequate explanation. I have only my knees and my tears. It is, I have come to think, exactly the amount of explanation God intended to give us."},
     ]},
     {id:'historian_conv',pos:[5,0,-7],col:0x5A5020,nm:'Fray Juan de Torquemada',lines:[
-      {sp:'Fray Juan de Torquemada -- Monarquia Indiana, 1615',t:"Torquemada writes: The conversion of the Mexican Indians after the apparition of Guadalupe surpasses all the conversions ever wrought by the Apostles in the history of the Church. No single Apostle converted as many souls in his lifetime as were converted in New Spain in the decade after 1531. The theologians say that without a special miracle this would have been impossible. I agree with the theologians."},
+      {sp:'Fray Juan de Torquemada OFM -- Monarquia Indiana, 1615',t:"Torquemada writes: The conversion of the Mexican Indians after the apparition of Guadalupe surpasses all the conversions ever wrought by the Apostles in the history of the Church. No single Apostle converted as many souls in his lifetime as were converted in New Spain in the decade after 1531. The theologians say that without a special miracle this would have been impossible."},
+      {sp:'Fray Juan de Torquemada',t:"I have examined the records of the Franciscan missions. Before 1531, conversions numbered in the hundreds annually, and many were superficial -- people accepting baptism for social reasons with no real belief. After 1531, they numbered in the millions, and they were deep. The converts built churches with their own hands, defended the faith against skeptics, taught their children. The image changed something fundamental in how these people understood God."},
     ]},
     {id:'catechist_woman',pos:[-5,0,5],col:0x7A5030,nm:'Catechist Maria de la Cruz',lines:[
-      {sp:'Catechist Maria de la Cruz',t:"I teach the doctrina to two hundred children every week. When I show them the image, the children grow still. You know how children are -- they never grow still. But before this image, they grow still. Even the smallest ones. I have watched it for twenty years. I have no explanation. I only know: she reaches children. She reached me that way when I was a child. Perhaps that is enough."},
+      {sp:'Catechist Maria de la Cruz -- Indigenous Catechist, c.1550',t:"I teach the doctrina to two hundred children every week. When I show them the image, the children grow still. You know how children are -- they never grow still for anything. But before this image, even the smallest ones grow still. I have watched it for twenty years and it has not changed."},
+      {sp:'Catechist Maria de la Cruz',t:"She reached me that way when I was six years old. My mother brought me to Tepeyac. I did not understand theology. I did not know what a bishop was. But I looked at that face on the cloth and I understood: she is here and she loves us and she is not going away. I have been teaching that to children ever since. It is the whole catechism in one sentence."},
     ]},
   ],
   hermit:[
@@ -575,6 +616,11 @@ const COLS = {
     {id:'procCandles', pos:[-7.5,0,-3], icon:'🕯',lbl:'River Procession Candles', desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
     {id:'tilmaCopy',   pos:[7.5,0,-5],  icon:'🖼',lbl:'Blessed Tilma Copy',       desc:'A copy of the miraculous image -- to be enshrined in Manila',ec:0xD4A017},
   ],
+  bishop:[
+    {id:'epistle',    pos:[5,0,6],    icon:'📜',lbl:'Franciscan Letter of Introduction', desc:'The letter from Fray Tomas vouching for Juan Diego -- it opened the Bishop\'s door',ec:0xC8A040},
+    {id:'gospel_bk',  pos:[-5,0,5],   icon:'📖',lbl:'Gospel Book from the Bishop',      desc:'A small Gospel book given to Juan Diego by Bishop Zumarraga -- to keep him strong on the return journey',ec:0x2A4A8A},
+    {id:'ep_seal',    pos:[0,0,8],    icon:'🪙',lbl:'Episcopal Seal of New Spain',       desc:'The wax seal of Bishop Juan de Zumarraga -- pressed onto every document authorizing the new Church in Mexico',ec:0xD4A017},
+  ],
   nican:[
     {id:'nican_ms',      pos:[4,0,5],    icon:'📜',lbl:'Nican Mopohua Manuscript',    desc:'The original Nahuatl account by Antonio Valeriano, c.1545 -- the oldest written record of the apparitions',ec:0xC8A040},
     {id:'quill',         pos:[-5,0,4],   icon:'🪶',lbl:"Valeriano's Writing Quill",   desc:'The quill used to record the sacred words in classical Nahuatl -- the most important document in Mexican history',ec:0xE8E8D0},
@@ -623,17 +669,28 @@ const QS = [
   {s:'hill',        f:'qh3', d:'Receive the First Apparition of Our Lady',  t:'npc',  id:'ourLady1'},
   {s:'bishop',      f:'qb1', d:"Speak with the Bishop's doorman",           t:'npc',  id:'doorman'},
   {s:'bishop',      f:'qb2', d:"Deliver Our Lady's message to the Bishop",  t:'npc',  id:'bishop'},
-  {s:'hill',        f:'qh4', d:'Return -- Receive the Second Apparition',   t:'npc',  id:'ourLady1'},
+  {s:'hill',        f:'qh4', d:'Dec 9 Evening -- Our Lady Comforts You',    t:'npc',  id:'ourLady1'},
+  {s:'hill',        f:'qh5', d:'Speak with shepherd Tlacatzin on the hill', t:'npc',  id:'shepherd'},
+  {s:'hill',        f:'qh6', d:"Hear from the Bishop's servant who tried to follow you", t:'npc', id:'spy_servant'},
+  {s:'hill',        f:'qh7', d:"Speak with Elder Cuauhtemoc about Tepeyac's sacred history", t:'npc', id:'tepeyac_elder'},
   {s:'miracle',     f:'qm1', d:'Collect all 12 Castilian roses',            t:'roses'},
   {s:'miracle',     f:'qm2', d:'Collect the ayate cactus cloth',            t:'item', id:'ayate'},
   {s:'miracle',     f:'qm3', d:"Receive Our Lady's final instructions",     t:'npc',  id:'ourLady2'},
   {s:'miracle',     f:'qm4', d:"Witness Juan Bernardino's miraculous healing",t:'npc',id:'cousin2'},
+  {s:'miracle',     f:'qm5', d:'Hear Tlacaelel -- he smelled roses where no roses grow', t:'npc', id:'rose_witness'},
   {s:'bishop',      f:'qb3', d:'Present the roses and tilma to the Bishop', t:'npc',  id:'bishop'},
+  {s:'bishop',      f:'qb4', d:'Speak with the palace guard Luis',           t:'npc',  id:'guard'},
+  {s:'bishop',      f:'qb5', d:'Hear church official Don Pedro',             t:'npc',  id:'official'},
+  {s:'bishop',      f:'qb6', d:'Collect the Franciscan letter of introduction', t:'item', id:'epistle'},
+  {s:'bishop',      f:'qb7', d:'Collect the Gospel Book from Bishop Zumarraga', t:'item', id:'gospel_bk'},
+  {s:'bishop',      f:'qb8', d:'Collect the episcopal seal of New Spain',     t:'item', id:'ep_seal'},
   {s:'church',      f:'qc1', d:"Hear Bishop Zumarraga's witness",           t:'npc',  id:'bishopChurch'},
   {s:'church',      f:'qc2', d:'Light the first candle at the chapel',      t:'item', id:'candle1'},
   {s:'church',      f:'qc3', d:'Place flowers at the tilma shrine',         t:'item', id:'flower1'},
   {s:'church',      f:'qc4', d:'Hear from the first pilgrims',              t:'npc',  id:'pilgrim'},
   {s:'church',      f:'qc5', d:'Speak with Juan Diego -- guardian of the shrine', t:'npc',  id:'juanOld'},
+  {s:'church',      f:'qc6', d:"Hear Catalina's eyewitness account of the tilma miracle", t:'npc', id:'palace_witness'},
+  {s:'church',      f:'qc7', d:'Speak with Fray Martin -- architect of the first chapel', t:'npc', id:'architect_chapel'},
   {s:'philippines', f:'qp1', d:'Meet Datu Panginoon -- Filipino chieftain', t:'npc',  id:'chieftain'},
   {s:'philippines', f:'qp2', d:'Gather sampaguita flowers for the altar',   t:'item', id:'sampaguita'},
   {s:'philippines', f:'qp3', d:'Collect bamboo for the chapel',             t:'item', id:'bamboo'},
@@ -697,8 +754,8 @@ function mStd(col,r,m,em,ei){
 
 // ======= SCENE BUILD =======
 function buildScene(sn){
-  while(scene.children.length) scene.remove(scene.children[0]);
-  G.npcMeshes=[]; G.colMeshes=[]; G.glows=[]; G.parts=null; G.skyMat=null;
+  // Arrays already reset by chgScene; only reset when called directly (restartGame)
+  if(!G.transitioning){while(scene.children.length) scene.remove(scene.children[0]);G.npcMeshes=[];G.colMeshes=[];G.glows=[];G.parts=null;G.skyMat=null;}
   const C=SC[sn];
 
   // Procedural sky
@@ -1141,8 +1198,8 @@ function closeDlg(npc){
   G.dlg.active=false;clearInterval(typeTmr);
   document.getElementById('dlg').style.display='none';
   G.npcMem[npc.id]=0;
-  const fk='spoke_'+npc.id;
-  if(!G.flags.has(fk)){G.flags.add(fk);grantNpcFlag(npc.id);}
+  // Always grant -- grantNpcFlag's scene filter and !flags.has(q.f) prevent double-grant
+  grantNpcFlag(npc.id);
   postDlg(npc);
 }
 
@@ -1167,11 +1224,12 @@ function postDlg(npc){
     setTimeout(()=>chgScene('nican'),5000);
     return;
   }
-  // After 2nd apparition on hill -> go to miracle/roses scene
-  if(npc.id==='ourLady1' && sn==='hill' && G.flags.has('bishop_1st_done') && !G.flags.has('to_miracle')){
+  // After 2nd apparition on hill (Dec 9 evening) -> go to miracle/roses scene
+  // Requires had_1st_vision + bishop_1st_done (full round trip confirmed)
+  if(npc.id==='ourLady1' && sn==='hill' && G.flags.has('had_1st_vision') && G.flags.has('bishop_1st_done') && !G.flags.has('to_miracle')){
     G.flags.add('to_miracle');
-    showNotif('🌹','Our Lady Sends You to the Summit','Gather the twelve Castilian roses -- then return to the Bishop with the sign!');
-    setTimeout(()=>chgScene('miracle'),5000);
+    showNotif('🌹','Our Lady Sends You to the Summit','December 12: Gather the twelve Castilian roses from the hilltop -- then return to the Bishop with the sign that cannot be made by human hands!');
+    setTimeout(()=>chgScene('miracle'),5500);
     return;
   }
   // After Bishop sees tilma miracle -> go to church chapter
@@ -1219,14 +1277,21 @@ function pickUp(cm){
   chkSceneDone();
   chkChurch();
 }
+// Quest prerequisite flags: these quests only grant when a story flag is already set
+const QUEST_PREREQS = {qh4:'bishop_1st_done', qb3:'sb_sign_ready'};
 function grantNpcFlag(npcId){
-  for(const q of QS){if(q.t==='npc'&&q.id===npcId&&!G.flags.has(q.f)) G.flags.add(q.f);}
+  for(const q of QS){
+    if(q.t==='npc'&&q.id===npcId&&q.s===G.scn&&!G.flags.has(q.f)){
+      const pre=QUEST_PREREQS[q.f];
+      if(!pre||G.flags.has(pre)) G.flags.add(q.f);
+    }
+  }
   chkSceneDone();
   chkChurch();
   updTasks();updPips();
 }
 function grantItemFlag(itemId){
-  for(const q of QS){if(q.t==='item'&&q.id===itemId&&!G.flags.has(q.f)) G.flags.add(q.f);}
+  for(const q of QS){if(q.t==='item'&&q.id===itemId&&q.s===G.scn&&!G.flags.has(q.f)) G.flags.add(q.f);}
   updTasks();updPips();
 }
 function chkSceneDone(){
@@ -1253,7 +1318,7 @@ function chkSceneDone(){
     }
   }
   if(sn==='miracle'&&!G.flags.has('m_done')){
-    if(['qm1','qm2','qm3','qm4'].every(f=>G.flags.has(f))){
+    if(['qm1','qm2','qm3','qm4','qm5'].every(f=>G.flags.has(f))){
       G.flags.add('m_done');if(!G.flags.has('sb_sign_ready'))G.flags.add('sb_sign_ready');
       doFlash();showNotif('✦','All Signs Ready!','Return to the Bishop. Do not open your tilma until you stand before him.');
       setTimeout(()=>chgScene('bishop'),6000);
@@ -1277,7 +1342,7 @@ function chkSceneDone(){
 
 function chkChurch(){
   if(G.scn!=='church'||G.flags.has('c_done')) return;
-  if(['qc1','qc2','qc3','qc4','qc5'].every(f=>G.flags.has(f))){
+  if(['qc1','qc2','qc3','qc4','qc5','qc6','qc7'].every(f=>G.flags.has(f))){
     G.flags.add('c_done');
     showNotif('⛪','The Church is Complete!','Nine million souls converted in seven years. Now visit Juan Diego in his final years as hermit of Tepeyac...');
     setTimeout(()=>chgScene('hermit'),5500);
@@ -1296,6 +1361,15 @@ function chgScene(ns){
   setTimeout(()=>{
     G.scn=ns;
     if(G.dlg.active){G.dlg.active=false;clearInterval(typeTmr);document.getElementById('dlg').style.display='none';}
+    // Dispose THREE.js geometries and materials to prevent memory leaks
+    scene.traverse(obj=>{
+      if(obj.geometry) obj.geometry.dispose();
+      if(obj.material){const mats=Array.isArray(obj.material)?obj.material:[obj.material];mats.forEach(m=>m.dispose());}
+    });
+    scene.clear();
+    // Reset scene-local state
+    G.npcMeshes=[];G.colMeshes=[];G.glows=[];G.parts=null;G.skyMat=null;
+    G.npcMem={};
     buildScene(ns);
     setTimeout(()=>{fo.style.opacity='0';fo.style.pointerEvents='none';showNotif('✟',SC[ns].name,SC[ns].sub);G.transitioning=false;},500);
   },700);
@@ -1312,7 +1386,11 @@ function restartGame(){
 // ======= UI =======
 function updTasks(){
   const list=document.getElementById('tlist');list.innerHTML='';
-  for(const q of QS.filter(q=>q.s===G.scn)){
+  const sceneQs=QS.filter(q=>q.s===G.scn);
+  const done_count=sceneQs.filter(q=>G.flags.has(q.f)).length;
+  const h3=document.querySelector('#tasks h3');
+  if(h3) h3.textContent='TASKS ('+done_count+'/'+sceneQs.length+')';
+  for(const q of sceneQs){
     const done=G.flags.has(q.f);
     const el=document.createElement('div');el.className='ti '+(done?'dn':'act');
     el.innerHTML='<div class="tp"></div><span>'+q.d+'</span>';
