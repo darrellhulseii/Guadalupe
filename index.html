@@ -276,6 +276,7 @@ window.addEventListener('resize', () => {
 
 // ======= STATE =======
 const G = {
+  transitioning:false,
   running:false, scn:'village', flags:new Set(), inv:{}, animT:0, npcMem:{},
   pl:{ pos:new THREE.Vector3(0,0,6), mesh:null, angle:0, tAngle:0, bobT:0, moving:false },
   cam:{ yaw:0, dist:18, h:11.5 },
@@ -325,6 +326,10 @@ const SC = {
   miracle:     { name:'Chapter IV -- The Roses and the Tilma',   sub:'Tepeyac Summit -- December 12, 1531',             st:0x1A0500, sb:0x3A0E00, fg:0x5A2408, fd:0.010, ac:0xFF9840, ai:0.58, dc:0xFFAA30, di:2.9, dp:[0,36,6],    gc:0x506035, sp:[0,0,11], bn:19 },
   church:      { name:'Chapter V -- The Church is Built',        sub:'Tepeyac -- 1533 A.D.',                            st:0x0A1C34, sb:0x1E3E62, fg:0x2E5080, fd:0.009, ac:0xB0CCFF, ai:0.53, dc:0xFFD890, di:2.2, dp:[14,30,10],  gc:0x4A3A22, sp:[0,0,10], bn:20 },
   philippines: { name:'Chapter VI -- The Philippines, 1601 A.D.',sub:'Makati, Manila -- The Faith Crosses the Pacific', st:0x0A2040, sb:0x1050A0, fg:0x1A60A0, fd:0.007, ac:0x90D8FF, ai:0.58, dc:0xFFEE70, di:2.9, dp:[12,38,6],   gc:0x2A5A1A, sp:[0,0,8],  bn:21 },
+  nican:       { name:'Chapter IIIb -- The Nican Mopohua',      sub:'Mexico City -- The Sacred Account Written Down, 1545',   st:0x0D0800, sb:0x261505, fg:0x301A08, fd:0.018, ac:0xFFD080, ai:0.52, dc:0xFFE0A0, di:2.3, dp:[12,28,10],  gc:0x5A4A2A, sp:[0,0,9],  bn:13 },
+  tilma_study: { name:'Chapter IVb -- Study of the Sacred Image', sub:'Tepeyac -- The Tilma Examined, 1666 and 1979',           st:0x080508, sb:0x181018, fg:0x201420, fd:0.022, ac:0xD0C0FF, ai:0.62, dc:0xFFEE88, di:2.4, dp:[8,24,12],   gc:0x3A2A3A, sp:[0,0,9],  bn:13 },
+  conversions: { name:'Chapter Vb -- Nine Million Souls',          sub:'New Spain -- The Great Conversion, 1532 to 1541',        st:0x0A1808, sb:0x163020, fg:0x203028, fd:0.010, ac:0xA0FFB8, ai:0.48, dc:0xFFE880, di:2.6, dp:[16,32,12],  gc:0x2A5A30, sp:[0,0,9],  bn:18 },
+  hermit:      { name:"Chapter VIb -- The Hermit of Tepeyac",     sub:"Tepeyac Hill -- Juan Diego's Last Years, 1533 to 1548",  st:0x100C04, sb:0x241A06, fg:0x2C1E08, fd:0.014, ac:0xFFE0A0, ai:0.50, dc:0xFFCC60, di:2.0, dp:[14,26,10],  gc:0x3A5020, sp:[0,0,9],  bn:14 },
 };
 
 // ======= NPC DATA (no smart quotes, no em-dashes) =======
@@ -431,7 +436,107 @@ const NPCS = {
       {sp:'Cantora Rosa',t:"She appeared to a poor man and said: I am YOUR mother. That is why Filipinos love Her so fiercely. She is ours. She has always been ours."},
     ]},
   ],
-};
+  nican:[
+    {id:'valeriano',pos:[0,0,-10],col:0x4A3820,nm:'Antonio Valeriano',lines:[
+      {sp:'Antonio Valeriano -- Author of the Nican Mopohua, c.1545',t:"I have written down what happened as the elders told it, in our own Nahuatl tongue. The account begins: Here it is told, it is recorded, how a short time ago the Perfect Virgin, Holy Mary, Mother of God our Lord Jesus Christ, appeared miraculously -- miraculous Queen, our Lady and our Maiden."},
+      {sp:'Antonio Valeriano',t:"She appeared first on the summit of the hill called Tepeyac, still in the night. She came before a poor commoner named Juan Diego. As he came near, he heard singing above -- as if different precious birds were singing and their songs would alternate. He said to himself: Is it I who am worthy of what I hear? Am I dreaming? Am I sleepwalking? Where am I?"},
+      {sp:'Antonio Valeriano',t:"As he looked toward the top of the hill he saw a Lady standing there who called out to him and said: Juanito, Juan Dieguito. Her clothes were shining like the sun, as if sending out waves of light. The stone on which she stood seemed like precious bracelets. The earth sparkled like a rainbow. The mesquites and other plants seemed like feathers of the quetzal bird."},
+      {sp:'Antonio Valeriano',t:"This is what I record from the witnesses. The indigenous people who heard Juan Diego speak of her. The old men and women who were children when it happened and remembered -- a woman of light on the hill, music no instrument makes, a poor man walking very fast toward the city with roses in December inside his cloak."},
+    ]},
+    {id:'fray_sahag',pos:[-9,0,4],col:0x4A5060,nm:'Fray Bernardino de Sahagun',lines:[
+      {sp:'Fray Bernardino de Sahagun OFM -- Chronicler of New Spain',t:"At Tepeyac, which they call Guadalupe, the natives come in great multitudes. They call her Tonantzin -- which was the name of their goddess. This troubles some religious who understand the indigenous tongue. They ask: are these people worshipping a goddess under a Christian name?"},
+      {sp:'Fray Bernardino de Sahagun',t:"And yet I watch what happens when they come. The sick are healed. The troubled are calmed. The weeping stop weeping. I am a man of learning. I know what I see. And what I see at Tepeyac is not deception. Something is happening there that I do not have vocabulary for. I am still working on the vocabulary."},
+    ]},
+    {id:'scholar_zumarro',pos:[8,0,2],col:0x3A5030,nm:'Don Juan de Zumarro, Copyist',lines:[
+      {sp:'Don Juan de Zumarro -- Keeper of the Nican Mopohua',t:"Valeriano gave me the manuscript to copy. Fifteen pages of the most beautiful Nahuatl I have ever read. He wrote as a man who had spoken to witnesses -- people who were children when Juan Diego walked past their door, who remembered seeing his tilma carried through the street, still damp with dew."},
+      {sp:'Don Juan de Zumarro',t:"What strikes me most is what Valeriano records her saying: I am your merciful mother, the mother of all of you who live united in this land. She did not come for the Spanish alone. She did not come for the indigenous alone. She came for all of them together. That is the thing the theologians are still working through."},
+    ]},
+    {id:'nican_scroll',pos:[-7,0,-4],col:0x8A6830,nm:'Brother Scribe',lines:[
+      {sp:'Brother Scribe -- Copying the Nican Mopohua',t:"The text opens in classical Nahuatl: Nican mopohua, motecpana in quenin yancuican huey tlamahuizoltica monexiti in cenquizca ichpochtli Santa Maria Dios inantzin. Here it is told, it is set in order, how the ever-virgin Holy Mary, Mother of God, recently appeared in a wonderful manner."},
+      {sp:'Brother Scribe',t:"Valeriano describes the moment the Bishop opened Juan Diego's tilma: At that very instant she painted herself -- the Precious Image of the Perfect Virgin Holy Mary, Mother of God our Lord, appeared, in the same form and figure as she is now kept and preserved in her precious home, in her hermitage of Tepeyac, which is called Guadalupe."},
+    ]},
+    {id:'scholar_lasso',pos:[7,0,-5],col:0x5A4838,nm:'Don Fernando de Alva Ixtlilxochitl',lines:[
+      {sp:'Don Fernando de Alva Ixtlilxochitl -- Nahua Historian',t:"Antonio Valeriano was the greatest Nahuatl scholar of his generation. He studied under the Franciscans at Tlatelolco -- the same college where Juan Diego heard Mass. He wrote the Nican Mopohua in the elevated classical Nahuatl of the Aztec court. This is not legend written long after. This is testimony recorded within living memory of the event."},
+    ]},
+  ],
+  tilma_study:[
+    {id:'callahan',pos:[0,0,-10],col:0x405060,nm:'Dr. Philip Callahan',lines:[
+      {sp:'Dr. Philip Callahan -- Infrared Physicist, Notre Dame, 1979',t:"I am an infrared photographer and an expert in painting technique. In 1979 I was permitted to examine the tilma of Juan Diego under infrared light for several hours. I have examined paintings in the great museums of the world. What I found on this cloth is unlike anything I have ever encountered in thirty years of scientific work."},
+      {sp:'Dr. Philip Callahan',t:"There is no sizing on the cloth. Any painter in the sixteenth century would have primed the cloth with sizing first -- it is impossible to paint fine detail on unsized cloth. Yet the image has extraordinary fine detail. There are no brushstrokes anywhere on the main figure. The pigment appears to have been applied without contact. No human painter works this way. No human painter can work this way."},
+      {sp:'Dr. Philip Callahan',t:"The tilma is made of two strips of coarse ayate cactus fiber joined by a vertical seam running through the image. Where the seam passes beneath the face of the Virgin, it does not distort the image at all. The image appears to float on top of the individual fibers. Under high magnification the fibers show through as if the paint -- if it is paint -- is transparent. I do not know how this was made."},
+      {sp:'Dr. Philip Callahan',t:"From the published report: 'The original figure -- the face, hands, robe, and mantle -- are inexplicable. In terms of the techniques employed, they are unique and not possible to explain or reproduce by any technique known.' I signed my name to that sentence. I still do."},
+    ]},
+    {id:'smith_jody',pos:[-9,0,4],col:0x503840,nm:'Jody Brant Smith',lines:[
+      {sp:'Jody Brant Smith -- "The Image of Guadalupe", 1984',t:"In my research I discovered something that astonished me. The stars on the mantle of the Virgin correspond exactly to the constellations visible over Mexico City on the morning of December 12, 1531 -- as seen from a height of several miles above the earth. The image is, among other things, a star map of the Mexican sky on that precise morning."},
+      {sp:'Jody Brant Smith',t:"The figure of the Virgin stands in the precise position of the sun at the moment of the winter solstice. She stands on the crescent moon, which was in exactly that phase on December 12, 1531. She is clothed with the sun -- it is behind her. This is not allegory. This is astronomy. Someone encoded the exact astronomical data of that morning into the image with a precision no sixteenth century painter could have achieved."},
+    ]},
+    {id:'tonesman',pos:[8,0,2],col:0x3A4050,nm:'Dr. Jose Aste Tonsmann',lines:[
+      {sp:'Dr. Jose Aste Tonsmann -- Digital Imaging Expert, Cornell, 1981',t:"I am a digital imaging specialist. In 1981 I used computer enhancement to magnify the eyes of the Virgin on the tilma to 2,500 times their actual size. In both eyes I found reflected images of human figures -- consistent with what would appear in a living human eye at the moment Juan Diego opened his tilma before the Bishop in 1531."},
+      {sp:'Dr. Jose Aste Tonsmann',t:"In the right eye I identified thirteen distinct figures. The central figure appears to be an indigenous man holding a cloth open -- Juan Diego. Beside him stands a bearded man in bishop's vestments. There are others around them. They are arranged exactly as a gathering around Juan Diego would have been arranged. The reflections appear in both eyes with the slight angular difference that occurs only in living human corneas."},
+      {sp:'Dr. Jose Aste Tonsmann',t:"The ophthalmologist Dr. Lavoignet also examined the eyes and found what he called the Purkinje-Sanson triple reflection -- the specific optical phenomenon of light reflections inside a living human cornea. This phenomenon does not occur in painted eyes. It occurs only in eyes that are alive. I am a scientist. I can only report what I measure."},
+    ]},
+    {id:'guerrero_art',pos:[-8,0,-4],col:0x506040,nm:'Prof. Francisco Camps-Ribera',lines:[
+      {sp:'Prof. Francisco Camps-Ribera -- Master Restorer of Colonial Paintings',t:"I have spent forty years studying the painting techniques of the Spanish colonial period. I know every pigment used in New Spain in the 1530s. None of them match what is on the tilma. The blue-green of the mantle -- that turquoise we call azul guadalupano -- does not correspond to any known pigment of the period. It has no match in any painting of the sixteenth century anywhere in the world."},
+      {sp:'Prof. Francisco Camps-Ribera',t:"The ayate cloth should have rotted within twenty years. Similar cloths from the same period are dust. Yet this cloth is supple after nearly five centuries. The Nobel laureate Richard Kuhn analyzed fiber samples in 1936 without being told their origin, and reported: the pigments correspond to no known mineral, vegetable, or animal dye. When told the source, he was silent for a long time."},
+    ]},
+    {id:'bishop_montufar',pos:[-5,0,-7],col:0x804040,nm:'Archbishop Alonso de Montufar',lines:[
+      {sp:'Archbishop Alonso de Montufar -- First Formal Investigation, 1556',t:"Twenty-five years after the apparition, I commissioned the first formal investigation into the tilma. I heard from the greatest indigenous painter of New Spain, Marcus Cipac de Aquino. I asked him: could you paint this image? He examined it at length. He said: No. He was not being modest. He was being honest."},
+    ]},
+    {id:'microscopist',pos:[5,0,-8],col:0x384858,nm:'Research Scientist',lines:[
+      {sp:'Research Scientist -- 1936 Nobel Commission',t:"The 1936 commission asked Nobel laureate Richard Kuhn to analyze fiber samples without telling him their origin. He analyzed them and reported: the pigments correspond to no known mineral, vegetable, or animal dye of any period. He was then told the source. He said nothing for a long time. Then he said: I do not have a scientific explanation for this image. Neither do I."},
+    ]},
+  ],
+  conversions:[
+    {id:'friar_zumarro2',pos:[0,0,-10],col:0x3A5060,nm:'Fray Toribio Motolinia OFM',lines:[
+      {sp:'Fray Toribio Motolinia -- History of the Indians of New Spain, c.1541',t:"In the years 1537, 1538, and 1539, so many people came to receive baptism that those of us administering it lost count. We baptized between morning and the Ave Maria bell -- on some days four thousand souls. On one day at a great feast we baptized fourteen thousand. I have tallied the numbers as carefully as I can: in fifteen years since our arrival, more than nine million people have been baptized."},
+      {sp:'Fray Toribio Motolinia',t:"What changed them? Many things. But one above all: the image that appeared on the tilma of Juan Diego. When we showed it to the indigenous people, they recognized it immediately. She stands before the sun -- she is greater than the sun. She stands on the moon -- she is greater than the moon. She wears our stars. She chose a poor man of our people. Then they asked to be baptized."},
+      {sp:'Fray Toribio Motolinia',t:"From the work of Carl Anderson: In an era when the Spanish conquest had given the indigenous people every reason to despair and resist Christianity, nine million of them entered the Church within seven years of the apparition. No missionary effort in history has produced anything remotely comparable. Church historians are unanimous: it was the image that did it."},
+    ]},
+    {id:'chief_convert',pos:[-9,0,5],col:0x7A4820,nm:'Cacique Tlapalteotl',lines:[
+      {sp:'Cacique Tlapalteotl -- Village Chieftain, Baptized 1533',t:"My father was a priest of Huitzilopochtli. He sacrificed prisoners. When the Spanish came, they destroyed everything he believed in. I grew up hating both worlds. Then they brought us to Tepeyac and showed us the image. A woman of our people, dressed in our colors, wearing our stars, standing where Tonantzin had stood. Speaking Nahuatl. Choosing a poor macehualli."},
+      {sp:'Cacique Tlapalteotl',t:"I looked at the image for a long time. I thought: if this God sent His mother to us in our own form, speaking our own language -- then perhaps this God is different from the god of the men who destroyed my father. I was baptized the next morning. I brought my whole village the week after. Not because soldiers stood behind me. Because of a woman on a cloth."},
+    ]},
+    {id:'midwife_convert',pos:[8,0,3],col:0x7A3A30,nm:'Dona Xochicueitl',lines:[
+      {sp:'Dona Xochicueitl -- Midwife, Baptized 1534',t:"I attended fifty births before the smallpox came. After the smallpox there were no births for two years. The villages were silent. A third of our people were dead. When the image was enshrined at Tepeyac, I went. I prayed the way I prayed at the old shrines. Something listened. I cannot prove it. But I went home lighter than I had been in years."},
+    ]},
+    {id:'friar_witness',pos:[-7,0,-4],col:0x4A4A6A,nm:'Bishop Zumarraga -- Final Years',lines:[
+      {sp:'Bishop Juan de Zumarraga -- Final Testimony, c.1547',t:"I am an old man now. I have been Bishop of New Spain for twenty years. I have seen much that was terrible -- cruelties I tried to stop and often could not. But I have also seen this: nine million people freely choosing baptism, after everything that was done to their people. They did not choose because soldiers stood behind them. Many came from distant mountains with no soldiers anywhere near."},
+      {sp:'Bishop Zumarraga',t:"They came because of a woman on a cloth. I know what I saw when that tilma opened. I know what I did -- I knelt on the floor of my own audience chamber and wept. And I know what has happened since. I have no adequate explanation. I have only my knees and my tears. It is, I have come to think, exactly the amount of explanation God intended to give us."},
+    ]},
+    {id:'historian_conv',pos:[5,0,-7],col:0x5A5020,nm:'Fray Juan de Torquemada',lines:[
+      {sp:'Fray Juan de Torquemada -- Monarquia Indiana, 1615',t:"Torquemada writes: The conversion of the Mexican Indians after the apparition of Guadalupe surpasses all the conversions ever wrought by the Apostles in the history of the Church. No single Apostle converted as many souls in his lifetime as were converted in New Spain in the decade after 1531. The theologians say that without a special miracle this would have been impossible. I agree with the theologians."},
+    ]},
+    {id:'catechist_woman',pos:[-5,0,5],col:0x7A5030,nm:'Catechist Maria de la Cruz',lines:[
+      {sp:'Catechist Maria de la Cruz',t:"I teach the doctrina to two hundred children every week. When I show them the image, the children grow still. You know how children are -- they never grow still. But before this image, they grow still. Even the smallest ones. I have watched it for twenty years. I have no explanation. I only know: she reaches children. She reached me that way when I was a child. Perhaps that is enough."},
+    ]},
+  ],
+  hermit:[
+    {id:'juan_hermit',pos:[0,0,-10],col:0x7A5030,nm:'Juan Diego -- Aged Hermit',lines:[
+      {sp:'Juan Diego -- Guardian of the Shrine, Tepeyac, c.1543',t:"Bishop Zumarraga gave me the small house that stands beside the chapel. I live here alone. I wake before the sun and light the first candles. I sweep the floor. I wait for the pilgrims. They come every day -- hundreds of them. Most of them are my people, Nahua, speaking our language. I show them the image and answer their questions."},
+      {sp:'Juan Diego',t:"They ask me what she was like. I tell them: she was young, perhaps fourteen years old, as a girl of our people looks at that age. Her face was -- I do not know the word. Neither fully Spanish nor fully Nahua but somehow both and more beautiful than either. Her voice was very gentle. She called me Juanito. Like a mother calls a small child. I was fifty-seven years old. And still it felt like being called by your mother."},
+      {sp:'Juan Diego',t:"They ask me if I am afraid to die. I tell them: Our Lady told me she would hear our weeping and our sorrow and remedy our misfortunes. I have one sorrow left -- I must leave this house and this image. But she will still be here. She will hear the next ones who come weeping. That is enough. More than enough for any man who was given what I was given."},
+    ]},
+    {id:'pilgrim_sick',pos:[-9,0,4],col:0x6A4030,nm:'Pilgrim from Michoacan',lines:[
+      {sp:'Pilgrim from Michoacan -- Seeking Healing',t:"I carried my son on my back for twelve days to reach Tepeyac. He cannot walk. The curandera said there was nothing she could do. The Spanish doctor said the same. My wife said: take him to Tepeyac. I did not believe in miracles. But I carried him here. I held him before the image. He stopped crying. For the first time in eight months, he stopped crying."},
+      {sp:'Pilgrim from Michoacan',t:"The old man who keeps the chapel -- Juan Diego himself -- came and sat beside us. He held my son's hand. He said: She hears him. She hears you. Leave your sorrow here. You can pick it up again when you leave if you want it back. But leave it here for now. We left it there. We did not pick it up again. We stayed three days. On the third day my son stood."},
+    ]},
+    {id:'neighbor_hermit',pos:[8,0,3],col:0x5A4020,nm:'Neighbor of the Shrine',lines:[
+      {sp:'Neighbor Cihuatl -- Lives Near Tepeyac Shrine',t:"I have lived next to the chapel since it was built. I see Juan Diego every day. He is very old now -- perhaps seventy-four, some say seventy-seven. He does not sleep much. I hear him praying in the night, in Nahuatl, the old words mixed with the new ones. He has not left this hill since Bishop Zumarraga gave him the house. Seventeen years on this hill."},
+      {sp:'Neighbor Cihuatl',t:"People offer him things. Food, money, a better house in the city. He refuses everything. He says: My Lady is here. Her house is here. I will stay where she is. When I ask him if he is lonely, he looks at me with such surprise. As if loneliness is something that has not occurred to him. As if he has not been alone for a single moment in seventeen years."},
+    ]},
+    {id:'friar_hermit',pos:[-7,0,-4],col:0x4A4A6A,nm:'Fray Diego de Valadez',lines:[
+      {sp:'Fray Diego de Valadez -- Visiting Theologian, c.1544',t:"I came to investigate the devotion at Tepeyac and left as a devotee. I interviewed Juan Diego at length. He is a man of extraordinary interior peace -- not the peace of age or resignation, but the peace of someone who knows something the rest of us are still trying to learn. He spoke of Our Lady as one speaks of a person one sees regularly. Not as a memory. As a presence."},
+      {sp:'Fray Diego de Valadez',t:"He showed me his ordinary cloak -- not the miraculous image in the chapel, but his everyday one from that morning. He pointed to the spot where he gathered the roses and folded the cloth. Here, he said. She arranged them herself. With her own hands. He touched the fabric very gently. Seventeen years later. Still tender with gratitude."},
+    ]},
+    {id:'socci_quote',pos:[5,0,-7],col:0x5A3A50,nm:'Scholar Reading Socci',lines:[
+      {sp:'From Antonio Socci -- The Secret of Guadalupe',t:"Antonio Socci writes: What happened at Tepeyac in December 1531 is one of the strangest and most documented events in human history. The image on the tilma has been examined by infrared photography, ultraviolet spectroscopy, computer enhancement, ophthalmological analysis, and textile chemistry. After five centuries, no natural explanation has been found for any of its principal characteristics."},
+      {sp:'From Antonio Socci',t:"The scientists go away puzzled. The pilgrims go away changed. Perhaps the pilgrims understand something the scientists do not. Or perhaps the scientists and the pilgrims are looking at the same thing and asking different questions. The scientists ask: how was this made? The pilgrims ask: what does it mean? Both questions remain fully open."},
+    ]},
+    {id:'johnston_quote',pos:[-5,0,5],col:0x4A5038,nm:'Reader of Johnston',lines:[
+      {sp:'From Francis Johnston -- The Wonder of Guadalupe, 1981',t:"Francis Johnston records: Juan Diego was beatified by Pope John Paul II on April 6, 1990, in the Basilica of Our Lady of Guadalupe in Mexico City, before the largest crowd ever assembled for a beatification. He was canonized on July 31, 2002, in the same basilica, before a crowd of twelve million people."},
+      {sp:'From Francis Johnston',t:"At his canonization, Pope John Paul II said: Juan Diego -- a simple, humble Indian -- played a key role in the evangelization of the Americas, and the whole world has been blessed through him. More than five hundred years after he carried roses in his tilma on a cold December morning, his name is known on every continent on earth."},
+    ]},
+  ],};
 
 // ======= COLLECTABLES =======
 const COLS = {
@@ -470,7 +575,34 @@ const COLS = {
     {id:'procCandles', pos:[-7.5,0,-3], icon:'🕯',lbl:'River Procession Candles', desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
     {id:'tilmaCopy',   pos:[7.5,0,-5],  icon:'🖼',lbl:'Blessed Tilma Copy',       desc:'A copy of the miraculous image -- to be enshrined in Manila',ec:0xD4A017},
   ],
-};
+  nican:[
+    {id:'nican_ms',      pos:[4,0,5],    icon:'📜',lbl:'Nican Mopohua Manuscript',    desc:'The original Nahuatl account by Antonio Valeriano, c.1545 -- the oldest written record of the apparitions',ec:0xC8A040},
+    {id:'quill',         pos:[-5,0,4],   icon:'🪶',lbl:"Valeriano's Writing Quill",   desc:'The quill used to record the sacred words in classical Nahuatl -- the most important document in Mexican history',ec:0xE8E8D0},
+    {id:'nahuatl_book',  pos:[5,0,-5],   icon:'📖',lbl:'Nahuatl Grammar Primer',      desc:'The grammar book Valeriano used at the Franciscan college at Tlatelolco where Juan Diego also heard Mass',ec:0x8B6040},
+    {id:'ink_pot',       pos:[-4,0,-5],  icon:'🖋',lbl:'Ink Pot from Tlatelolco',     desc:'Iron gall ink -- the same used to copy the account that preserves the apparition for all time',ec:0x3A3A2A},
+    {id:'beeswax_nican', pos:[0,0,8],    icon:'🕯',lbl:'Chapel Beeswax Candle',       desc:'Burned at the shrine while Valeriano wrote -- the Nahuatl word for candle is the same as the word for prayer',ec:0xFFE080},
+  ],
+  tilma_study:[
+    {id:'infrared_photo',pos:[4,0,5],    icon:'📷',lbl:'Infrared Photograph, 1979',   desc:"Dr. Callahan's infrared photograph -- no sizing, no brushstrokes, no underdrawing. Impossible for any human painter of any era.",ec:0x2A4A6A},
+    {id:'fiber_sample',  pos:[-5,0,4],   icon:'🧵',lbl:'Ayate Fiber Sample',           desc:'A single thread of the cactus-fiber cloth -- analysis shows it should have rotted 450 years ago. It did not.',ec:0xD4B060},
+    {id:'eye_magnified', pos:[5,0,-5],   icon:'👁',lbl:'Magnified Eye Study, 1981',    desc:"Dr. Tonsmann's 2500x enlargement showing 13 human figures reflected in the Virgin's eyes -- with the Purkinje-Sanson triple reflection of living corneas.",ec:0x6080A0},
+    {id:'star_chart',    pos:[-4,0,-5],  icon:'⭐',lbl:'December 1531 Star Chart',     desc:"The constellations on the tilma's mantle match exactly the sky over Mexico at dawn on December 12, 1531 -- viewed from miles above the earth.",ec:0x2A2A5A},
+    {id:'pigment_vial',  pos:[0,0,8],    icon:'🎨',lbl:'Unknown Pigment Sample',       desc:'Nobel laureate Richard Kuhn, 1936: the pigments correspond to no known mineral, vegetable, or animal dye of any period.',ec:0x9A6080},
+  ],
+  conversions:[
+    {id:'baptism_record',pos:[5,0,6],    icon:'📋',lbl:'Baptism Record -- 14,000',    desc:"Fray Toribio's record of a single day on which 14,000 people received baptism. He lost count on many such days.",ec:0x4A7080},
+    {id:'codex_conv',    pos:[-6,0,5],   icon:'📜',lbl:'Conversion Codex',             desc:'An indigenous pictorial record of mass baptisms -- the scribes could not write fast enough to record every name.',ec:0xC8A040},
+    {id:'cross_new',     pos:[6,0,-4],   icon:'✝',lbl:'Mission Cross',                desc:'One of thousands of crosses erected as the faith spread through nine million souls in nine years after the apparition.',ec:0xD4A017},
+    {id:'catechism_nahua',pos:[-5,0,-5], icon:'📗',lbl:'Nahuatl Catechism',            desc:"The catechism translated into Nahuatl by Fray Bernardino. Our Lady's language became the Church's language in New Spain.",ec:0x406830},
+    {id:'tlacuilo_art',  pos:[0,0,-11],  icon:'🎨',lbl:'Tlacuilo Painting of Her',    desc:'An indigenous artist copy of the tilma image, made entirely in the pre-Columbian pictorial style -- she belongs to both worlds.',ec:0xD46030},
+  ],
+  hermit:[
+    {id:'prayer_mat',    pos:[4,0,5],    icon:'🧎',lbl:"Juan Diego's Prayer Mat",     desc:'Worn thin by seventeen years of pre-dawn prayer. He knelt on this mat every morning of his life as shrine keeper.',ec:0x8B6040},
+    {id:'broom_hermit',  pos:[-5,0,4],   icon:'🧹',lbl:"The Shrine Keeper's Broom",   desc:'Juan Diego swept the chapel floor every morning for 17 years. The last act of his life, witnesses say, was sweeping.',ec:0x7A5030},
+    {id:'old_tilma2',    pos:[5,0,-5],   icon:'🌵',lbl:"Juan Diego's Ordinary Cloak", desc:"His everyday cloak -- he pointed to the spot where Our Lady arranged the roses with her own hands. Still tender about it, seventeen years later.",ec:0xC4916A},
+    {id:'beatif_decree', pos:[-4,0,-5],  icon:'📜',lbl:'Beatification Decree, 1990',  desc:'Pope John Paul II beatified Juan Diego before the largest crowd ever assembled for a beatification -- at Tepeyac itself.',ec:0xD4A017},
+    {id:'canoniz_image', pos:[0,0,9],    icon:'👑',lbl:'Canonization Image, 2002',    desc:'Canonized July 31, 2002. Twelve million pilgrims attended. The Pope said: the whole world has been blessed through him.',ec:0xFFD700},
+  ],};
 const ROSES = ['rose1','rose2','rose3','rose4','rose5','rose6','rose7','rose8','rose9','rose10','rose11','rose12'];
 
 // ======= QUEST STAGES (strict chronological order) =======
@@ -483,6 +615,9 @@ const QS = [
   {s:'village',     f:'qv3', d:'Pick up your tilma cloak',                  t:'item', id:'manta'},
   {s:'village',     f:'qv4', d:'Visit cousin Juan Bernardino',              t:'npc',  id:'cousin'},
   {s:'village',     f:'qv5', d:'Speak with Fray Tomas, OFM',               t:'npc',  id:'friar'},
+  {s:'village',     f:'qv6', d:'Collect the rosary from Fray Tomas',           t:'item', id:'rosary'},
+  {s:'village',     f:'qv7', d:'Speak with the merchant at the market',         t:'npc',  id:'merchant'},
+  {s:'village',     f:'qv8', d:'Speak with Xochitl the village woman',          t:'npc',  id:'woman'},
   {s:'hill',        f:'qh1', d:'Collect sacred herbs on the path',          t:'item', id:'herbs'},
   {s:'hill',        f:'qh2', d:'Hear the miraculous birdsong',              t:'item', id:'birdsong'},
   {s:'hill',        f:'qh3', d:'Receive the First Apparition of Our Lady',  t:'npc',  id:'ourLady1'},
@@ -498,6 +633,7 @@ const QS = [
   {s:'church',      f:'qc2', d:'Light the first candle at the chapel',      t:'item', id:'candle1'},
   {s:'church',      f:'qc3', d:'Place flowers at the tilma shrine',         t:'item', id:'flower1'},
   {s:'church',      f:'qc4', d:'Hear from the first pilgrims',              t:'npc',  id:'pilgrim'},
+  {s:'church',      f:'qc5', d:'Speak with Juan Diego -- guardian of the shrine', t:'npc',  id:'juanOld'},
   {s:'philippines', f:'qp1', d:'Meet Datu Panginoon -- Filipino chieftain', t:'npc',  id:'chieftain'},
   {s:'philippines', f:'qp2', d:'Gather sampaguita flowers for the altar',   t:'item', id:'sampaguita'},
   {s:'philippines', f:'qp3', d:'Collect bamboo for the chapel',             t:'item', id:'bamboo'},
@@ -508,7 +644,49 @@ const QS = [
   {s:'philippines', f:'qp8', d:'Enshrine the blessed tilma copy',           t:'item', id:'tilmaCopy'},
   {s:'philippines', f:'qp9', d:"Receive the Governor's land grant",         t:'npc',  id:'governor'},
   {s:'philippines', f:'qp10',d:"Hear Cantora Rosa's Tagalog hymn -- Finale",t:'npc', id:'singer'},
-];
+  {s:'nican',      f:'qn1', d:'Meet Antonio Valeriano, author of the Nican Mopohua', t:'npc',  id:'valeriano'},
+  {s:'nican',      f:'qn2', d:'Collect the original Nican Mopohua manuscript',         t:'item', id:'nican_ms'},
+  {s:'nican',      f:'qn3', d:'Speak with Fray Bernardino de Sahagun, OFM',            t:'npc',  id:'fray_sahag'},
+  {s:'nican',      f:'qn4', d:"Collect Valeriano's writing quill",                     t:'item', id:'quill'},
+  {s:'nican',      f:'qn5', d:'Hear the Nahua copyist Don Juan de Zumarro',            t:'npc',  id:'scholar_zumarro'},
+  {s:'nican',      f:'qn6', d:'Collect the Nahuatl grammar primer',                    t:'item', id:'nahuatl_book'},
+  {s:'nican',      f:'qn7', d:"Read the Brother Scribe's copy of the account",         t:'npc',  id:'nican_scroll'},
+  {s:'nican',      f:'qn8', d:'Collect the iron gall ink pot used to write the account', t:'item', id:'ink_pot'},
+  {s:'nican',      f:'qn9', d:'Collect the chapel candle that burned while Valeriano wrote', t:'item', id:'beeswax_nican'},
+  {s:'nican',      f:'qn10',d:'Speak with Nahua historian Don Fernando de Alva Ixtlilxochitl', t:'npc', id:'scholar_lasso'},
+  {s:'tilma_study',f:'qt1', d:"Hear Dr. Callahan's infrared findings, 1979",           t:'npc',  id:'callahan'},
+  {s:'tilma_study',f:'qt2', d:'Collect the 1979 infrared photograph',                  t:'item', id:'infrared_photo'},
+  {s:'tilma_study',f:'qt3', d:'Hear Jody Brant Smith on the star-map of the tilma',   t:'npc',  id:'smith_jody'},
+  {s:'tilma_study',f:'qt4', d:'Collect the December 1531 star chart',                  t:'item', id:'star_chart'},
+  {s:'tilma_study',f:'qt5', d:"Hear Dr. Tonsmann on the Virgin's eyes, 1981",         t:'npc',  id:'tonesman'},
+  {s:'tilma_study',f:'qt6', d:'Collect the magnified eye study',                       t:'item', id:'eye_magnified'},
+  {s:'tilma_study',f:'qt7', d:"Hear Archbishop Montufar's 1556 inquiry",              t:'npc',  id:'bishop_montufar'},
+  {s:'tilma_study',f:'qt8', d:'Collect the unknown pigment sample',                    t:'item', id:'pigment_vial'},
+  {s:'tilma_study',f:'qt9', d:'Collect the ayate fiber sample analyzed by Nobel laureate Kuhn', t:'item', id:'fiber_sample'},
+  {s:'tilma_study',f:'qt10',d:'Hear Prof. Camps-Ribera on the unknown pigments and ageless cloth', t:'npc', id:'guerrero_art'},
+  {s:'tilma_study',f:'qt11',d:'Hear the anonymous 1936 Nobel commission research scientist',    t:'npc', id:'microscopist'},
+  {s:'conversions',f:'qv6', d:'Hear Fray Motolinia on nine million baptisms',          t:'npc',  id:'friar_zumarro2'},
+  {s:'conversions',f:'qv7', d:'Collect the baptism record of 14,000 souls',            t:'item', id:'baptism_record'},
+  {s:'conversions',f:'qv8', d:'Speak with Cacique Tlapalteotl -- why he converted',   t:'npc',  id:'chief_convert'},
+  {s:'conversions',f:'qv9', d:'Collect the Nahuatl catechism',                         t:'item', id:'catechism_nahua'},
+  {s:'conversions',f:'qv10',d:"Hear Bishop Zumarraga's final testimony",               t:'npc',  id:'friar_witness'},
+  {s:'conversions',f:'qv11',d:'Collect the indigenous tlacuilo painting of Her',       t:'item', id:'tlacuilo_art'},
+  {s:'conversions',f:'qv12',d:'Collect the indigenous pictorial conversion codex',        t:'item', id:'codex_conv'},
+  {s:'conversions',f:'qv13',d:'Collect one of the thousand mission crosses erected across New Spain', t:'item', id:'cross_new'},
+  {s:'conversions',f:'qv14',d:'Speak with midwife Dona Xochicueitl -- her conversion story',   t:'npc',  id:'midwife_convert'},
+  {s:'conversions',f:'qv15',d:'Read Fray Torquemada on the incomparable conversion',           t:'npc',  id:'historian_conv'},
+  {s:'conversions',f:'qv16',d:'Speak with Catechist Maria de la Cruz',                         t:'npc',  id:'catechist_woman'},
+  {s:'hermit',     f:'qhe1',d:'Speak with Juan Diego in his final years',              t:'npc',  id:'juan_hermit'},
+  {s:'hermit',     f:'qhe2',d:"Collect Juan Diego's worn prayer mat",                  t:'item', id:'prayer_mat'},
+  {s:'hermit',     f:'qhe3',d:'Hear from the pilgrim seeking healing',                 t:'npc',  id:'pilgrim_sick'},
+  {s:'hermit',     f:'qhe4',d:"Collect Juan Diego's shrine keeper's broom",            t:'item', id:'broom_hermit'},
+  {s:'hermit',     f:'qhe5',d:'Hear Fray Valadez interview Juan Diego',                t:'npc',  id:'friar_hermit'},
+  {s:'hermit',     f:'qhe6',d:'Collect the beatification decree, 1990',                t:'item', id:'beatif_decree'},
+  {s:'hermit',     f:'qhe7',d:'Read the passage from Antonio Socci',                   t:'npc',  id:'socci_quote'},
+  {s:'hermit',     f:'qhe8',d:'Read the passage from Francis Johnston',                t:'npc',  id:'johnston_quote'},
+  {s:'hermit',     f:'qhe9',d:"Hear neighbor Cihuatl's account of Juan Diego's final years", t:'npc', id:'neighbor_hermit'},
+  {s:'hermit',     f:'qhe10',d:"Collect Juan Diego's everyday cloak from the morning of the miracle", t:'item', id:'old_tilma2'},
+  {s:'hermit',     f:'qhe11',d:'Collect the 2002 canonization image -- 12 million pilgrims attended', t:'item', id:'canoniz_image'},];
 
 // ======= MATERIAL HELPER =======
 function mStd(col,r,m,em,ei){
@@ -643,6 +821,64 @@ function buildEnv(sn){
     for(let i=0;i<12;i++) bTree(-22+i*4,0,12,1.0);
     const sl=new THREE.PointLight(0xFFEE88,2.8,24);sl.position.set(-11,5,-8);scene.add(sl);G.glows.push({l:sl,b:2.8,f:0.33});
     const bl=new THREE.PointLight(0xFFD090,2.5,32);bl.position.set(0,14,-15);scene.add(bl);G.glows.push({l:bl,b:2.5,f:0.28});
+  }
+
+  if(sn==='nican'){
+    bPalace();
+    for(let i=-2;i<=2;i++) bColumn(i*5,0,-12);
+    bThrone(-8,0,-8);
+    // Writing tables
+    for(let tx of [-5,0,5]){
+      const tbl=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.14,1.1),mStd(0x6B4226,0.88));tbl.position.set(tx,0.85,2);scene.add(tbl);
+      const leg=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.85,7),mStd(0x5A3A18));leg.position.set(tx,0.42,2);scene.add(leg);
+    }
+    const cl=new THREE.PointLight(0xFFE090,1.8,22);cl.position.set(0,7,-5);scene.add(cl);G.glows.push({l:cl,b:1.8,f:0.35});
+    bDoorFrame(0,0,12);
+  }
+  if(sn==='tilma_study'){
+    // Dark intimate chapel space for tilma examination
+    const wallM=mStd(0x1A0E1A,0.92);
+    const fw=new THREE.Mesh(new THREE.BoxGeometry(20,10,0.5),wallM);fw.position.set(0,5,-12);scene.add(fw);
+    const lw=new THREE.Mesh(new THREE.BoxGeometry(0.5,10,22),wallM);lw.position.set(-10,5,0);scene.add(lw);
+    const rw=lw.clone();rw.position.set(10,5,0);scene.add(rw);
+    // Tilma display frame
+    const frameM=mStd(0xD4A017,0.4,0.4,0x8B6001,0.5);
+    const fv=new THREE.Mesh(new THREE.BoxGeometry(0.2,6.5,0.2),frameM);fv.position.set(-1.5,4,-11.5);scene.add(fv);
+    const fv2=fv.clone();fv2.position.set(1.5,4,-11.5);scene.add(fv2);
+    const fh=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.2,0.2),frameM);fh.position.set(0,7.2,-11.5);scene.add(fh);
+    const fh2=fh.clone();fh2.position.set(0,0.8,-11.5);scene.add(fh2);
+    // Golden glow from the tilma
+    const tl=new THREE.PointLight(0xFFEE88,4.5,28);tl.position.set(0,4,-9);scene.add(tl);G.glows.push({l:tl,b:4.5,f:0.55,fl:true,fy:4});
+    const tl2=new THREE.PointLight(0xFFD4A0,1.8,16);tl2.position.set(0,4,-9);scene.add(tl2);G.glows.push({l:tl2,b:1.8,f:1.1});
+    // Study lamps
+    for(const[px,pz]of[[-5,3],[5,3],[-5,-3],[5,-3]]){
+      bTorch(px,0,pz);const ll=new THREE.PointLight(0xFF9900,1.2,10);ll.position.set(px,2.2,pz);scene.add(ll);G.glows.push({l:ll,b:1.2,f:0.8+Math.random()*0.5});
+    }
+    bDoorFrame(0,0,11);
+  }
+  if(sn==='conversions'){
+    // Open outdoor space - mass baptism field
+    for(let i=0;i<30;i++){const a=(i/30)*Math.PI*2,r=16+Math.random()*4;bTree(Math.cos(a)*r,0,Math.sin(a)*r,0.8+Math.random()*0.6);}
+    bCross(-12,0,-5);bCross(0,0,-14);bCross(12,0,-5);
+    // Baptism font
+    const font=new THREE.Mesh(new THREE.CylinderGeometry(1.1,0.85,0.85,16),mStd(0xD4C090,0.82));font.position.set(0,0.42,0);font.castShadow=true;scene.add(font);
+    const water=new THREE.Mesh(new THREE.CylinderGeometry(0.88,0.88,0.12,16),mStd(0x4488FF,0.08,0.55));water.material.transparent=true;water.material.opacity=0.8;water.position.set(0,0.82,0);scene.add(water);
+    // Crowd suggestion - many small cone figures
+    const cM=mStd(0x5A3820);
+    for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,r=4+Math.random()*10;const f=new THREE.Mesh(new THREE.ConeGeometry(0.28,1.2,7),cM);f.position.set(Math.cos(a)*r,0.6,Math.sin(a)*r);scene.add(f);}
+    const sl=new THREE.PointLight(0xFFEE70,2.2,35);sl.position.set(0,14,0);scene.add(sl);G.glows.push({l:sl,b:2.2,f:0.22});
+  }
+  if(sn==='hermit'){
+    // Small hermitage - simple chapel hut
+    bChapel(0,0,-9);
+    for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2,r=10+Math.random()*3;bRock(Math.cos(a)*r,0,Math.sin(a)*r);}
+    for(let i=0;i<10;i++) bTree(-15+i*3,0,-13+Math.random()*4,0.7+Math.random()*0.4);
+    bCross(0,0,-14);
+    // Interior candle glow from chapel
+    const cl=new THREE.PointLight(0xFFCC60,2.2,16);cl.position.set(0,4,-9);scene.add(cl);G.glows.push({l:cl,b:2.2,f:0.4,fl:true,fy:4});
+    // Path stones to chapel
+    for(let i=0;i<12;i++) bPathStone(Math.sin(i*0.3)*1.5,0.05,5-i*1.2);
+    const dl=new THREE.PointLight(0xFF8844,1.5,80);dl.position.set(-20,10,-25);scene.add(dl);
   }
   if(sn==='philippines'){
     for(let i=0;i<24;i++){const a=(i/24)*Math.PI*2,r=20+Math.random()*4;bPalm(Math.cos(a)*r,0,Math.sin(a)*r);}
@@ -927,8 +1163,8 @@ function postDlg(npc){
   // After Bishop 1st visit sends you back -> return to hill
   if(npc.id==='bishop' && sn==='bishop' && G.flags.has('had_1st_vision') && !G.flags.has('bishop_1st_done')){
     G.flags.add('bishop_1st_done');
-    showNotif('⛪','The Bishop Asks for a Sign','Return to Tepeyac Hill. Our Lady will provide proof for the Bishop.');
-    setTimeout(()=>chgScene('hill'),5000);
+    showNotif('⛪','The Bishop Asks for a Sign','Before returning to Tepeyac, study the sacred account in the scriptorium at Tlatelolco. The Nican Mopohua holds the full testimony.');
+    setTimeout(()=>chgScene('nican'),5000);
     return;
   }
   // After 2nd apparition on hill -> go to miracle/roses scene
@@ -942,8 +1178,8 @@ function postDlg(npc){
   if(npc.id==='bishop' && sn==='bishop' && G.flags.has('sb_sign_ready') && !G.flags.has('bishop_miracle_done')){
     G.flags.add('bishop_miracle_done');
     doFlash();
-    showNotif('MIRACLE','The Tilma Reveals Her Image!','The roses fall from the tilma. Our Lady blazes on the cloth. The Bishop weeps and kneels.');
-    setTimeout(()=>chgScene('church'),6500);
+    showNotif('MIRACLE','The Tilma Reveals Her Image!','The roses fall from the tilma. Our Lady blazes on the cloth. The Bishop weeps and kneels. Nine million souls will follow. Witness the Great Conversion.');
+    setTimeout(()=>chgScene('conversions'),6500);
     return;
   }
   // Church complete check on every NPC dialogue
@@ -996,9 +1232,23 @@ function grantItemFlag(itemId){
 function chkSceneDone(){
   const sn=G.scn;
   if(sn==='village'&&!G.flags.has('v_done')){
-    if(['qv1','qv2','qv3','qv4','qv5'].every(f=>G.flags.has(f))){
+    if(['qv1','qv2','qv3','qv4','qv5','qv6','qv7','qv8'].every(f=>G.flags.has(f))){
       G.flags.add('v_done');
       showNotif('🌄','Village Complete!','The sky breaks pink over Tepeyac. Something calls you up the hill...');
+      setTimeout(()=>chgScene('hill'),5500);
+    }
+  }
+  if(sn==='nican'&&!G.flags.has('nican_done')){
+    if(['qn1','qn2','qn3','qn4','qn5','qn6','qn7','qn8','qn9','qn10'].every(f=>G.flags.has(f))){
+      G.flags.add('nican_done');
+      showNotif('📜','The Nican Mopohua Preserved!','The sacred account is written down for all generations. Now study the miraculous image itself -- travel to the tilma study.');
+      setTimeout(()=>chgScene('tilma_study'),5500);
+    }
+  }
+  if(sn==='tilma_study'&&!G.flags.has('tilma_done')){
+    if(['qt1','qt2','qt3','qt4','qt5','qt6','qt7','qt8','qt9','qt10','qt11'].every(f=>G.flags.has(f))){
+      G.flags.add('tilma_done');
+      showNotif('👁','The Image Defies Explanation!','Five centuries of science -- no answer. Now return to Tepeyac Hill. Our Lady is waiting to give you the roses for the Bishop.');
       setTimeout(()=>chgScene('hill'),5500);
     }
   }
@@ -1009,13 +1259,28 @@ function chkSceneDone(){
       setTimeout(()=>chgScene('bishop'),6000);
     }
   }
+  if(sn==='conversions'&&!G.flags.has('conv_done')){
+    if(['qv6','qv7','qv8','qv9','qv10','qv11','qv12','qv13','qv14','qv15','qv16'].every(f=>G.flags.has(f))){
+      G.flags.add('conv_done');
+      showNotif('✟','Nine Million Souls!','The greatest conversion in history. Now see the chapel they built at Tepeyac -- and visit Juan Diego in his last years.');
+      setTimeout(()=>chgScene('church'),5500);
+    }
+  }
+  if(sn==='hermit'&&!G.flags.has('hermit_done')){
+    if(['qhe1','qhe2','qhe3','qhe4','qhe5','qhe6','qhe7','qhe8','qhe9','qhe10','qhe11'].every(f=>G.flags.has(f))){
+      G.flags.add('hermit_done');
+      showNotif('🕯','Juan Diego -- Blessed and Canonized!','His story does not end at Tepeyac. The faith he carried now crosses the Pacific to the Philippines...');
+      setTimeout(()=>{document.getElementById('phsc').style.display='flex';},5500);
+    }
+  }
 }
+
 function chkChurch(){
   if(G.scn!=='church'||G.flags.has('c_done')) return;
-  if(['qc1','qc2','qc3','qc4'].every(f=>G.flags.has(f))){
+  if(['qc1','qc2','qc3','qc4','qc5'].every(f=>G.flags.has(f))){
     G.flags.add('c_done');
-    showNotif('⛪','The Church is Complete!','Nine million souls converted in seven years. The faith crosses the Pacific...');
-    setTimeout(()=>{document.getElementById('phsc').style.display='flex';},5500);
+    showNotif('⛪','The Church is Complete!','Nine million souls converted in seven years. Now visit Juan Diego in his final years as hermit of Tepeyac...');
+    setTimeout(()=>chgScene('hermit'),5500);
   }
 }
 
@@ -1025,12 +1290,14 @@ function doFlash(){
   G.glows.forEach(g=>{g.l.intensity=g.b*7;});setTimeout(()=>{G.glows.forEach(g=>{g.l.intensity=g.b;});},1200);
 }
 function chgScene(ns){
+  if(G.transitioning) return;
+  G.transitioning=true;
   const fo=document.getElementById('fade');fo.style.opacity='1';fo.style.pointerEvents='all';
   setTimeout(()=>{
     G.scn=ns;
     if(G.dlg.active){G.dlg.active=false;clearInterval(typeTmr);document.getElementById('dlg').style.display='none';}
     buildScene(ns);
-    setTimeout(()=>{fo.style.opacity='0';fo.style.pointerEvents='none';showNotif('✟',SC[ns].name,SC[ns].sub);},500);
+    setTimeout(()=>{fo.style.opacity='0';fo.style.pointerEvents='none';showNotif('✟',SC[ns].name,SC[ns].sub);G.transitioning=false;},500);
   },700);
 }
 function beginPhil(){document.getElementById('phsc').style.display='none';chgScene('philippines');}
