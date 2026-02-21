@@ -221,7 +221,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
   <span style="font-size:0.42rem;letter-spacing:1px">NEXT</span>
 </div>
 
-<div id="abtn" onclick="toggleMusic()">♪ Music</div>
+<div id="abtn" onclick="toggleMusic()">Music ON</div>
 
 <!-- Notification -->
 
@@ -254,11 +254,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 <script>
 'use strict';
 
-// ═══════════════ RENDERER ═══════════════
+// ======= RENDERER =======
 const canvas = document.getElementById('gc');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.physicallyCorrectLights = true;
@@ -268,309 +268,310 @@ renderer.outputEncoding = THREE.sRGBEncoding;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, 0.1, 500);
-
 window.addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
   camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
 });
 
-// ═══════════════ STATE ═══════════════
+// ======= STATE =======
 const G = {
-  running:false, scn:'village', flags:new Set(), inv:{}, animT:0,
-  npcMem:{},
+  running:false, scn:'village', flags:new Set(), inv:{}, animT:0, npcMem:{},
   pl:{ pos:new THREE.Vector3(0,0,6), mesh:null, angle:0, tAngle:0, bobT:0, moving:false },
   cam:{ yaw:0, dist:18, h:11.5 },
   dlg:{ active:false, npc:null, line:0, full:'', done:false },
   npcMeshes:[], colMeshes:[], glows:[], parts:null, skyMat:null,
 };
 
+// ======= INPUT =======
 const keys = {};
 const joy = {x:0, y:0};
 document.addEventListener('keydown', e => {
   keys[e.code] = true;
-  if(e.code==='KeyE'||e.code==='Space'||e.code==='Enter'){e.preventDefault();doInteract();}
+  if (e.code==='KeyE'||e.code==='Space'||e.code==='Enter') { e.preventDefault(); doInteract(); }
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
 
-// ═══════════════ JOYSTICK ═══════════════
+// ======= JOYSTICK =======
 const jb = document.getElementById('jb');
 const jk = document.getElementById('jk');
 let jOn=false, jTid=-1, jcx=0, jcy=0;
-const jR = () => jb.getBoundingClientRect().width/2;
-function jCenter(){ const r=jb.getBoundingClientRect(); jcx=r.left+r.width/2; jcy=r.top+r.height/2; }
-function jMove(cx,cy){
-  const dx=cx-jcx, dy=cy-jcy, d=Math.hypot(dx,dy), mx=jR()-14, cp=Math.min(d,mx), a=Math.atan2(dy,dx);
-  jk.style.transform=`translate(calc(-50% + ${Math.cos(a)*cp}px),calc(-50% + ${Math.sin(a)*cp}px))`;
-  if(d>mx*0.18){ const s=Math.round(a/(Math.PI/4))*(Math.PI/4); const n=Math.min(d/mx,1); joy.x=Math.cos(s)*n; joy.y=Math.sin(s)*n; }
-  else{ joy.x=0; joy.y=0; }
+function jRadius() { return jb.getBoundingClientRect().width/2; }
+function jCenter() { const r=jb.getBoundingClientRect(); jcx=r.left+r.width/2; jcy=r.top+r.height/2; }
+function jMove(cx,cy) {
+  const dx=cx-jcx, dy=cy-jcy, d=Math.hypot(dx,dy), mx=jRadius()-14;
+  const cp=Math.min(d,mx), ang=Math.atan2(dy,dx);
+  jk.style.transform=`translate(calc(-50% + ${Math.cos(ang)*cp}px),calc(-50% + ${Math.sin(ang)*cp}px))`;
+  if (d>mx*0.18) { const snapAng=Math.round(ang/(Math.PI/4))*(Math.PI/4), nm=Math.min(d/mx,1); joy.x=Math.cos(snapAng)*nm; joy.y=Math.sin(snapAng)*nm; }
+  else { joy.x=0; joy.y=0; }
 }
-function jReset(){ jOn=false; jTid=-1; jk.style.transform='translate(-50%,-50%)'; joy.x=0; joy.y=0; }
+function jReset() { jOn=false; jTid=-1; jk.style.transform='translate(-50%,-50%)'; joy.x=0; joy.y=0; }
 jb.addEventListener('touchstart',e=>{e.preventDefault();jCenter();jOn=true;jTid=e.changedTouches[0].identifier;jMove(e.changedTouches[0].clientX,e.changedTouches[0].clientY);},{passive:false});
 jb.addEventListener('mousedown',e=>{e.preventDefault();jCenter();jOn=true;jMove(e.clientX,e.clientY);});
 document.addEventListener('touchmove',e=>{if(!jOn)return;for(const t of e.changedTouches)if(t.identifier===jTid){jMove(t.clientX,t.clientY);break;}},{passive:false});
 document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===jTid){jReset();break;}},{passive:false});
 document.addEventListener('mousemove',e=>{if(jOn)jMove(e.clientX,e.clientY);});
 document.addEventListener('mouseup',()=>{if(jOn)jReset();});
-
 function tStart(e){e.preventDefault();document.getElementById('tbtn').classList.add('pr');doInteract();}
 function tEnd(e){e.preventDefault();document.getElementById('tbtn').classList.remove('pr');}
 function sStart(e){e.preventDefault();document.getElementById('sbtn').style.transform='scale(0.88)';advDlg();}
 function sEnd(e){e.preventDefault();document.getElementById('sbtn').style.transform='';}
 
-// ═══════════════ SCENE CONFIG ═══════════════
+// ======= SCENE CONFIG (ASCII only - hyphens not em-dashes) =======
 const SC = {
-  village:{ name:'Chapter I — The Village', sub:'Tepeyac, Mexico — December 1531', st:0x3A1E06, sb:0x9B6828, fg:0xAA7830, fd:0.011, ac:0xFFD080, ai:0.55, dc:0xFFE8A0, di:2.6, dp:[18,32,12], gc:0x3D6A18, sp:[0,0,6], bn:19 },
-  hill:{    name:'Chapter II — The Apparition', sub:'Tepeyac Hill — Before Dawn, December 9', st:0x020914, sb:0x0E1E3C, fg:0x182A4A, fd:0.009, ac:0x90B8E8, ai:0.38, dc:0xFFAA50, di:1.9, dp:[-12,22,16], gc:0x5A6A40, sp:[0,0,11], bn:20 },
-  bishop:{  name:"Chapter III — The Bishop's Palace", sub:'Mexico City — December 9–11, 1531', st:0x120900, sb:0x2C1A0A, fg:0x382010, fd:0.016, ac:0xFFB870, ai:0.52, dc:0xFFD090, di:2.1, dp:[10,28,14], gc:0x8B6840, sp:[0,0,10], bn:14 },
-  miracle:{ name:'Chapter IV — The Roses & The Tilma', sub:'Tepeyac Summit — December 12, 1531', st:0x1A0500, sb:0x3A0E00, fg:0x5A2408, fd:0.010, ac:0xFF9840, ai:0.58, dc:0xFFAA30, di:2.9, dp:[0,36,6], gc:0x506035, sp:[0,0,11], bn:19 },
-  church:{  name:'Chapter V — The Church is Built', sub:'Tepeyac — 1533', st:0x0A1C34, sb:0x1E3E62, fg:0x2E5080, fd:0.009, ac:0xB0CCFF, ai:0.53, dc:0xFFD890, di:2.2, dp:[14,30,10], gc:0x4A3A22, sp:[0,0,10], bn:20 },
-  philippines:{ name:'The Philippines — 1601 A.D.', sub:'Makati, Manila — The Faith Crosses the Pacific', st:0x0A2040, sb:0x1050A0, fg:0x1A60A0, fd:0.007, ac:0x90D8FF, ai:0.58, dc:0xFFEE70, di:2.9, dp:[12,38,6], gc:0x2A5A1A, sp:[0,0,8], bn:21 },
+  village:     { name:'Chapter I -- The Village',                sub:'Tepeyac, Mexico -- December 1531',                st:0x3A1E06, sb:0x9B6828, fg:0xAA7830, fd:0.011, ac:0xFFD080, ai:0.55, dc:0xFFE8A0, di:2.6, dp:[18,32,12],  gc:0x3D6A18, sp:[0,0,6],  bn:19 },
+  hill:        { name:'Chapter II -- The Apparition',            sub:'Tepeyac Hill -- Before Dawn, December 9',         st:0x020914, sb:0x0E1E3C, fg:0x182A4A, fd:0.009, ac:0x90B8E8, ai:0.38, dc:0xFFAA50, di:1.9, dp:[-12,22,16], gc:0x5A6A40, sp:[0,0,11], bn:20 },
+  bishop:      { name:"Chapter III -- The Bishop's Palace",      sub:'Mexico City -- December 9 to 11, 1531',           st:0x120900, sb:0x2C1A0A, fg:0x382010, fd:0.016, ac:0xFFB870, ai:0.52, dc:0xFFD090, di:2.1, dp:[10,28,14],  gc:0x8B6840, sp:[0,0,10], bn:14 },
+  miracle:     { name:'Chapter IV -- The Roses and the Tilma',   sub:'Tepeyac Summit -- December 12, 1531',             st:0x1A0500, sb:0x3A0E00, fg:0x5A2408, fd:0.010, ac:0xFF9840, ai:0.58, dc:0xFFAA30, di:2.9, dp:[0,36,6],    gc:0x506035, sp:[0,0,11], bn:19 },
+  church:      { name:'Chapter V -- The Church is Built',        sub:'Tepeyac -- 1533 A.D.',                            st:0x0A1C34, sb:0x1E3E62, fg:0x2E5080, fd:0.009, ac:0xB0CCFF, ai:0.53, dc:0xFFD890, di:2.2, dp:[14,30,10],  gc:0x4A3A22, sp:[0,0,10], bn:20 },
+  philippines: { name:'Chapter VI -- The Philippines, 1601 A.D.',sub:'Makati, Manila -- The Faith Crosses the Pacific', st:0x0A2040, sb:0x1050A0, fg:0x1A60A0, fd:0.007, ac:0x90D8FF, ai:0.58, dc:0xFFEE70, di:2.9, dp:[12,38,6],   gc:0x2A5A1A, sp:[0,0,8],  bn:21 },
 };
 
-// ═══════════════ NPC DATA ═══════════════
+// ======= NPC DATA (no smart quotes, no em-dashes) =======
 const NPCS = {
   village:[
     {id:'elder',pos:[9,0,7],col:0x7A5030,nm:'Village Elder',lines:[
-      {sp:'Village Elder — Nahua',t:'"Juan Diego, brother — the old hill Tepeyac has always been sacred. The ancestors said Tonantzin dwelt there. Now the Spanish priests say we must not worship there. But the hill remembers.'},
-      {sp:'Village Elder',t:'"Our people plant corn, beans, and squash together in the milpa — as the ancestors taught. Since the conquest, our numbers are far fewer. But we survive, Juan Diego. We always survive."'},
-      {sp:'Village Elder',t:'"I hear you walk fifteen miles each morning before sunrise to hear Mass at Tlatelolco. You are not young, friend. Your faith is remarkable. Perhaps God has plans for you."'},
+      {sp:'Village Elder',t:"Juan Diego, brother -- the old hill Tepeyac has always been sacred. The ancestors said Tonantzin dwelt there. Now the Spanish priests say we must not worship here. But the hill remembers what it was."},
+      {sp:'Village Elder',t:"Our people plant corn, beans, and squash together in the milpa -- as the ancestors taught. Since the conquest, our numbers are far fewer. But we survive, Juan Diego. We always survive."},
+      {sp:'Village Elder',t:"I hear you walk fifteen miles each morning before the sun rises to hear Mass at Tlatelolco. You are not young, friend. Your faith is remarkable. Perhaps God has plans for you."},
     ]},
     {id:'merchant',pos:[-9,0,6],col:0x5A3820,nm:'Merchant Itzcoatl',lines:[
-      {sp:'Merchant Itzcoatl',t:'"Welcome to the tianguis! Cacao, dried chili, maguey cloth — the market still breathes even in hard times. Ten years since Cortés. Millions of our people died from the Spanish sicknesses. Yet here we stand."'},
-      {sp:'Merchant Itzcoatl',t:'"They say Bishop Zumárraga is a good man — he protects us from the worst encomenderos. He wants to build churches for us. Perhaps this new faith is something real, Juan Diego."'},
+      {sp:'Merchant Itzcoatl',t:"Welcome to the tianguis! Cacao, dried chili, maguey cloth -- the market still breathes even in hard times. Ten years since Cortes. Millions of our people died from the Spanish sicknesses. Yet here we stand."},
+      {sp:'Merchant Itzcoatl',t:"They say Bishop Zumarraga is a good man -- he protects us from the worst encomenderos. He wants to build churches for us. Perhaps this new faith is something real, Juan Diego."},
     ]},
     {id:'woman',pos:[7,0,-6],col:0x8A4830,nm:'Xochitl',lines:[
-      {sp:'Xochitl — Village Woman',t:'"Cuauhtlatoatzin! Take these tamales for your journey — fifteen miles to Tlatelolco is a long walk. I wrapped them to stay warm. The morning is very cold."'},
-      {sp:'Xochitl',t:'"My children ask — who is this new God? I tell them: He is the God of mercy, who took flesh in a woman\'s womb. They say: then He understands mothers, then He understands us. I think they are right."'},
+      {sp:'Xochitl -- Village Woman',t:"Cuauhtlatoatzin! Take these tamales for your journey -- fifteen miles to Tlatelolco is a long walk. I wrapped them to stay warm. The morning is very cold."},
+      {sp:'Xochitl',t:"My children ask -- who is this new God? I tell them: He is the God of mercy, who took flesh in a woman's womb. They say: then He understands mothers. I think they are right."},
     ]},
     {id:'cousin',pos:[-7,0,-7],col:0x6A3820,nm:'Juan Bernardino',lines:[
-      {sp:'Juan Bernardino — Your Cousin',t:'"Juan Diego... I am not feeling well today. The fever has come. My bones ache. You know this fever — it has taken so many of our people. Please, go to your Mass. Pray for me, cousin."'},
-      {sp:'Juan Bernardino',t:'"Do not worry about me. If it is God\'s will that I recover, I will recover. If it is His will that I join our ancestors, then pray for a good priest to reach me in time."'},
+      {sp:'Juan Bernardino -- Your Cousin',t:"Juan Diego... I am not feeling well today. The fever has come. My bones ache. You know this fever -- it has taken so many of our people. Please, go to your Mass. Pray for me, cousin."},
+      {sp:'Juan Bernardino',t:"Do not worry about me. If it is God's will that I recover, I will recover. If it is His will that I join our ancestors, then pray for a good priest to reach me in time."},
     ]},
-    {id:'friar',pos:[5,0,-9],col:0x4A4A6A,nm:'Fray Tomás, OFM',lines:[
-      {sp:'Fray Tomás — Franciscan Friar',t:'"Praised be Jesus Christ! Juan Diego — your devotion, your willingness to walk fifteen miles before sunrise — the other friars speak of it with great admiration. You are among the first fruits of this New World mission."'},
-      {sp:'Fray Tomás',t:'"Bishop Zumárraga wishes to build a chapel for the indigenous faithful. But he needs a clear sign from heaven before he can justify it. Pray for us, Juan Diego. Pray that heaven sends such a sign."'},
+    {id:'friar',pos:[5,0,-9],col:0x4A4A6A,nm:'Fray Tomas, OFM',lines:[
+      {sp:'Fray Tomas -- Franciscan Friar',t:"Praised be Jesus Christ! Juan Diego -- your devotion, your willingness to walk fifteen miles before sunrise, is spoken of with admiration among the friars. You are among the first fruits of this New World mission."},
+      {sp:'Fray Tomas',t:"Bishop Zumarraga wishes to build a chapel for the indigenous faithful. But he needs a clear sign from heaven before he can justify it. Pray for us, Juan Diego. Pray that heaven sends such a sign."},
     ]},
   ],
   hill:[
     {id:'ourLady1',pos:[0,3,-13],col:0xD4A017,nm:'Our Lady of Guadalupe',isHoly:true,lines:[
-      {sp:'Our Lady of Guadalupe',t:'"Know for certain, smallest of my children, dearest Juan Diego — I am the perfect and ever-virgin Holy Mary, Mother of the God of great truth through Whom we live, the Creator of Persons, the Lord of Heaven and Earth."'},
-      {sp:'Our Lady of Guadalupe',t:'"I very much want and ardently desire that my hermitage be erected in this place. Here I will show, give, and offer all my love, compassion, help, and protection to the people. I am your merciful mother."'},
-      {sp:'Our Lady of Guadalupe',t:'"I will hear their weeping, their sorrow, and will remedy and alleviate all their multiple sufferings, necessities, and misfortunes. Go to the dwelling of the Bishop of Mexico — tell him I sent you to manifest my desire."'},
-      {sp:'Our Lady of Guadalupe',t:'"Tell him all you have seen and admired and heard. Be certain that I will be grateful and will repay you. You have heard my word — now go, and put forth all your effort."'},
+      {sp:'Our Lady of Guadalupe',t:"Know for certain, smallest of my children, dearest Juan Diego -- I am the perfect and ever-virgin Holy Mary, Mother of the God of great truth through Whom we live, the Creator of Persons, the Lord of Heaven and Earth."},
+      {sp:'Our Lady of Guadalupe',t:"I very much want and ardently desire that my hermitage be erected in this place. Here I will show, give, and offer all my love, compassion, help, and protection to the people. I am your merciful mother, the mother of all who live in this land."},
+      {sp:'Our Lady of Guadalupe',t:"I will hear their weeping, their sorrow, and will remedy and alleviate all their multiple sufferings, necessities, and misfortunes. Go to the dwelling of the Bishop of Mexico -- tell him I sent you to manifest my desire."},
+      {sp:'Our Lady of Guadalupe',t:"Tell him all you have seen and admired and heard. Be certain that I will be grateful and will repay you. I will make you joyful. You have heard my word -- now go, and put forth all your effort."},
     ]},
     {id:'shepherd',pos:[10,0,4],col:0x4A3818,nm:'Shepherd Tlacatzin',lines:[
-      {sp:'Shepherd Tlacatzin',t:'"Juan Diego! You look pale as a spirit. I was on this hill before dawn — I heard singing. Like birds I have never known in all my years on this mountain. Sweeter than any sound I have ever heard."'},
-      {sp:'Shepherd Tlacatzin',t:'"Whatever you witnessed — your eyes are different now. Like a man who has touched something eternal. Go safely, friend. I will pray for you."'},
+      {sp:'Shepherd Tlacatzin',t:"Juan Diego! You look pale as a spirit. I was on this hill before dawn -- I heard singing. Like birds I have never known in all my years on this mountain. Sweeter than any sound I have ever heard."},
+      {sp:'Shepherd Tlacatzin',t:"Whatever you witnessed -- your eyes are different now. Like a man who has touched something eternal. Go safely, friend. I will pray for you."},
     ]},
   ],
   bishop:[
     {id:'doorman',pos:[0,0,11],col:0x3A2818,nm:"Bishop's Doorman",lines:[
-      {sp:"Doorman — Rodrigo",t:'"Hold there. You cannot simply present yourself at the Bishop\'s door. This is the residence of His Excellency the first Bishop of Mexico. State your name and your business."'},
-      {sp:'Rodrigo',t:'"An Indian claiming to have seen a vision on Tepeyac Hill... The Bishop is a good man. He has instructed us to receive all who come in good faith. Wait here. I will announce you."'},
+      {sp:'Doorman -- Rodrigo',t:"Hold there. You cannot simply present yourself at the Bishop's door. This is the residence of His Excellency the first Bishop of Mexico. State your name and your business."},
+      {sp:'Rodrigo',t:"An Indian claiming to have seen a vision on Tepeyac Hill... The Bishop is a good man. He has instructed us to receive all who come in good faith. Wait here. I will announce you."},
     ]},
-    {id:'bishop',pos:[0,0,-10],col:0x800000,nm:'Bishop Zumárraga',isBishop:true,lines:[
-      {sp:'Bishop Juan de Zumárraga',t:'"My son, I have heard your words attentively. You say the Most Holy Virgin Mother of God appeared on the hill of Tepeyac and desires that I build her a sacred house there. This is a weighty claim. I must reflect carefully."'},
-      {sp:'Bishop Zumárraga',t:'"Come again another time and I will hear you with all patience. Tell the Lady who sent you that I am grateful for her intention — and I will examine her request with much care and diligence."'},
-      {sp:'Bishop Zumárraga',t:'"My child, I cannot authorize a church on one man\'s testimony alone, however sincere. Heaven\'s works require confirmation. Bring me a sign — a token she herself provides — that I may know this is truly God\'s will."'},
+    {id:'bishop',pos:[0,0,-10],col:0x800000,nm:'Bishop Zumarraga',isBishop:true,lines:[
+      {sp:'Bishop Juan de Zumarraga',t:"My son, I have heard your words attentively. You say the Most Holy Virgin Mother of God appeared on the hill of Tepeyac and desires that I build her a sacred house there. This is a weighty claim. I must reflect carefully."},
+      {sp:'Bishop Zumarraga',t:"Come again another time and I will hear you with all patience. Tell the Lady who sent you that I am grateful for her intention. But I will need a sign -- a token from the Lady herself -- before I can act."},
+      {sp:'Bishop Zumarraga',t:"My child, I cannot authorize a church on one man's testimony alone, however sincere. Bring me a sign she herself provides -- that I may know this is truly God's will. Then I will believe with all my heart."},
     ]},
     {id:'guard',pos:[-9,0,4],col:0x505060,nm:'Palace Guard',lines:[
-      {sp:'Palace Guard — Luis',t:'"Move along. The Bishop receives important visitors today. If you have business, state it to the doorman."'},
-      {sp:'Palace Guard',t:'"...They say you have come before and came back again. That takes courage — or deep faith. Either way the Bishop has agreed to hear you. Good luck to you."'},
+      {sp:'Palace Guard -- Luis',t:"Move along. The Bishop receives important visitors today. If you have business, state it to the doorman."},
+      {sp:'Palace Guard',t:"...They say you have come before and came back again. That takes courage -- or deep faith. Either way the Bishop has agreed to hear you. Good luck to you."},
     ]},
     {id:'official',pos:[9,0,2],col:0x5A4838,nm:'Church Official',lines:[
-      {sp:'Church Official — Don Pedro',t:'"So you are the one who claims to have seen Our Lady on Tepeyac Hill. Bring the sign the Bishop requires — something that cannot be made by human hands. Then even the most skeptical among us will believe."'},
+      {sp:'Church Official -- Don Pedro',t:"So you are the one who claims to have seen Our Lady on Tepeyac Hill. Bring the sign the Bishop requests -- something that cannot be made by human hands. Then even the most skeptical among us will believe."},
     ]},
   ],
   miracle:[
     {id:'ourLady2',pos:[0,4,-11],col:0xD4A017,nm:'Our Lady of Guadalupe',isHoly:true,lines:[
-      {sp:'Our Lady of Guadalupe',t:'"Listen and put it in your heart, my smallest and dearest child — what is frightening you? What is distressing you? Is not I here, who am your mother? Are you not under my shadow and protection? Am I not the source of your joy?"'},
-      {sp:'Our Lady of Guadalupe',t:'"Do not let your uncle\'s illness distress you — he shall not die of his present sickness. Be assured in your heart that he is already well. Go now to the top of the hill — there you will find a great variety of flowers. Cut them and bring them to me."'},
-      {sp:'Our Lady of Guadalupe',t:'"This is the sign and token I send to the Bishop. Tell him in my name that he should see in it what I ask, and carry out my wish. You are my trusted ambassador. For this I will reward you. Go now, with all your heart."'},
+      {sp:'Our Lady of Guadalupe',t:"Listen and put it in your heart, my smallest and dearest child -- what is frightening you? What is distressing you? Is not I here, who am your mother? Are you not under my shadow and protection?"},
+      {sp:'Our Lady of Guadalupe',t:"Do not let your uncle's illness distress you -- he shall not die of his present sickness. Be assured in your heart that he is already well. Go now to the top of the hill -- there you will find a great variety of flowers. Cut them and bring them to me."},
+      {sp:'Our Lady of Guadalupe',t:"This is the sign and token I send to the Bishop. Tell him in my name that he should see in it what I ask, and carry out my wish. You are my trusted ambassador. For this I will reward you. Go now, with all your heart."},
     ]},
-    {id:'cousin2',pos:[-10,0,5],col:0x8A5030,nm:'Juan Bernardino — Healed!',lines:[
-      {sp:'Juan Bernardino — Miraculously Healed!',t:'"Juan Diego! I am completely well! The fever has left me entirely! A magnificent young woman appeared here — radiant with light. She told me she had just sent my nephew Juan Diego to the Bishop with her image!"'},
-      {sp:'Juan Bernardino',t:'"She told me her name — she said: I am Santa María de Guadalupe. She spoke in Nahuatl, just as you said! Cousin — I feel stronger than I have in years. God and His Holy Mother be praised!"'},
+    {id:'cousin2',pos:[-10,0,5],col:0x8A5030,nm:'Juan Bernardino -- Healed!',lines:[
+      {sp:'Juan Bernardino -- Miraculously Healed!',t:"Juan Diego! I am completely well! The fever has left me entirely! A magnificent young woman appeared here -- radiant with light. She told me she had just sent my nephew Juan Diego to the Bishop with her holy image!"},
+      {sp:'Juan Bernardino',t:"She told me her name -- she said: I am Santa Maria de Guadalupe. She spoke in Nahuatl, just as you said! Cousin -- I feel stronger than I have in years. God and His Holy Mother be praised forever!"},
     ]},
   ],
   church:[
-    {id:'bishopChurch',pos:[0,0,-10],col:0x800000,nm:'Bishop Zumárraga',isBishop:true,lines:[
-      {sp:'Bishop Juan de Zumárraga',t:'"Juan Diego — I knelt before the image when it appeared on your tilma, and I wept. There was no doubt this was the work of God, made by no human painter. I ordered the chapel built at Tepeyac immediately, just as Our Lady desired."'},
-      {sp:'Bishop Zumárraga',t:'"The tilma is the greatest marvel I have ever witnessed. A coarse cloth of ayate fiber — and yet upon it rests an image no master painter in all of Europe could have made. Her eyes contain a reflection of the room, as if they are alive."'},
-      {sp:'Bishop Zumárraga',t:'"Juan Diego — you are blessed above all men of this age. What God has done through you will be remembered as long as this world stands. Nine million of your people will come to the faith because of this day."'},
+    {id:'bishopChurch',pos:[0,0,-10],col:0x800000,nm:'Bishop Zumarraga',isBishop:true,lines:[
+      {sp:'Bishop Juan de Zumarraga',t:"Juan Diego -- I knelt before the image when it appeared on your tilma, and I wept. There was no doubt this was the work of God, made by no human painter. I ordered the chapel built at Tepeyac immediately, just as Our Lady desired."},
+      {sp:'Bishop Zumarraga',t:"The tilma is the greatest marvel I have ever witnessed. A coarse cloth of ayate fiber -- and yet upon it rests an image no master painter in all of Europe could have made. Her eyes contain a reflection of the room, as if they are alive."},
+      {sp:'Bishop Zumarraga',t:"Juan Diego -- you are blessed above all men of this age. What God has done through you will be remembered as long as this world stands. Nine million of your people will come to the faith because of this day."},
     ]},
     {id:'pilgrim',pos:[8,0,3],col:0x5A3020,nm:'Pilgrim Citlali',lines:[
-      {sp:'Pilgrim Citlali — First Pilgrim',t:'"I walked four days to be here. Four days! When I heard that the Mother of God appeared to one of our own people, spoke in Nahuatl, chose a Nahua man — I fell to my knees in the road and wept for an hour with joy."'},
-      {sp:'Pilgrim Citlali',t:'"She came to us in our own language. She wore our stars. She stood on the ancient crescent moon. She chose a poor man — not an archbishop or nobleman. A poor macehualli like us. How could we not love Her?"'},
+      {sp:'Pilgrim Citlali -- First Pilgrim',t:"I walked four days to be here. When I heard that the Mother of God appeared to one of our own people, spoke in Nahuatl, chose a Nahua man -- I fell to my knees in the road and wept with joy."},
+      {sp:'Pilgrim Citlali',t:"She came to us in our own language. She wore our stars. She stood on the ancient crescent moon. She chose a poor macehualli like us -- not an archbishop or a nobleman. How could we not love Her?"},
     ]},
-    {id:'juanOld',pos:[-8,0,0],col:0x7A5030,nm:'Juan Diego (Elder)',lines:[
-      {sp:'Juan Diego — Guardian of the Shrine',t:'"I have lived here at the chapel every day since it was built. I sweep the floors, light the candles, guide the pilgrims. People come from every part of New Spain. Nine million baptized. The friars call it the greatest miracle in their history."'},
-      {sp:'Juan Diego',t:'"The tilma — Her image — I look at it every day. It has not faded. The cloth should have rotted long ago, but it has not. I am nothing — a poor old weaver. But She chose me. Why me? The only answer I have found: because She loves the small ones."'},
+    {id:'juanOld',pos:[-8,0,0],col:0x7A5030,nm:'Juan Diego -- Elder',lines:[
+      {sp:'Juan Diego -- Guardian of the Shrine',t:"I have lived here at the chapel every day since it was built. I sweep the floors, light the candles, guide the pilgrims. People come from every part of New Spain. Nine million baptized in seven years."},
+      {sp:'Juan Diego',t:"The tilma -- Her image -- I look at it every day. It has not faded. The cloth should have rotted long ago, but it has not. I am nothing -- a poor old weaver. But She chose me. Because She loves the small ones."},
     ]},
   ],
   philippines:[
     {id:'chieftain',pos:[-10,0,5],col:0x6A3A10,nm:'Datu Panginoon',lines:[
-      {sp:'Datu Panginoon — Chieftain of Makati',t:'"Fray Miguel — you bring the sacred image from Mexico? Her face looks like ours. She appeared to a poor man, not a nobleman. She spoke his language, not the conqueror\'s language. Fray Miguel — that is our story too."'},
-      {sp:'Datu Panginoon',t:'"We are a conquered people. We are the poor. If She appeared to the poor of Mexico, She will come to the poor of the Philippines. Build your chapel here by the Pasig River. I give you the land gladly."'},
+      {sp:'Datu Panginoon -- Chieftain of Makati',t:"Fray Miguel -- you bring the sacred image from Mexico? Her face looks like ours. She appeared to a poor man, not a nobleman. She spoke his language, not the conqueror's language. That is our story too."},
+      {sp:'Datu Panginoon',t:"We are a conquered people. We are the poor. If She appeared to the poor of Mexico, She will come to the poor of the Philippines. Build your chapel here by the Pasig River. I give you the land gladly."},
     ]},
     {id:'friarPh',pos:[10,0,5],col:0x3A3A5A,nm:'Fray Rodrigo, OSA',lines:[
-      {sp:'Fray Rodrigo de Santiago, OSA',t:'"Brother Miguel! God be praised, you arrived safely! The Archbishop has approved our petition — we are authorized to establish the Confraternity of Nuestra Señora de Guadalupe here in Makati."'},
-      {sp:'Fray Rodrigo',t:'"Every December 12th we will hold a great procession on the Pasig River. The faithful will carry the image on a barge lit with a thousand candles. The Tagalog faithful are already singing Her praises. Their hearts are ready."'},
+      {sp:'Fray Rodrigo de Santiago, OSA',t:"Brother Miguel! God be praised, you arrived safely! The Archbishop has approved our petition -- we are authorized to establish the Confraternity of Our Lady of Guadalupe here in Makati. The first such church on Asian soil."},
+      {sp:'Fray Rodrigo',t:"Every December 12th we will hold a great procession on the Pasig River. The faithful will carry the image on a barge lit with a thousand candles. The Tagalog faithful are already singing Her praises. Their hearts are ready."},
     ]},
-    {id:'laywoman',pos:[-9,0,-5],col:0x7A4020,nm:'Doña María Panganiban',lines:[
-      {sp:'Doña María Panganiban',t:'"Fray Miguel — teach us the novena prayers. We know the Rosary, but we want to know Her specific story — how She appeared to a poor man in Mexico, how She chose the conquered. We want to pray with Her story in our hearts."'},
-      {sp:'Doña María',t:'"My daughter was very ill last month. We prayed the novena to Our Lady of Guadalupe every night as you taught us. She recovered completely. Forty more families have asked to join our confraternity this week."'},
-      {sp:'Doña María',t:'"On December 12 we will bring sampaguita, champaca, ilang-ilang — our native flowers for Her altar. She belongs to the Philippines now. She is the mother of the poor, and we are the poor."'},
+    {id:'laywoman',pos:[-9,0,-5],col:0x7A4020,nm:'Dona Maria Panganiban',lines:[
+      {sp:'Dona Maria Panganiban',t:"Fray Miguel -- teach us the novena prayers. We know the Rosary, but we want to know Her specific story -- how She appeared to a poor man in Mexico, how She chose the conquered. We want to pray with Her story in our hearts."},
+      {sp:'Dona Maria',t:"My daughter was very ill last month. We prayed the novena to Our Lady of Guadalupe every night. She recovered completely. Forty more families have asked to join our confraternity this week."},
+      {sp:'Dona Maria',t:"On December 12 we will bring sampaguita, champaca, ilang-ilang -- our native flowers for Her altar. She belongs to the Philippines now. She is the mother of the poor, and we are the poor."},
     ]},
     {id:'governor',pos:[9,0,-5],col:0x5A4828,nm:'Gobernador Tello',lines:[
-      {sp:'Gobernador Francisco Tello de Guzmán',t:'"Friar — I have approved the land grant for the church of Nuestra Señora de Guadalupe at Makati. The devotion has spread remarkably fast. Build it well. Let it be worthy of the image it will hold."'},
+      {sp:'Gobernador Francisco Tello de Guzman',t:"Friar -- I have approved the land grant for the church of Our Lady of Guadalupe at Makati. The devotion has spread remarkably fast. Build it well. Let it be worthy of the image it will hold."},
     ]},
     {id:'singer',pos:[0,0,-12],col:0x7A4A20,nm:'Cantora Rosa Mendoza',lines:[
-      {sp:'Cantora Rosa Mendoza',t:'"Fray Miguel — listen! We have composed a Tagalog hymn: "Ina ng Guadalupe, Ina namin, Ipanalangin mo kami" — Mother of Guadalupe, our mother, pray for us. Three hundred voices will sing it together in the procession."'},
-      {sp:'Cantora Rosa',t:'"Every December 12 now, people come from everywhere — from Tondo, Intramuros, Cavite. They carry candles all night to arrive for the dawn Mass. The Pasig River glows from shore to shore."'},
-      {sp:'Cantora Rosa',t:'"She is not the God of the Spanish who conquered us. She is the God who chose the conquered. She appeared to a poor man and said: I am YOUR mother. That is why Filipinos love Her so fiercely. She is ours. She has always been ours."'},
+      {sp:'Cantora Rosa Mendoza',t:"Fray Miguel -- listen! We have composed a Tagalog hymn: Ina ng Guadalupe, Ina namin, Ipanalangin mo kami -- Mother of Guadalupe, our mother, pray for us. Three hundred voices will sing it in the procession."},
+      {sp:'Cantora Rosa',t:"Every December 12 now, people come from everywhere -- from Tondo, Intramuros, Cavite. They carry candles all night to arrive for the dawn Mass. The Pasig River glows from shore to shore."},
+      {sp:'Cantora Rosa',t:"She appeared to a poor man and said: I am YOUR mother. That is why Filipinos love Her so fiercely. She is ours. She has always been ours."},
     ]},
   ],
 };
 
-// ═══════════════ COLLECTABLES ═══════════════
+// ======= COLLECTABLES =======
 const COLS = {
   village:[
-    {id:'tamale',pos:[3.5,0,4.5],icon:'🌽',lbl:'Tamales for the Journey',desc:'Food for the long walk to Tlatelolco — fifteen miles each way',ec:0xD4A020},
-    {id:'manta',pos:[-4,0,3.5],icon:'🧣',lbl:'Tilma — Ayate Cloak',desc:'The coarse cactus-fiber cloak of Juan Diego. One day it will bear the image of heaven.',ec:0xC4916A},
-    {id:'rosary',pos:[5.5,0,-4],icon:'📿',lbl:'Rosary from Fray Tomás',desc:'Prayer beads — a gift from the Franciscan friar',ec:0x8B6914},
+    {id:'tamale',   pos:[3.5,0,4.5],  icon:'🌽',lbl:'Tamales for the Journey',  desc:'Food for the long walk to Tlatelolco -- fifteen miles each way',ec:0xD4A020},
+    {id:'manta',    pos:[-4,0,3.5],   icon:'🧣',lbl:'Tilma -- Ayate Cloak',      desc:'The coarse cactus-fiber cloak. One day it will bear the image of heaven.',ec:0xC4916A},
+    {id:'rosary',   pos:[5.5,0,-4],   icon:'📿',lbl:'Rosary from Fray Tomas',    desc:'Prayer beads -- a gift from the Franciscan friar',ec:0x8B6914},
   ],
   hill:[
-    {id:'herbs',pos:[-5.5,1,4],icon:'🌿',lbl:'Sacred Mountain Herbs',desc:'Plants blooming in the cold dawn air of Tepeyac Hill',ec:0x2E7A2E},
-    {id:'birdsong',pos:[6,2,-5],icon:'🎵',lbl:'Miraculous Birdsong',desc:'"A chorus sweeter than any instrument" — the sign that called Juan Diego',ec:0x4A7FC1},
+    {id:'herbs',    pos:[-5.5,1,4],   icon:'🌿',lbl:'Sacred Mountain Herbs',     desc:'Plants blooming in the cold dawn air of Tepeyac Hill',ec:0x2E7A2E},
+    {id:'birdsong', pos:[6,2,-5],     icon:'🎵',lbl:'Miraculous Birdsong',        desc:'A chorus sweeter than any instrument -- the sign that called Juan Diego',ec:0x4A7FC1},
   ],
   miracle:[
-    {id:'rose1',pos:[-5,1,-3.5],icon:'🌹',lbl:'Rose 1 / 12',desc:'A Castilian rose — impossibly blooming in Mexican December',ec:0xFF3366},
-    {id:'rose2',pos:[4.5,1,-5.5],icon:'🌹',lbl:'Rose 2 / 12',desc:'Fresh and fragrant despite the frost',ec:0xFF3366},
-    {id:'rose3',pos:[-7.5,1,-6],icon:'🌹',lbl:'Rose 3 / 12',desc:"Heaven's gift on a frozen hillside",ec:0xFF3366},
-    {id:'rose4',pos:[7,1,-4.5],icon:'🌹',lbl:'Rose 4 / 12',desc:'Each rose a proof of Her love',ec:0xFF3366},
-    {id:'rose5',pos:[-3.5,1,-8],icon:'🌹',lbl:'Rose 5 / 12',desc:'Blooming on bare winter rock',ec:0xFF3366},
-    {id:'rose6',pos:[3,1,-7],icon:'🌹',lbl:'Rose 6 / 12',desc:'Half gathered — six more remain',ec:0xFF3366},
-    {id:'rose7',pos:[-9,1,-2.5],icon:'🌹',lbl:'Rose 7 / 12',desc:'Their perfume fills the cold morning air',ec:0xFF3366},
-    {id:'rose8',pos:[9,1,-2],icon:'🌹',lbl:'Rose 8 / 12',desc:'Eight roses gathered in the tilma',ec:0xFF3366},
-    {id:'rose9',pos:[0,1,-13],icon:'🌹',lbl:'Rose 9 / 12',desc:"Near Our Lady's summit — blessed",ec:0xFF3366},
-    {id:'rose10',pos:[-5.5,1,4],icon:'🌹',lbl:'Rose 10 / 12',desc:'Two more to complete the twelve',ec:0xFF3366},
-    {id:'rose11',pos:[5.5,1,4.5],icon:'🌹',lbl:'Rose 11 / 12',desc:'The sacred number is nearly complete',ec:0xFF3366},
-    {id:'rose12',pos:[0,2,-15.5],icon:'🌹',lbl:'Rose 12 / 12 ✦',desc:'TWELVE ROSES! The miraculous sign is complete!',ec:0xFF5588},
-    {id:'ayate',pos:[-4.5,0,7],icon:'🌵',lbl:'Cactus Cloth — Ayate',desc:'The humble cloth of Juan Diego — chosen by heaven for a masterpiece',ec:0x8B6040},
+    {id:'rose1',  pos:[-5,1,-3.5],  icon:'🌹',lbl:'Rose 1 of 12', desc:'A Castilian rose -- impossibly blooming in Mexican December',ec:0xFF3366},
+    {id:'rose2',  pos:[4.5,1,-5.5], icon:'🌹',lbl:'Rose 2 of 12', desc:'Fresh and fragrant despite the frost',ec:0xFF3366},
+    {id:'rose3',  pos:[-7.5,1,-6],  icon:'🌹',lbl:'Rose 3 of 12', desc:"Heaven's gift on a frozen hillside",ec:0xFF3366},
+    {id:'rose4',  pos:[7,1,-4.5],   icon:'🌹',lbl:'Rose 4 of 12', desc:'Each rose a proof of Her love',ec:0xFF3366},
+    {id:'rose5',  pos:[-3.5,1,-8],  icon:'🌹',lbl:'Rose 5 of 12', desc:'Blooming on bare winter rock',ec:0xFF3366},
+    {id:'rose6',  pos:[3,1,-7],     icon:'🌹',lbl:'Rose 6 of 12', desc:'Half gathered -- six more remain',ec:0xFF3366},
+    {id:'rose7',  pos:[-9,1,-2.5],  icon:'🌹',lbl:'Rose 7 of 12', desc:'Their perfume fills the cold morning air',ec:0xFF3366},
+    {id:'rose8',  pos:[9,1,-2],     icon:'🌹',lbl:'Rose 8 of 12', desc:'Eight roses gathered in the tilma',ec:0xFF3366},
+    {id:'rose9',  pos:[0,1,-13],    icon:'🌹',lbl:'Rose 9 of 12', desc:"Near Our Lady's summit -- blessed",ec:0xFF3366},
+    {id:'rose10', pos:[-5.5,1,4],   icon:'🌹',lbl:'Rose 10 of 12',desc:'Two more to complete the twelve',ec:0xFF3366},
+    {id:'rose11', pos:[5.5,1,4.5],  icon:'🌹',lbl:'Rose 11 of 12',desc:'The sacred number is nearly complete',ec:0xFF3366},
+    {id:'rose12', pos:[0,2,-15.5],  icon:'🌹',lbl:'Rose 12 of 12',desc:'TWELVE ROSES! The miraculous sign is complete!',ec:0xFF5588},
+    {id:'ayate',  pos:[-4.5,0,7],   icon:'🌵',lbl:'Cactus Cloth -- Ayate',desc:'The humble cloth of Juan Diego -- chosen by heaven for a masterpiece',ec:0x8B6040},
   ],
   church:[
-    {id:'candle1',pos:[-4.5,0,-6],icon:'🕯',lbl:'First Chapel Candle',desc:'The first candle lit at the new chapel of Tepeyac — 1533',ec:0xFFE080},
-    {id:'flower1',pos:[4.5,0,-6],icon:'💐',lbl:'First Offering Flowers',desc:'Flowers placed at the foot of the miraculous tilma',ec:0xD4522A},
+    {id:'candle1', pos:[-4.5,0,-6], icon:'🕯',lbl:'First Chapel Candle',  desc:'The first candle lit at the new chapel of Tepeyac -- 1533',ec:0xFFE080},
+    {id:'flower1', pos:[4.5,0,-6],  icon:'💐',lbl:'First Offering Flowers',desc:'Flowers placed at the foot of the miraculous tilma',ec:0xD4522A},
   ],
   philippines:[
-    {id:'sampaguita',pos:[-6,0,4],icon:'🌸',lbl:'Sampaguita Garland',desc:'The sacred white flower of the Philippines — for Our Lady\'s altar',ec:0xFFEECC},
-    {id:'bamboo',pos:[7,0,4.5],icon:'🎋',lbl:'Bamboo for the Chapel',desc:'Local bamboo to frame the first Philippine Guadalupe chapel',ec:0x4A8A4A},
-    {id:'novenaTxt',pos:[0,0,9],icon:'📿',lbl:'Tagalog Novena Text',desc:'Nine-day prayers written in Tagalog for the Filipino faithful',ec:0x8B6914},
-    {id:'procCandles',pos:[-7.5,0,-3],icon:'🕯',lbl:'River Procession Candles',desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
-    {id:'tilmaCopy',pos:[7.5,0,-5],icon:'🖼',lbl:'Blessed Tilma Copy',desc:'A copy of the miraculous image — to be enshrined in Manila',ec:0xD4A017},
+    {id:'sampaguita',  pos:[-6,0,4],    icon:'🌸',lbl:'Sampaguita Garland',       desc:"The sacred white flower of the Philippines for Our Lady's altar",ec:0xFFEECC},
+    {id:'bamboo',      pos:[7,0,4.5],   icon:'🎋',lbl:'Bamboo for the Chapel',    desc:'Local bamboo to frame the first Philippine Guadalupe chapel',ec:0x4A8A4A},
+    {id:'novenaTxt',   pos:[0,0,9],     icon:'📿',lbl:'Tagalog Novena Text',       desc:'Nine-day prayers written in Tagalog for the Filipino faithful',ec:0x8B6914},
+    {id:'procCandles', pos:[-7.5,0,-3], icon:'🕯',lbl:'River Procession Candles', desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
+    {id:'tilmaCopy',   pos:[7.5,0,-5],  icon:'🖼',lbl:'Blessed Tilma Copy',       desc:'A copy of the miraculous image -- to be enshrined in Manila',ec:0xD4A017},
   ],
 };
 const ROSES = ['rose1','rose2','rose3','rose4','rose5','rose6','rose7','rose8','rose9','rose10','rose11','rose12'];
 
-// ═══════════════ QUESTS ═══════════════
+// ======= QUEST STAGES (strict chronological order) =======
+// Chapter I: Village -> Chapter II: Hill 1st vision -> Chapter III: Bishop 1st visit
+// -> Chapter III cont: Hill 2nd vision -> Chapter IV: Miracle/roses
+// -> Chapter III return: Bishop miracle reveal -> Chapter V: Church -> Chapter VI: Philippines
 const QS = [
-  {s:'village',f:'qv1',d:'Speak with the Village Elder',t:'npc',id:'elder'},
-  {s:'village',f:'qv2',d:'Collect tamales for the journey',t:'item',id:'tamale'},
-  {s:'village',f:'qv3',d:'Pick up your tilma cloak',t:'item',id:'manta'},
-  {s:'village',f:'qv4',d:'Visit cousin Juan Bernardino',t:'npc',id:'cousin'},
-  {s:'village',f:'qv5',d:'Speak with Fray Tomás, OFM',t:'npc',id:'friar'},
-  {s:'hill',f:'qh1',d:'Collect sacred herbs on the path',t:'item',id:'herbs'},
-  {s:'hill',f:'qh2',d:'Hear the miraculous birdsong',t:'item',id:'birdsong'},
-  {s:'hill',f:'qh3',d:'Receive the First Apparition',t:'npc',id:'ourLady1'},
-  {s:'bishop',f:'qb1',d:"Speak with the Bishop's doorman",t:'npc',id:'doorman'},
-  {s:'bishop',f:'qb2',d:"Present Our Lady's message to the Bishop",t:'npc',id:'bishop'},
-  {s:'hill',f:'qh4',d:'Return — Receive the Second Apparition',t:'npc',id:'ourLady1'},
-  {s:'miracle',f:'qm1',d:'Collect all 12 Castilian roses',t:'roses'},
-  {s:'miracle',f:'qm2',d:'Collect the ayate cactus cloth',t:'item',id:'ayate'},
-  {s:'miracle',f:'qm3',d:"Receive Our Lady's instructions",t:'npc',id:'ourLady2'},
-  {s:'miracle',f:'qm4',d:"Witness Juan Bernardino's healing",t:'npc',id:'cousin2'},
-  {s:'bishop',f:'qb3',d:'Present roses and tilma to the Bishop',t:'npc',id:'bishop'},
-  {s:'church',f:'qc1',d:"Hear Bishop Zumárraga's repentance",t:'npc',id:'bishopChurch'},
-  {s:'church',f:'qc2',d:'Light the first candle at the chapel',t:'item',id:'candle1'},
-  {s:'church',f:'qc3',d:'Place flowers at the tilma shrine',t:'item',id:'flower1'},
-  {s:'church',f:'qc4',d:'Hear from the first pilgrims',t:'npc',id:'pilgrim'},
-  {s:'philippines',f:'qp1',d:'Meet Datu Panginoon — Filipino chieftain',t:'npc',id:'chieftain'},
-  {s:'philippines',f:'qp2',d:'Gather sampaguita flowers for the altar',t:'item',id:'sampaguita'},
-  {s:'philippines',f:'qp3',d:'Collect bamboo for the chapel',t:'item',id:'bamboo'},
-  {s:'philippines',f:'qp4',d:'Meet Fray Rodrigo de Santiago, OSA',t:'npc',id:'friarPh'},
-  {s:'philippines',f:'qp5',d:'Write the Tagalog novena prayers',t:'item',id:'novenaTxt'},
-  {s:'philippines',f:'qp6',d:'Teach Doña María Panganiban',t:'npc',id:'laywoman'},
-  {s:'philippines',f:'qp7',d:'Prepare river procession candles',t:'item',id:'procCandles'},
-  {s:'philippines',f:'qp8',d:'Enshrine the blessed tilma copy',t:'item',id:'tilmaCopy'},
-  {s:'philippines',f:'qp9',d:"Receive the Governor's land grant",t:'npc',id:'governor'},
-  {s:'philippines',f:'qp10',d:"Hear Cantora Rosa's Tagalog hymn — Finale",t:'npc',id:'singer'},
+  {s:'village',     f:'qv1', d:'Speak with the Village Elder',             t:'npc',  id:'elder'},
+  {s:'village',     f:'qv2', d:'Collect tamales for the journey',           t:'item', id:'tamale'},
+  {s:'village',     f:'qv3', d:'Pick up your tilma cloak',                  t:'item', id:'manta'},
+  {s:'village',     f:'qv4', d:'Visit cousin Juan Bernardino',              t:'npc',  id:'cousin'},
+  {s:'village',     f:'qv5', d:'Speak with Fray Tomas, OFM',               t:'npc',  id:'friar'},
+  {s:'hill',        f:'qh1', d:'Collect sacred herbs on the path',          t:'item', id:'herbs'},
+  {s:'hill',        f:'qh2', d:'Hear the miraculous birdsong',              t:'item', id:'birdsong'},
+  {s:'hill',        f:'qh3', d:'Receive the First Apparition of Our Lady',  t:'npc',  id:'ourLady1'},
+  {s:'bishop',      f:'qb1', d:"Speak with the Bishop's doorman",           t:'npc',  id:'doorman'},
+  {s:'bishop',      f:'qb2', d:"Deliver Our Lady's message to the Bishop",  t:'npc',  id:'bishop'},
+  {s:'hill',        f:'qh4', d:'Return -- Receive the Second Apparition',   t:'npc',  id:'ourLady1'},
+  {s:'miracle',     f:'qm1', d:'Collect all 12 Castilian roses',            t:'roses'},
+  {s:'miracle',     f:'qm2', d:'Collect the ayate cactus cloth',            t:'item', id:'ayate'},
+  {s:'miracle',     f:'qm3', d:"Receive Our Lady's final instructions",     t:'npc',  id:'ourLady2'},
+  {s:'miracle',     f:'qm4', d:"Witness Juan Bernardino's miraculous healing",t:'npc',id:'cousin2'},
+  {s:'bishop',      f:'qb3', d:'Present the roses and tilma to the Bishop', t:'npc',  id:'bishop'},
+  {s:'church',      f:'qc1', d:"Hear Bishop Zumarraga's witness",           t:'npc',  id:'bishopChurch'},
+  {s:'church',      f:'qc2', d:'Light the first candle at the chapel',      t:'item', id:'candle1'},
+  {s:'church',      f:'qc3', d:'Place flowers at the tilma shrine',         t:'item', id:'flower1'},
+  {s:'church',      f:'qc4', d:'Hear from the first pilgrims',              t:'npc',  id:'pilgrim'},
+  {s:'philippines', f:'qp1', d:'Meet Datu Panginoon -- Filipino chieftain', t:'npc',  id:'chieftain'},
+  {s:'philippines', f:'qp2', d:'Gather sampaguita flowers for the altar',   t:'item', id:'sampaguita'},
+  {s:'philippines', f:'qp3', d:'Collect bamboo for the chapel',             t:'item', id:'bamboo'},
+  {s:'philippines', f:'qp4', d:'Meet Fray Rodrigo de Santiago, OSA',        t:'npc',  id:'friarPh'},
+  {s:'philippines', f:'qp5', d:'Write the Tagalog novena prayers',          t:'item', id:'novenaTxt'},
+  {s:'philippines', f:'qp6', d:'Teach Dona Maria Panganiban',               t:'npc',  id:'laywoman'},
+  {s:'philippines', f:'qp7', d:'Prepare river procession candles',          t:'item', id:'procCandles'},
+  {s:'philippines', f:'qp8', d:'Enshrine the blessed tilma copy',           t:'item', id:'tilmaCopy'},
+  {s:'philippines', f:'qp9', d:"Receive the Governor's land grant",         t:'npc',  id:'governor'},
+  {s:'philippines', f:'qp10',d:"Hear Cantora Rosa's Tagalog hymn -- Finale",t:'npc', id:'singer'},
 ];
 
-// ═══════════════ SCENE BUILD ═══════════════
-let sunL=null, ambL=null;
+// ======= MATERIAL HELPER =======
+function mStd(col,r,m,em,ei){
+  const mat=new THREE.MeshStandardMaterial({color:col,roughness:r!==undefined?r:0.88,metalness:m||0});
+  if(em){mat.emissive=new THREE.Color(em);mat.emissiveIntensity=ei||0.3;}
+  return mat;
+}
+
+// ======= SCENE BUILD =======
 function buildScene(sn){
   while(scene.children.length) scene.remove(scene.children[0]);
   G.npcMeshes=[]; G.colMeshes=[]; G.glows=[]; G.parts=null; G.skyMat=null;
   const C=SC[sn];
 
-  // Sky
-  const skyG=new THREE.SphereGeometry(350,48,24);
-  const skyM=new THREE.ShaderMaterial({
+  // Procedural sky
+  const skyMat=new THREE.ShaderMaterial({
     uniforms:{topC:{value:new THREE.Color(C.st)},botC:{value:new THREE.Color(C.sb)},time:{value:0}},
     vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-    fragmentShader:`uniform vec3 topC,botC;uniform float time;varying vec3 vD;
-float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
-void main(){
-  float h=clamp(vD.y*0.5+0.5,0.0,1.0);
-  vec3 c=mix(botC,topC,pow(h,0.62));
-  float sv=hash(floor(vD.xy*120.0+vD.z*85.0));
-  c+=step(0.992,sv)*max(0.0,vD.y)*(0.6+0.4*sin(time*2.0+sv*90.0));
-  c+=noise(vD.xz*2.5+time*0.012)*noise(vD.xz*5.5)*max(0.0,vD.y)*0.13;
-  gl_FragColor=vec4(c,1.0);
-}`,
+    fragmentShader:'uniform vec3 topC,botC;uniform float time;varying vec3 vD;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}void main(){float h=clamp(vD.y*0.5+0.5,0.0,1.0);vec3 c=mix(botC,topC,pow(h,0.62));float sv=hash(floor(vD.xy*120.0+vD.z*85.0));c+=step(0.992,sv)*max(0.0,vD.y)*(0.6+0.4*sin(time*2.0+sv*90.0));c+=noise(vD.xz*2.5+time*0.012)*noise(vD.xz*5.5)*max(0.0,vD.y)*0.13;gl_FragColor=vec4(c,1.0);}',
     side:THREE.BackSide,depthWrite:false
   });
-  const sky=new THREE.Mesh(skyG,skyM);
-  sky.userData.isSky=true; scene.add(sky); G.skyMat=skyM;
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(350,48,24),skyMat));
+  G.skyMat=skyMat;
 
   scene.fog=new THREE.FogExp2(C.fg,C.fd);
   renderer.setClearColor(C.fg);
   scene.add(new THREE.HemisphereLight(C.st,C.gc,0.38));
-  ambL=new THREE.AmbientLight(C.ac,C.ai); scene.add(ambL);
-  sunL=new THREE.DirectionalLight(C.dc,C.di);
-  sunL.position.set(...C.dp); sunL.castShadow=true;
-  sunL.shadow.mapSize.set(2048,2048);
-  sunL.shadow.camera.near=0.5; sunL.shadow.camera.far=110;
-  sunL.shadow.camera.left=-32; sunL.shadow.camera.right=32;
-  sunL.shadow.camera.top=32; sunL.shadow.camera.bottom=-32;
-  sunL.shadow.bias=-0.0003; sunL.shadow.normalBias=0.02;
-  scene.add(sunL);
+  scene.add(new THREE.AmbientLight(C.ac,C.ai));
+  const sun=new THREE.DirectionalLight(C.dc,C.di);
+  sun.position.set(C.dp[0],C.dp[1],C.dp[2]);
+  sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.near=0.5; sun.shadow.camera.far=110;
+  sun.shadow.camera.left=-32; sun.shadow.camera.right=32;
+  sun.shadow.camera.top=32; sun.shadow.camera.bottom=-32;
+  sun.shadow.bias=-0.0003; sun.shadow.normalBias=0.02;
+  scene.add(sun);
 
   buildGround(sn,C);
   buildEnv(sn);
 
   for(const nd of (NPCS[sn]||[])){
-    const m=buildNPC(nd); m.position.set(...nd.pos); scene.add(m);
+    const m=buildNPC(nd);
+    m.position.set(nd.pos[0],nd.pos[1],nd.pos[2]);
+    scene.add(m);
     G.npcMeshes.push({mesh:m,data:nd});
   }
   for(const cd of (COLS[sn]||[])){
     if(G.flags.has(cd.id)) continue;
-    const m=buildCol(cd); m.position.set(...cd.pos); scene.add(m);
+    const m=buildCol(cd);
+    m.position.set(cd.pos[0],cd.pos[1],cd.pos[2]);
+    scene.add(m);
     G.colMeshes.push({mesh:m,data:cd,by:cd.pos[1]});
   }
 
   if(!G.pl.mesh) G.pl.mesh=buildPlayer();
-  G.pl.pos.set(...C.sp); G.pl.angle=0; G.pl.tAngle=0; G.pl.bobT=0;
+  G.pl.pos.set(C.sp[0],C.sp[1],C.sp[2]);
+  G.pl.angle=0; G.pl.tAngle=0; G.pl.bobT=0;
   G.pl.mesh.position.copy(G.pl.pos);
   G.pl.mesh.rotation.y=0;
   scene.add(G.pl.mesh);
 
   buildParts(sn);
-
-  // Camera reset
   G.cam.yaw=0;
   camera.position.set(G.pl.pos.x,G.pl.pos.y+G.cam.h,G.pl.pos.z+G.cam.dist);
   camera.lookAt(G.pl.pos.x,G.pl.pos.y+2,G.pl.pos.z);
@@ -580,312 +581,272 @@ void main(){
   updTasks(); updInv(); updPips();
 }
 
+// ======= GROUND =======
 function buildGround(sn,C){
   const geo=new THREE.PlaneGeometry(150,150,90,90);
   const pa=geo.attributes.position;
-  const hilly=(sn==='hill'||sn==='miracle');
-  const flat=(sn==='bishop'||sn==='philippines');
+  const hilly=(sn==='hill'||sn==='miracle'), flat=(sn==='bishop'||sn==='philippines');
   for(let i=0;i<pa.count;i++){
     const x=pa.getX(i),z=pa.getZ(i);
     let h=Math.sin(x*0.13)*0.65+Math.cos(z*0.11)*0.55+Math.sin(x*0.32+z*0.26)*0.28+Math.sin(x*0.58+z*0.48)*0.13;
-    if(hilly){ const d=Math.hypot(x,z+9); h+=Math.max(0,(22-d)*0.38); }
+    if(hilly){const d=Math.hypot(x,z+9);h+=Math.max(0,(22-d)*0.38);}
     if(flat) h*=0.3;
     pa.setZ(i,h);
   }
   geo.computeVertexNormals();
-  const mat=new THREE.MeshStandardMaterial({color:C.gc,roughness:0.96,metalness:0});
-  const m=new THREE.Mesh(geo,mat); m.rotation.x=-Math.PI/2; m.receiveShadow=true; scene.add(m);
+  const mesh=new THREE.Mesh(geo,mStd(C.gc,0.96,0));
+  mesh.rotation.x=-Math.PI/2; mesh.receiveShadow=true; scene.add(mesh);
   if(!flat){
-    const tg=new THREE.ConeGeometry(0.06,0.4,4);
-    const tm=new THREE.MeshLambertMaterial({color:sn==='philippines'?0x2A7020:0x2A5A10});
-    const count=500, dummy=new THREE.Object3D();
-    const ti=new THREE.InstancedMesh(tg,tm,count); ti.castShadow=true;
-    for(let i=0;i<count;i++){
-      dummy.position.set((Math.random()-0.5)*80,0.18,(Math.random()-0.5)*80);
-      dummy.rotation.y=Math.random()*Math.PI*2;
-      dummy.scale.setScalar(0.55+Math.random()*0.9);
-      dummy.updateMatrix(); ti.setMatrixAt(i,dummy.matrix);
-    }
-    ti.instanceMatrix.needsUpdate=true; scene.add(ti);
+    const dummy=new THREE.Object3D(), inst=new THREE.InstancedMesh(new THREE.ConeGeometry(0.06,0.4,4),mStd(sn==='philippines'?0x2A7020:0x2A5A10,0.92,0),500);
+    inst.castShadow=true;
+    for(let i=0;i<500;i++){dummy.position.set((Math.random()-0.5)*80,0.18,(Math.random()-0.5)*80);dummy.rotation.y=Math.random()*Math.PI*2;dummy.scale.setScalar(0.55+Math.random()*0.9);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix);}
+    inst.instanceMatrix.needsUpdate=true; scene.add(inst);
   }
 }
 
+// ======= ENVIRONMENT =======
 function buildEnv(sn){
   if(sn==='village'){
-    for(const p of [[-13,0,-8],[-15,0,5],[13,0,-7],[15,0,4],[-5,0,-15],[5,0,-14],[0,0,-16],[-17,0,-2],[16,0,-2]]) bAdobe(...p);
+    [[-13,0,-8],[-15,0,5],[13,0,-7],[15,0,4],[-5,0,-15],[5,0,-14],[0,0,-16],[-17,0,-2],[16,0,-2]].forEach(p=>bAdobe(p[0],p[1],p[2]));
     for(let i=0;i<5;i++) bStall(-8+i*4,0,9);
     for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2,r=19+Math.random()*4;bTree(Math.cos(a)*r,0,Math.sin(a)*r,0.7+Math.random()*0.6);}
     bCross(11,0,-5); bWell(0,0,8);
-    for(const p of [[-7,0,7],[7,0,7],[-7,0,-7],[7,0,-7]]){
+    [[-7,0,7],[7,0,7],[-7,0,-7],[7,0,-7]].forEach(p=>{
       bTorch(p[0],p[1],p[2]);
-      const tl=new THREE.PointLight(0xFF7700,1.5,9); tl.position.set(p[0],2.3,p[2]); scene.add(tl);
+      const tl=new THREE.PointLight(0xFF7700,1.5,9);tl.position.set(p[0],2.3,p[2]);scene.add(tl);
       G.glows.push({l:tl,b:1.5,f:1.3+Math.random()*0.8});
-    }
+    });
   }
   if(sn==='hill'){
     for(let i=0;i<30;i++){const a=Math.random()*Math.PI*2,r=5+Math.random()*15;bRock(Math.cos(a)*r,0,Math.sin(a)*r-7);}
     for(let i=0;i<18;i++) bPathStone(Math.sin(i*0.45)*2.5,0.05,6-i*1.5);
     bCross(0,0,-22);
-    const dl=new THREE.PointLight(0xFF8844,2.0,90); dl.position.set(-28,12,-35); scene.add(dl);
-    const hl=new THREE.PointLight(0xFFD700,3.8,24); hl.position.set(0,7,-13); scene.add(hl);
+    const dl=new THREE.PointLight(0xFF8844,2.0,90);dl.position.set(-28,12,-35);scene.add(dl);
+    const hl=new THREE.PointLight(0xFFD700,3.8,24);hl.position.set(0,7,-13);scene.add(hl);
     G.glows.push({l:hl,b:3.8,f:0.75,fl:true,fy:7});
   }
   if(sn==='bishop'){
     bPalace();
-    for(let i=-3;i<=3;i+=1.5) if(Math.abs(i)>0.5) bColumn(i*4,0,-13);
+    for(let i=-3;i<=3;i+=1.5){if(Math.abs(i)>0.5) bColumn(i*4,0,-13);}
     bThrone(0,0,-11); bDoorFrame(0,0,13);
-    for(const[pos,b,f] of [[[0,9,-5],2.2,0.4],[[0,8,3],1.5,0.55]]){
-      const cl=new THREE.PointLight(0xFFCC88,b,30); cl.position.set(...pos); scene.add(cl);
-      G.glows.push({l:cl,b,f});
-    }
+    const cl1=new THREE.PointLight(0xFFCC88,2.2,30);cl1.position.set(0,9,-5);scene.add(cl1);G.glows.push({l:cl1,b:2.2,f:0.4});
+    const cl2=new THREE.PointLight(0xFFCC88,1.5,30);cl2.position.set(0,8,3);scene.add(cl2);G.glows.push({l:cl2,b:1.5,f:0.55});
   }
   if(sn==='miracle'){
     for(let i=0;i<36;i++){const a=Math.random()*Math.PI*2,r=7+Math.random()*9;bRock(Math.cos(a)*r,Math.random()*1.3,Math.sin(a)*r-6);}
     for(let i=0;i<14;i++){const a=(i/14)*Math.PI*2;bRoseDecor(Math.cos(a)*6.5,0.3,Math.sin(a)*6.5-9);}
-    const ml=new THREE.PointLight(0xFFD700,5.5,38); ml.position.set(0,9,-11); scene.add(ml);
-    G.glows.push({l:ml,b:5.5,f:1.0,fl:true,fy:9});
-    const ml2=new THREE.PointLight(0xFF9050,2.2,24); ml2.position.set(0,3,0); scene.add(ml2);
-    G.glows.push({l:ml2,b:2.2,f:0.65});
+    const ml=new THREE.PointLight(0xFFD700,5.5,38);ml.position.set(0,9,-11);scene.add(ml);G.glows.push({l:ml,b:5.5,f:1.0,fl:true,fy:9});
+    const ml2=new THREE.PointLight(0xFF9050,2.2,24);ml2.position.set(0,3,0);scene.add(ml2);G.glows.push({l:ml2,b:2.2,f:0.65});
   }
   if(sn==='church'){
     bBasilica(0,0,-15); bChapel(-11,0,-8); bCross(11,0,-6);
     for(let i=0;i<12;i++) bTree(-22+i*4,0,12,1.0);
-    const sl=new THREE.PointLight(0xFFEE88,2.8,24); sl.position.set(-11,5,-8); scene.add(sl);
-    G.glows.push({l:sl,b:2.8,f:0.33});
-    const bl=new THREE.PointLight(0xFFD090,2.5,32); bl.position.set(0,14,-15); scene.add(bl);
-    G.glows.push({l:bl,b:2.5,f:0.28});
+    const sl=new THREE.PointLight(0xFFEE88,2.8,24);sl.position.set(-11,5,-8);scene.add(sl);G.glows.push({l:sl,b:2.8,f:0.33});
+    const bl=new THREE.PointLight(0xFFD090,2.5,32);bl.position.set(0,14,-15);scene.add(bl);G.glows.push({l:bl,b:2.5,f:0.28});
   }
   if(sn==='philippines'){
     for(let i=0;i<24;i++){const a=(i/24)*Math.PI*2,r=20+Math.random()*4;bPalm(Math.cos(a)*r,0,Math.sin(a)*r);}
     bPhilChurch(0,0,-15);
-    const rg=new THREE.PlaneGeometry(70,20);
-    const rm=new THREE.MeshStandardMaterial({color:0x1A6090,roughness:0.08,metalness:0.55,transparent:true,opacity:0.78});
-    const rv=new THREE.Mesh(rg,rm); rv.rotation.x=-Math.PI/2; rv.position.set(0,0.1,18); scene.add(rv);
-    const wl=new THREE.PointLight(0x4488FF,1.5,22); wl.position.set(-8,5,0); scene.add(wl);
-    G.glows.push({l:wl,b:1.5,f:0.6,fl:true,fy:5});
-    const yl=new THREE.PointLight(0xFFCC00,1.3,22); yl.position.set(8,5,0); scene.add(yl);
-    G.glows.push({l:yl,b:1.3,f:0.9,fl:true,fy:5});
+    const rv=new THREE.Mesh(new THREE.PlaneGeometry(70,20),mStd(0x1A6090,0.08,0.55));
+    rv.material.transparent=true; rv.material.opacity=0.78;
+    rv.rotation.x=-Math.PI/2; rv.position.set(0,0.1,18); scene.add(rv);
+    const wl=new THREE.PointLight(0x4488FF,1.5,22);wl.position.set(-8,5,0);scene.add(wl);G.glows.push({l:wl,b:1.5,f:0.6,fl:true,fy:5});
+    const yl=new THREE.PointLight(0xFFCC00,1.3,22);yl.position.set(8,5,0);scene.add(yl);G.glows.push({l:yl,b:1.3,f:0.9,fl:true,fy:5});
   }
 }
 
-// ─── NPC Builder ───
+// ======= NPC MESH =======
 function buildNPC(nd){
   const g=new THREE.Group();
   if(nd.isHoly){
-    const mM=new THREE.MeshStandardMaterial({color:0x1B4A6B,roughness:0.88,metalness:0});
-    const mntle=new THREE.Mesh(new THREE.ConeGeometry(1.15,3.6,14),mM); mntle.position.y=1.8; mntle.castShadow=true; g.add(mntle);
-    const drM=new THREE.MeshStandardMaterial({color:0xC0392B,roughness:0.85,metalness:0});
-    const dress=new THREE.Mesh(new THREE.ConeGeometry(0.82,2.95,14),drM); dress.position.y=1.47; g.add(dress);
-    const bM=new THREE.MeshStandardMaterial({color:0xD4A017,roughness:0.4,metalness:0.3,emissive:0x8B6001,emissiveIntensity:0.4});
-    const belt=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.065,8,24),bM); belt.position.y=1.52; belt.rotation.x=Math.PI/2; g.add(belt);
-    const skM=new THREE.MeshStandardMaterial({color:0xD4956A,roughness:0.82,metalness:0});
-    const head=new THREE.Mesh(new THREE.SphereGeometry(0.33,14,14),skM); head.position.y=3.35; g.add(head);
-    const vM=new THREE.MeshStandardMaterial({color:0xEDD9A3,roughness:0.92,metalness:0,side:THREE.DoubleSide});
-    const veil=new THREE.Mesh(new THREE.ConeGeometry(0.62,1.85,12),vM); veil.position.y=3.86; g.add(veil);
-    const hM=new THREE.MeshStandardMaterial({color:0xFFD700,roughness:0.3,metalness:0.4,emissive:0x8B6001,emissiveIntensity:0.5});
-    const halo=new THREE.Mesh(new THREE.TorusGeometry(0.58,0.042,8,32),hM); halo.position.y=3.65; g.add(halo);
-    const moM=new THREE.MeshStandardMaterial({color:0xD4A017,roughness:0.45,metalness:0.25,emissive:0x8B6001,emissiveIntensity:0.3});
-    const moon=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.13,8,18,Math.PI),moM); moon.position.y=0.06; moon.rotation.z=Math.PI; g.add(moon);
-    const stM=new THREE.MeshStandardMaterial({color:0xF5C842,emissive:0xC8A020,emissiveIntensity:0.6,roughness:0.3});
-    for(let i=0;i<12;i++){const a=(i/12)*Math.PI*2,r=0.82;const s=new THREE.Mesh(new THREE.SphereGeometry(0.045,5,5),stM);s.position.set(Math.cos(a)*r,1.52+Math.sin(a)*0.78,Math.sin(a)*r*0.28+0.22);g.add(s);}
-    const rM2=new THREE.MeshBasicMaterial({color:0xFFD700,transparent:true,opacity:0.13});
-    for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2;const ray=new THREE.Mesh(new THREE.BoxGeometry(0.04,3.8+Math.random()*1.2,0.02),rM2);ray.position.set(Math.cos(a)*0.5,2.1,Math.sin(a)*0.12);ray.rotation.z=a;ray.userData.ray=true;g.add(ray);}
-    const ang=new THREE.Mesh(new THREE.SphereGeometry(0.24,10,10),skM); ang.position.y=0.05; g.add(ang);
-    const figL=new THREE.PointLight(0xFFD700,3.0,12); figL.position.y=2.2; g.add(figL);
+    const mntle=new THREE.Mesh(new THREE.ConeGeometry(1.15,3.6,14),mStd(0x1B4A6B));mntle.position.y=1.8;mntle.castShadow=true;g.add(mntle);
+    const dress=new THREE.Mesh(new THREE.ConeGeometry(0.82,2.95,14),mStd(0xC0392B));dress.position.y=1.47;g.add(dress);
+    const belt=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.065,8,24),mStd(0xD4A017,0.4,0.3,0x8B6001,0.4));belt.position.y=1.52;belt.rotation.x=Math.PI/2;g.add(belt);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.33,14,14),mStd(0xD4956A));head.position.y=3.35;g.add(head);
+    const veil=new THREE.Mesh(new THREE.ConeGeometry(0.62,1.85,12),mStd(0xEDD9A3));veil.position.y=3.86;g.add(veil);
+    const halo=new THREE.Mesh(new THREE.TorusGeometry(0.58,0.042,8,32),mStd(0xFFD700,0.3,0.4,0x8B6001,0.5));halo.position.y=3.65;g.add(halo);
+    const moon=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.13,8,18,Math.PI),mStd(0xD4A017,0.45,0.25,0x8B6001,0.3));moon.position.y=0.06;moon.rotation.z=Math.PI;g.add(moon);
+    const stM=mStd(0xF5C842,0.3,0,0xC8A020,0.6);
+    for(let i=0;i<12;i++){const a=(i/12)*Math.PI*2;const s=new THREE.Mesh(new THREE.SphereGeometry(0.045,5,5),stM);s.position.set(Math.cos(a)*0.82,1.52+Math.sin(a)*0.78,Math.sin(a)*0.82*0.28+0.22);g.add(s);}
+    const rayM=new THREE.MeshBasicMaterial({color:0xFFD700,transparent:true,opacity:0.13});
+    for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2;const ray=new THREE.Mesh(new THREE.BoxGeometry(0.04,3.8+Math.random()*1.2,0.02),rayM);ray.position.set(Math.cos(a)*0.5,2.1,Math.sin(a)*0.12);ray.rotation.z=a;ray.userData.ray=true;g.add(ray);}
+    const ang=new THREE.Mesh(new THREE.SphereGeometry(0.24,10,10),mStd(0xD4956A));ang.position.y=0.05;g.add(ang);
+    const figL=new THREE.PointLight(0xFFD700,3.0,12);figL.position.y=2.2;g.add(figL);
     G.glows.push({l:figL,b:3.0,f:0.9,fl:true,fy:2.2});
   } else if(nd.isBishop){
-    const roM=new THREE.MeshStandardMaterial({color:0x600000,roughness:0.86,metalness:0});
-    const robe=new THREE.Mesh(new THREE.ConeGeometry(0.82,2.9,12),roM); robe.position.y=1.45; robe.castShadow=true; g.add(robe);
-    const coM=new THREE.MeshStandardMaterial({color:0xF0EEE8,roughness:0.88,metalness:0});
-    g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.36,0.26,12),coM),{position:{x:0,y:2.58,z:0}}));
-    const heM=new THREE.MeshStandardMaterial({color:0xD4A870,roughness:0.82,metalness:0});
-    const head=new THREE.Mesh(new THREE.SphereGeometry(0.31,12,12),heM); head.position.y=3.12; g.add(head);
-    const miM=new THREE.MeshStandardMaterial({color:0xF5EDD0,roughness:0.88,metalness:0});
-    const mitre=new THREE.Mesh(new THREE.ConeGeometry(0.29,0.72,4),miM); mitre.position.y=3.68; g.add(mitre);
-    const goM=new THREE.MeshStandardMaterial({color:0xD4A017,roughness:0.35,metalness:0.4,emissive:0x6B5000,emissiveIntensity:0.35});
-    const cv=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.44,0.05),goM); cv.position.y=3.72; g.add(cv);
-    const ch=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.07,0.05),goM); ch.position.set(0,3.88,0); g.add(ch);
-    const stM=new THREE.MeshStandardMaterial({color:0xD4A017,roughness:0.38,metalness:0.4,emissive:0x6B5000,emissiveIntensity:0.3});
-    const staff=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,3.6,8),stM); staff.position.set(0.72,1.8,0); g.add(staff);
-    const crook=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.055,8,18,Math.PI),stM); crook.position.set(0.72,3.55,0); crook.rotation.z=Math.PI/2; g.add(crook);
-    const bL=new THREE.PointLight(0xFFCC60,0.9,9); bL.position.y=2.2; g.add(bL);
-    G.glows.push({l:bL,b:0.9,f:0.42});
+    const robe=new THREE.Mesh(new THREE.ConeGeometry(0.82,2.9,12),mStd(0x600000));robe.position.y=1.45;robe.castShadow=true;g.add(robe);
+    const collar=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.36,0.26,12),mStd(0xF0EEE8));collar.position.set(0,2.58,0);g.add(collar);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.31,12,12),mStd(0xD4A870));head.position.y=3.12;g.add(head);
+    const mitre=new THREE.Mesh(new THREE.ConeGeometry(0.29,0.72,4),mStd(0xF5EDD0));mitre.position.y=3.68;g.add(mitre);
+    const gM=mStd(0xD4A017,0.35,0.4,0x6B5000,0.35);
+    const cv=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.44,0.05),gM);cv.position.set(0,3.72,0);g.add(cv);
+    const ch=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.07,0.05),gM);ch.position.set(0,3.88,0);g.add(ch);
+    const sM=mStd(0xD4A017,0.38,0.4,0x6B5000,0.3);
+    const staff=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,3.6,8),sM);staff.position.set(0.72,1.8,0);g.add(staff);
+    const crook=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.055,8,18,Math.PI),sM);crook.position.set(0.72,3.55,0);crook.rotation.z=Math.PI/2;g.add(crook);
+    const bL=new THREE.PointLight(0xFFCC60,0.9,9);bL.position.y=2.2;g.add(bL);G.glows.push({l:bL,b:0.9,f:0.42});
   } else {
-    const boM=new THREE.MeshStandardMaterial({color:nd.col,roughness:0.88,metalness:0});
-    const body=new THREE.Mesh(new THREE.ConeGeometry(0.56,2.25,10),boM); body.position.y=1.12; body.castShadow=true; g.add(body);
-    const skM=new THREE.MeshStandardMaterial({color:0xC88050,roughness:0.82,metalness:0});
-    const head=new THREE.Mesh(new THREE.SphereGeometry(0.29,10,10),skM); head.position.y=2.52; g.add(head);
-    const haM=new THREE.MeshStandardMaterial({color:0x2A1200,roughness:0.95,metalness:0});
-    const hair=new THREE.Mesh(new THREE.SphereGeometry(0.31,10,7,0,Math.PI*2,0,Math.PI/2),haM); hair.position.y=2.72; g.add(hair);
-    const aM=new THREE.MeshStandardMaterial({color:nd.col,roughness:0.88,metalness:0});
-    const aG=new THREE.CylinderGeometry(0.07,0.07,0.92,7);
-    const la=new THREE.Mesh(aG,aM); la.position.set(-0.62,1.62,0); la.rotation.z=0.4; g.add(la);
-    const ra=la.clone(); ra.position.x=0.62; ra.rotation.z=-0.4; g.add(ra);
+    const body=new THREE.Mesh(new THREE.ConeGeometry(0.56,2.25,10),mStd(nd.col));body.position.y=1.12;body.castShadow=true;g.add(body);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.29,10,10),mStd(0xC88050));head.position.y=2.52;g.add(head);
+    const hair=new THREE.Mesh(new THREE.SphereGeometry(0.31,10,7,0,Math.PI*2,0,Math.PI/2),mStd(0x2A1200));hair.position.y=2.72;g.add(hair);
+    const aM=mStd(nd.col);
+    const la=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.92,7),aM);la.position.set(-0.62,1.62,0);la.rotation.z=0.4;g.add(la);
+    const ra=la.clone();ra.position.set(0.62,1.62,0);ra.rotation.z=-0.4;g.add(ra);
   }
-  const shM=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.28});
-  const sh=new THREE.Mesh(new THREE.CircleGeometry(0.55,14),shM); sh.rotation.x=-Math.PI/2; sh.position.y=0.02; g.add(sh);
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(0.55,14),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.28}));
+  sh.rotation.x=-Math.PI/2; sh.position.y=0.02; g.add(sh);
   g.userData.npcId=nd.id;
   return g;
 }
 
-// ─── Collectable Builder ───
+// ======= COLLECTABLE MESH =======
 function buildCol(cd){
   const g=new THREE.Group();
   const c=cd.ec||0xD4A017;
-  const m=new THREE.MeshStandardMaterial({color:c,roughness:0.45,metalness:0.1,emissive:c,emissiveIntensity:0.55,transparent:true,opacity:0.92});
-  g.add(new THREE.Mesh(new THREE.SphereGeometry(0.26,10,10),m));
-  const pl=new THREE.PointLight(c,1.3,4.5); g.add(pl);
+  const mat=mStd(c,0.45,0.1,c,0.55);mat.transparent=true;mat.opacity=0.92;
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(0.26,10,10),mat));
+  const pl=new THREE.PointLight(c,1.3,4.5);g.add(pl);
   G.glows.push({l:pl,b:1.3,f:2.2+Math.random()*1.8});
   g.userData.cid=cd.id;
   return g;
 }
 
-// ─── Player Builder ───
+// ======= PLAYER MESH =======
 function buildPlayer(){
   const g=new THREE.Group();
-  const cM=new THREE.MeshStandardMaterial({color:0xC4916A,roughness:0.9,metalness:0});
-  const clk=new THREE.Mesh(new THREE.ConeGeometry(0.52,1.85,12),cM); clk.position.y=0.92; clk.castShadow=true; g.add(clk);
-  const tM=new THREE.MeshStandardMaterial({color:0x8B5A2A,roughness:0.92,metalness:0});
-  g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.46,1.25,10),tM),{position:{x:0,y:0.72,z:0}}));
-  const hM=new THREE.MeshStandardMaterial({color:0xC88050,roughness:0.82,metalness:0});
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.27,12,12),hM); head.position.y=2.12; head.castShadow=true; g.add(head);
-  const haM=new THREE.MeshStandardMaterial({color:0x1A0A00,roughness:0.96,metalness:0});
-  const hair=new THREE.Mesh(new THREE.SphereGeometry(0.28,10,7,0,Math.PI*2,0,Math.PI*0.55),haM); hair.position.y=2.26; g.add(hair);
-  const lM=new THREE.MeshStandardMaterial({color:0x5A3A1A,roughness:0.92,metalness:0});
-  const lG=new THREE.CylinderGeometry(0.1,0.1,0.82,7);
-  const ll=new THREE.Mesh(lG,lM); ll.position.set(-0.19,-0.16,0); g.add(ll);
-  const lr=new THREE.Mesh(lG,lM); lr.position.set(0.19,-0.16,0); g.add(lr);
-  const sM=new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.32});
-  const sh=new THREE.Mesh(new THREE.CircleGeometry(0.42,14),sM); sh.rotation.x=-Math.PI/2; sh.position.y=0.02; g.add(sh);
+  const cloak=new THREE.Mesh(new THREE.ConeGeometry(0.52,1.85,12),mStd(0xC4916A,0.9,0));cloak.position.y=0.92;cloak.castShadow=true;g.add(cloak);
+  const tunic=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.46,1.25,10),mStd(0x8B5A2A,0.92,0));tunic.position.set(0,0.72,0);g.add(tunic);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.27,12,12),mStd(0xC88050,0.82,0));head.position.y=2.12;head.castShadow=true;g.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(0.28,10,7,0,Math.PI*2,0,Math.PI*0.55),mStd(0x1A0A00,0.96,0));hair.position.y=2.26;g.add(hair);
+  const lG=new THREE.CylinderGeometry(0.1,0.1,0.82,7),lM=mStd(0x5A3A1A,0.92,0);
+  const ll=new THREE.Mesh(lG,lM);ll.position.set(-0.19,-0.16,0);g.add(ll);
+  const lr=new THREE.Mesh(lG,lM);lr.position.set(0.19,-0.16,0);g.add(lr);
+  const sh=new THREE.Mesh(new THREE.CircleGeometry(0.42,14),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.32}));
+  sh.rotation.x=-Math.PI/2;sh.position.y=0.02;g.add(sh);
   g.userData.ll=ll; g.userData.lr=lr;
   return g;
 }
 
-// ─── Environment Pieces ───
-function m3(col,r=0.88,met=0,em=0,ei=0){
-  const m=new THREE.MeshStandardMaterial({color:col,roughness:r,metalness:met});
-  if(em){m.emissive=new THREE.Color(em);m.emissiveIntensity=ei;}
-  return m;
-}
-function bAdobe(x,y,z,s=1){
-  const w=new THREE.Mesh(new THREE.BoxGeometry(3*s,2.6*s,3*s),m3(0xC4916A)); w.position.set(x,y+1.3*s,z); w.castShadow=w.receiveShadow=true; scene.add(w);
-  const r=new THREE.Mesh(new THREE.BoxGeometry(3.35*s,0.26*s,3.35*s),m3(0x8B6340)); r.position.set(x,y+2.63*s,z); scene.add(r);
-  const d=new THREE.Mesh(new THREE.BoxGeometry(0.72*s,1.45*s,0.1),m3(0x3D1C02)); d.position.set(x,y+0.72*s,z+1.55*s); scene.add(d);
+// ======= ENV PIECES =======
+function bAdobe(x,y,z,s){s=s||1;
+  const w=new THREE.Mesh(new THREE.BoxGeometry(3*s,2.6*s,3*s),mStd(0xC4916A));w.position.set(x,y+1.3*s,z);w.castShadow=w.receiveShadow=true;scene.add(w);
+  const r=new THREE.Mesh(new THREE.BoxGeometry(3.35*s,0.26*s,3.35*s),mStd(0x8B6340));r.position.set(x,y+2.63*s,z);scene.add(r);
+  const d=new THREE.Mesh(new THREE.BoxGeometry(0.72*s,1.45*s,0.1),mStd(0x3D1C02));d.position.set(x,y+0.72*s,z+1.55*s);scene.add(d);
 }
 function bStall(x,y,z){
-  const pm=m3(0x8B4513);
+  const pm=mStd(0x8B4513);
   for(let px=-1.5;px<=1.5;px+=3)for(let pz=-1;pz<=1;pz+=2){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.065,0.065,2.55,8),pm);p.position.set(x+px,y+1.27,z+pz);scene.add(p);}
-  const c=new THREE.Mesh(new THREE.PlaneGeometry(3.5,2.5),new THREE.MeshStandardMaterial({color:0xD4522A,roughness:0.88,metalness:0,side:THREE.DoubleSide}));
-  c.rotation.x=-Math.PI/2; c.position.set(x,y+2.55,z); scene.add(c);
+  const cm=mStd(0xD4522A,0.88,0);cm.side=THREE.DoubleSide;
+  const c=new THREE.Mesh(new THREE.PlaneGeometry(3.5,2.5),cm);c.rotation.x=-Math.PI/2;c.position.set(x,y+2.55,z);scene.add(c);
 }
-function bTree(x,y,z,s=1){
-  const t=new THREE.Mesh(new THREE.CylinderGeometry(0.12*s,0.19*s,2.1*s,9),m3(0x5C3317)); t.position.set(x,y+s,z); t.castShadow=true; scene.add(t);
-  const f=new THREE.Mesh(new THREE.ConeGeometry(1.25*s,2.6*s,9),m3(0x2D5A1B)); f.position.set(x,y+3.1*s,z); f.castShadow=true; scene.add(f);
+function bTree(x,y,z,s){s=s||1;
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(0.12*s,0.19*s,2.1*s,9),mStd(0x5C3317));t.position.set(x,y+s,z);t.castShadow=true;scene.add(t);
+  const f=new THREE.Mesh(new THREE.ConeGeometry(1.25*s,2.6*s,9),mStd(0x2D5A1B));f.position.set(x,y+3.1*s,z);f.castShadow=true;scene.add(f);
 }
 function bPalm(x,y,z){
-  const t=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.22,5.5,9),m3(0x7A5C2E)); t.position.set(x,y+2.75,z); t.castShadow=true; scene.add(t);
-  const fM=m3(0x2E7A3A);
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.22,5.5,9),mStd(0x7A5C2E));t.position.set(x,y+2.75,z);t.castShadow=true;scene.add(t);
+  const fM=mStd(0x2E7A3A);
   for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;const f=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.07,2.4),fM);f.position.set(x+Math.cos(a)*0.95,y+5.5,z+Math.sin(a)*0.95);f.rotation.y=a;f.rotation.z=0.42;f.castShadow=true;scene.add(f);}
 }
 function bCross(x,y,z){
-  const gM=m3(0x8B6914,0.6,0.2,0x4A3800,0.22);
-  const v=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.6,0.22),gM); v.position.set(x,y+1.8,z); v.castShadow=true; scene.add(v);
-  const h=new THREE.Mesh(new THREE.BoxGeometry(1.45,0.22,0.22),gM); h.position.set(x,y+2.9,z); scene.add(h);
-  const gl=new THREE.PointLight(0xFFD700,0.65,7); gl.position.set(x,y+2.6,z); scene.add(gl);
+  const gM=mStd(0x8B6914,0.6,0.2,0x4A3800,0.22);
+  const v=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.6,0.22),gM);v.position.set(x,y+1.8,z);v.castShadow=true;scene.add(v);
+  const h=new THREE.Mesh(new THREE.BoxGeometry(1.45,0.22,0.22),gM);h.position.set(x,y+2.9,z);scene.add(h);
+  const gl=new THREE.PointLight(0xFFD700,0.65,7);gl.position.set(x,y+2.6,z);scene.add(gl);
   G.glows.push({l:gl,b:0.65,f:0.5});
 }
 function bRock(x,y,z){
-  const r=new THREE.Mesh(new THREE.DodecahedronGeometry(0.42+Math.random()*0.32,0),m3(0x808070,0.96));
-  r.position.set(x,y+0.16,z); r.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);
-  r.castShadow=r.receiveShadow=true; scene.add(r);
+  const r=new THREE.Mesh(new THREE.DodecahedronGeometry(0.42+Math.random()*0.32,0),mStd(0x808070,0.96));
+  r.position.set(x,y+0.16,z);r.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);r.castShadow=r.receiveShadow=true;scene.add(r);
 }
 function bRoseDecor(x,y,z){
-  const r=new THREE.Mesh(new THREE.SphereGeometry(0.19,9,9),m3(0xFF3366,0.65,0,0x8B0020,0.32)); r.position.set(x,y,z); scene.add(r);
-  const s=new THREE.Mesh(new THREE.CylinderGeometry(0.032,0.032,0.52,6),m3(0x2D5A1B)); s.position.set(x,y-0.26,z); scene.add(s);
+  const r=new THREE.Mesh(new THREE.SphereGeometry(0.19,9,9),mStd(0xFF3366,0.65,0,0x8B0020,0.32));r.position.set(x,y,z);scene.add(r);
+  const s=new THREE.Mesh(new THREE.CylinderGeometry(0.032,0.032,0.52,6),mStd(0x2D5A1B));s.position.set(x,y-0.26,z);scene.add(s);
 }
 function bPathStone(x,y,z){
-  const s=new THREE.Mesh(new THREE.CylinderGeometry(0.28+Math.random()*0.14,0.32+Math.random()*0.14,0.12,8),m3(0x909080,0.95));
-  s.position.set(x,y,z); s.rotation.y=Math.random()*Math.PI; s.receiveShadow=true; scene.add(s);
+  const s=new THREE.Mesh(new THREE.CylinderGeometry(0.28+Math.random()*0.14,0.32+Math.random()*0.14,0.12,8),mStd(0x909080,0.95));
+  s.position.set(x,y,z);s.rotation.y=Math.random()*Math.PI;s.receiveShadow=true;scene.add(s);
 }
 function bTorch(x,y,z){
-  const p=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,1.8,7),m3(0x8B4513)); p.position.set(x,y+0.9,z); p.castShadow=true; scene.add(p);
-  const fM=new THREE.MeshStandardMaterial({color:0xFF7700,roughness:0.5,emissive:new THREE.Color(0xFF4400),emissiveIntensity:1.0});
-  const f=new THREE.Mesh(new THREE.ConeGeometry(0.1,0.22,8),fM); f.position.set(x,y+1.9,z); scene.add(f);
+  const p=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,1.8,7),mStd(0x8B4513));p.position.set(x,y+0.9,z);p.castShadow=true;scene.add(p);
+  const fM=mStd(0xFF7700,0.5,0,0xFF4400,1.0);
+  const f=new THREE.Mesh(new THREE.ConeGeometry(0.1,0.22,8),fM);f.position.set(x,y+1.9,z);scene.add(f);
 }
 function bWell(x,y,z){
-  const bM=m3(0x808070,0.95); const b=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.75,1.0,14,1,true),bM); b.position.set(x,y+0.5,z); b.castShadow=b.receiveShadow=true; scene.add(b);
-  const t=new THREE.Mesh(new THREE.TorusGeometry(0.72,0.1,8,18),bM); t.position.set(x,y+1.05,z); t.rotation.x=Math.PI/2; scene.add(t);
+  const bM=mStd(0x808070,0.95);
+  const b=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.75,1.0,14,1,true),bM);b.position.set(x,y+0.5,z);b.castShadow=b.receiveShadow=true;scene.add(b);
+  const t=new THREE.Mesh(new THREE.TorusGeometry(0.72,0.1,8,18),bM);t.position.set(x,y+1.05,z);t.rotation.x=Math.PI/2;scene.add(t);
 }
 function bPalace(){
-  const m=m3(0xD4C090);
-  const bw=new THREE.Mesh(new THREE.BoxGeometry(30,9,1),m); bw.position.set(0,4.5,-15); bw.castShadow=bw.receiveShadow=true; scene.add(bw);
-  const lw=new THREE.Mesh(new THREE.BoxGeometry(1,9,30),m); lw.position.set(-15,4.5,0); scene.add(lw);
-  const rw=lw.clone(); rw.position.x=15; scene.add(rw);
-  const fl=new THREE.Mesh(new THREE.PlaneGeometry(30,30),m3(0xC8A870,0.82)); fl.rotation.x=-Math.PI/2; fl.position.y=0.02; fl.receiveShadow=true; scene.add(fl);
-  const tap=new THREE.Mesh(new THREE.BoxGeometry(7,5.5,0.12),m3(0x800000)); tap.position.set(0,4.8,-14.4); scene.add(tap);
-  const cM2=m3(0xD4A017,0.35,0.4,0x8B6001,0.5);
-  const cv=new THREE.Mesh(new THREE.BoxGeometry(0.16,2.2,0.12),cM2); cv.position.set(0,5.4,-14.3); scene.add(cv);
-  const ch=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.16,0.12),cM2); ch.position.set(0,6.1,-14.3); scene.add(ch);
+  const m=mStd(0xD4C090,0.85);
+  const bw=new THREE.Mesh(new THREE.BoxGeometry(30,9,1),m);bw.position.set(0,4.5,-15);bw.castShadow=bw.receiveShadow=true;scene.add(bw);
+  const lw=new THREE.Mesh(new THREE.BoxGeometry(1,9,30),m);lw.position.set(-15,4.5,0);scene.add(lw);
+  const rw=lw.clone();rw.position.set(15,4.5,0);scene.add(rw);
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(30,30),mStd(0xC8A870,0.82));fl.rotation.x=-Math.PI/2;fl.position.y=0.02;fl.receiveShadow=true;scene.add(fl);
+  const tap=new THREE.Mesh(new THREE.BoxGeometry(7,5.5,0.12),mStd(0x800000));tap.position.set(0,4.8,-14.4);scene.add(tap);
+  const cM=mStd(0xD4A017,0.35,0.4,0x8B6001,0.5);
+  const cv=new THREE.Mesh(new THREE.BoxGeometry(0.16,2.2,0.12),cM);cv.position.set(0,5.4,-14.3);scene.add(cv);
+  const ch=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.16,0.12),cM);ch.position.set(0,6.1,-14.3);scene.add(ch);
 }
 function bColumn(x,y,z){
-  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.42,7.2,14),m3(0xE8D8B0,0.82)); c.position.set(x,y+3.6,z); c.castShadow=true; scene.add(c);
-  const cap=new THREE.Mesh(new THREE.BoxGeometry(1.05,0.42,1.05),m3(0xE8D8B0,0.82)); cap.position.set(x,y+7.42,z); scene.add(cap);
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.42,7.2,14),mStd(0xE8D8B0,0.82));c.position.set(x,y+3.6,z);c.castShadow=true;scene.add(c);
+  const cap=new THREE.Mesh(new THREE.BoxGeometry(1.05,0.42,1.05),mStd(0xE8D8B0,0.82));cap.position.set(x,y+7.42,z);scene.add(cap);
 }
 function bThrone(x,y,z){
-  const m=m3(0x8B4513); const seat=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.32,1.9),m); seat.position.set(x,y+1.22,z); seat.castShadow=true; scene.add(seat);
-  const back=new THREE.Mesh(new THREE.BoxGeometry(2.1,3.2,0.32),m); back.position.set(x,y+2.72,z+0.8); scene.add(back);
-  const gT=new THREE.Mesh(new THREE.BoxGeometry(2.35,0.32,0.32),m3(0xD4A017,0.35,0.4,0x6B5000,0.32)); gT.position.set(x,y+4.38,z+0.8); scene.add(gT);
+  const m=mStd(0x8B4513);
+  const seat=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.32,1.9),m);seat.position.set(x,y+1.22,z);seat.castShadow=true;scene.add(seat);
+  const back=new THREE.Mesh(new THREE.BoxGeometry(2.1,3.2,0.32),m);back.position.set(x,y+2.72,z+0.8);scene.add(back);
+  const gT=new THREE.Mesh(new THREE.BoxGeometry(2.35,0.32,0.32),mStd(0xD4A017,0.35,0.4,0x6B5000,0.32));gT.position.set(x,y+4.38,z+0.8);scene.add(gT);
 }
 function bDoorFrame(x,y,z){
-  const m=m3(0x5A3A1A);
-  const lp=new THREE.Mesh(new THREE.BoxGeometry(0.32,5.2,0.32),m); lp.position.set(x-2.1,y+2.6,z); scene.add(lp);
-  const rp=lp.clone(); rp.position.x=x+2.1; scene.add(rp);
-  const top=new THREE.Mesh(new THREE.BoxGeometry(4.7,0.32,0.32),m); top.position.set(x,y+5.22,z); scene.add(top);
+  const m=mStd(0x5A3A1A);
+  const lp=new THREE.Mesh(new THREE.BoxGeometry(0.32,5.2,0.32),m);lp.position.set(x-2.1,y+2.6,z);scene.add(lp);
+  const rp=lp.clone();rp.position.set(x+2.1,y+2.6,z);scene.add(rp);
+  const top=new THREE.Mesh(new THREE.BoxGeometry(4.7,0.32,0.32),m);top.position.set(x,y+5.22,z);scene.add(top);
 }
 function bBasilica(x,y,z){
-  const m=m3(0xE8D5A3,0.82); const body=new THREE.Mesh(new THREE.CylinderGeometry(7.2,7.7,6.2,22),m); body.position.set(x,y+3.1,z); body.castShadow=body.receiveShadow=true; scene.add(body);
-  const dom=new THREE.Mesh(new THREE.SphereGeometry(7.2,22,12,0,Math.PI*2,0,Math.PI/2),m3(0xD4B483,0.82)); dom.position.set(x,y+6.2,z); scene.add(dom);
-  const cM3=m3(0xD4A017,0.35,0.4,0x8B6001,0.52);
-  const cv=new THREE.Mesh(new THREE.BoxGeometry(0.32,4.2,0.32),cM3); cv.position.set(x,y+13.2,z); scene.add(cv);
-  const ch2=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.32,0.32),cM3); ch2.position.set(x,y+14.7,z); scene.add(ch2);
-  const arch=new THREE.Mesh(new THREE.BoxGeometry(4.2,4.2,1.1),m); arch.position.set(x,y+2.1,z+7.7); scene.add(arch);
+  const m=mStd(0xE8D5A3,0.82);
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(7.2,7.7,6.2,22),m);body.position.set(x,y+3.1,z);body.castShadow=body.receiveShadow=true;scene.add(body);
+  const dom=new THREE.Mesh(new THREE.SphereGeometry(7.2,22,12,0,Math.PI*2,0,Math.PI/2),mStd(0xD4B483,0.82));dom.position.set(x,y+6.2,z);scene.add(dom);
+  const cM=mStd(0xD4A017,0.35,0.4,0x8B6001,0.52);
+  const cv=new THREE.Mesh(new THREE.BoxGeometry(0.32,4.2,0.32),cM);cv.position.set(x,y+13.2,z);scene.add(cv);
+  const ch=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.32,0.32),cM);ch.position.set(x,y+14.7,z);scene.add(ch);
+  const arch=new THREE.Mesh(new THREE.BoxGeometry(4.2,4.2,1.1),m);arch.position.set(x,y+2.1,z+7.7);scene.add(arch);
 }
 function bChapel(x,y,z){
-  const m=m3(0xCDB79E,0.86); const w=new THREE.Mesh(new THREE.BoxGeometry(4.2,3.6,5.2),m); w.position.set(x,y+1.8,z); w.castShadow=w.receiveShadow=true; scene.add(w);
-  const r=new THREE.Mesh(new THREE.ConeGeometry(3.3,2.1,4),m3(0x8B4513,0.9)); r.position.set(x,y+4.65,z); r.rotation.y=Math.PI/4; scene.add(r);
+  const w=new THREE.Mesh(new THREE.BoxGeometry(4.2,3.6,5.2),mStd(0xCDB79E,0.86));w.position.set(x,y+1.8,z);w.castShadow=w.receiveShadow=true;scene.add(w);
+  const r=new THREE.Mesh(new THREE.ConeGeometry(3.3,2.1,4),mStd(0x8B4513,0.9));r.position.set(x,y+4.65,z);r.rotation.y=Math.PI/4;scene.add(r);
 }
 function bPhilChurch(x,y,z){
-  const m=m3(0xF0E0C0,0.82);
-  const nave=new THREE.Mesh(new THREE.BoxGeometry(8.2,7.2,14.5),m); nave.position.set(x,y+3.6,z); nave.castShadow=nave.receiveShadow=true; scene.add(nave);
-  const tow=new THREE.Mesh(new THREE.BoxGeometry(2.6,11.5,2.6),m); tow.position.set(x-5.4,y+5.75,z+2.2); scene.add(tow);
-  const tt=new THREE.Mesh(new THREE.ConeGeometry(1.9,2.6,4),m3(0xC4952A,0.8)); tt.position.set(x-5.4,y+12.3,z+2.2); tt.rotation.y=Math.PI/4; scene.add(tt);
-  const fac=new THREE.Mesh(new THREE.BoxGeometry(8.2,8.2,0.65),m3(0xEDD9A5,0.82)); fac.position.set(x,y+4.1,z+7.55); scene.add(fac);
-  const cM4=m3(0xD4A017,0.35,0.4,0x8B6001,0.42);
-  const cv2=new THREE.Mesh(new THREE.BoxGeometry(0.2,3.1,0.2),cM4); cv2.position.set(x,y+6.7,z+7.9); scene.add(cv2);
-  const ch3=new THREE.Mesh(new THREE.BoxGeometry(1.55,0.2,0.2),cM4); ch3.position.set(x,y+7.45,z+7.9); scene.add(ch3);
+  const m=mStd(0xF0E0C0,0.82);
+  const nave=new THREE.Mesh(new THREE.BoxGeometry(8.2,7.2,14.5),m);nave.position.set(x,y+3.6,z);nave.castShadow=nave.receiveShadow=true;scene.add(nave);
+  const tow=new THREE.Mesh(new THREE.BoxGeometry(2.6,11.5,2.6),m);tow.position.set(x-5.4,y+5.75,z+2.2);scene.add(tow);
+  const tt=new THREE.Mesh(new THREE.ConeGeometry(1.9,2.6,4),mStd(0xC4952A,0.8));tt.position.set(x-5.4,y+12.3,z+2.2);tt.rotation.y=Math.PI/4;scene.add(tt);
+  const fac=new THREE.Mesh(new THREE.BoxGeometry(8.2,8.2,0.65),mStd(0xEDD9A5,0.82));fac.position.set(x,y+4.1,z+7.55);scene.add(fac);
+  const cM=mStd(0xD4A017,0.35,0.4,0x8B6001,0.42);
+  const cv=new THREE.Mesh(new THREE.BoxGeometry(0.2,3.1,0.2),cM);cv.position.set(x,y+6.7,z+7.9);scene.add(cv);
+  const ch=new THREE.Mesh(new THREE.BoxGeometry(1.55,0.2,0.2),cM);ch.position.set(x,y+7.45,z+7.9);scene.add(ch);
 }
 function buildParts(sn){
-  const cnt=120;
-  const pos=new Float32Array(cnt*3);
-  const sp=(sn==='hill'||sn==='miracle')?22:30;
+  const cnt=120,pos=new Float32Array(cnt*3),sp=(sn==='hill'||sn==='miracle')?22:30;
   for(let i=0;i<cnt;i++){pos[i*3]=(Math.random()-0.5)*sp;pos[i*3+1]=Math.random()*9+0.5;pos[i*3+2]=(Math.random()-0.5)*sp;}
-  const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  const m=new THREE.PointsMaterial({color:0xFFD700,size:0.14,transparent:true,opacity:0.58,sizeAttenuation:true});
-  const pts=new THREE.Points(geo,m); pts.userData.pos=pos; pts.userData.cnt=cnt; scene.add(pts); G.parts=pts;
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xFFD700,size:0.14,transparent:true,opacity:0.58,sizeAttenuation:true}));
+  pts.userData.pos=pos;pts.userData.cnt=cnt;scene.add(pts);G.parts=pts;
 }
 
-// ═══════════════ AUDIO ═══════════════
+// ======= AUDIO =======
 let actx=null,mgain=null,mOn=true,drone=null,chantTO=null;
 function initAudio(){
   actx=new(window.AudioContext||window.webkitAudioContext)();
-  mgain=actx.createGain(); mgain.gain.value=0.13; mgain.connect(actx.destination);
+  mgain=actx.createGain();mgain.gain.value=0.13;mgain.connect(actx.destination);
   playChant();
 }
 function playChant(){
   if(!actx||!mOn) return;
-  const conv=actx.createConvolver(), len=actx.sampleRate*4.5, buf=actx.createBuffer(2,len,actx.sampleRate);
+  const conv=actx.createConvolver(),len=actx.sampleRate*4.5,buf=actx.createBuffer(2,len,actx.sampleRate);
   for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2);}
-  conv.buffer=buf; conv.connect(mgain);
+  conv.buffer=buf;conv.connect(mgain);
   const notes=[[293.66,0.9],[329.63,0.6],[349.23,0.9],[369.99,0.6],[329.63,1.2],[293.66,0.6],[261.63,0.9],[293.66,0.6],[329.63,0.9],[349.23,0.6],[369.99,1.2],[392.00,0.6],[349.23,0.9],[329.63,0.6],[293.66,1.5],[261.63,0.6],[246.94,0.9],[261.63,0.6],[293.66,0.9],[329.63,1.2],[293.66,0.6],[261.63,0.9],[246.94,0.6],[220.00,2.2]];
   let t=actx.currentTime+0.5,tot=0;
   for(const[freq,dur]of notes){
@@ -897,31 +858,25 @@ function playChant(){
     }
     t+=dur;tot+=dur;
   }
-  if(!drone){
-    drone=actx.createOscillator();drone.type='sine';drone.frequency.value=73.42;
-    const dg=actx.createGain();dg.gain.value=0.065;drone.connect(dg);dg.connect(mgain);drone.start();
-  }
+  if(!drone){drone=actx.createOscillator();drone.type='sine';drone.frequency.value=73.42;const dg=actx.createGain();dg.gain.value=0.065;drone.connect(dg);dg.connect(mgain);drone.start();}
   chantTO=setTimeout(()=>{if(mOn)playChant();},(tot+2)*1000);
 }
 function playSfx(){
   if(!actx) return;
   const now=actx.currentTime;
   [[523.25,0],[659.25,0.1],[783.99,0.2]].forEach(([f,d])=>{
-    const o=actx.createOscillator(),g2=actx.createGain();
-    o.type='sine';o.frequency.value=f;
+    const o=actx.createOscillator(),g2=actx.createGain();o.type='sine';o.frequency.value=f;
     g2.gain.setValueAtTime(0.22,now+d);g2.gain.linearRampToValueAtTime(0,now+d+0.42);
     o.connect(g2);g2.connect(actx.destination);o.start(now+d);o.stop(now+d+0.48);
   });
 }
 function toggleMusic(){
-  mOn=!mOn;
-  if(mgain) mgain.gain.value=mOn?0.13:0;
-  if(!mOn) clearTimeout(chantTO);
-  else try{playChant();}catch(e){}
-  document.getElementById('abtn').textContent=mOn?'♪ Music':'♪ Off';
+  mOn=!mOn;if(mgain) mgain.gain.value=mOn?0.13:0;
+  if(!mOn) clearTimeout(chantTO);else try{playChant();}catch(e){}
+  document.getElementById('abtn').textContent=mOn?'Music ON':'Music OFF';
 }
 
-// ═══════════════ DIALOGUE ═══════════════
+// ======= DIALOGUE =======
 let typeTmr=null;
 function openDlg(npc){
   if(G.dlg.active) return;
@@ -931,127 +886,143 @@ function openDlg(npc){
   showLine(npc,sl);
 }
 function showLine(npc,idx){
-  const lines=npc.lines; if(idx>=lines.length)idx=lines.length-1;
-  const ln=lines[idx];
+  if(idx>=npc.lines.length) idx=npc.lines.length-1;
+  const ln=npc.lines[idx];
   document.getElementById('dsp').textContent=ln.sp;
-  G.dlg.full=ln.t; G.dlg.done=false;
-  let ci=0; clearInterval(typeTmr);
+  G.dlg.full=ln.t;G.dlg.done=false;
+  let ci=0;clearInterval(typeTmr);
   document.getElementById('dtxt').textContent='';
-  typeTmr=setInterval(()=>{
-    ci++; document.getElementById('dtxt').textContent=G.dlg.full.slice(0,ci);
-    if(ci>=G.dlg.full.length){clearInterval(typeTmr);G.dlg.done=true;}
-  },18);
+  typeTmr=setInterval(()=>{ci++;document.getElementById('dtxt').textContent=G.dlg.full.slice(0,ci);if(ci>=G.dlg.full.length){clearInterval(typeTmr);G.dlg.done=true;}},18);
 }
 function advDlg(){
   if(!G.dlg.active) return;
   if(!G.dlg.done){clearInterval(typeTmr);document.getElementById('dtxt').textContent=G.dlg.full;G.dlg.done=true;return;}
-  const npc=G.dlg.npc, ni=G.dlg.line+1;
-  if(ni<npc.lines.length){G.dlg.line=ni;G.npcMem[npc.id]=ni;showLine(npc,ni);}
+  const npc=G.dlg.npc,next=G.dlg.line+1;
+  if(next<npc.lines.length){G.dlg.line=next;G.npcMem[npc.id]=next;showLine(npc,next);}
   else closeDlg(npc);
 }
 function closeDlg(npc){
-  G.dlg.active=false; clearInterval(typeTmr);
+  G.dlg.active=false;clearInterval(typeTmr);
   document.getElementById('dlg').style.display='none';
   G.npcMem[npc.id]=0;
   const fk='spoke_'+npc.id;
-  if(!G.flags.has(fk)){G.flags.add(fk);grantQuestFlags(npc.id);}
+  if(!G.flags.has(fk)){G.flags.add(fk);grantNpcFlag(npc.id);}
   postDlg(npc);
 }
+
+// ======= CHRONOLOGICAL STORY FLOW =======
+// I: Village -> II: Hill 1st apparition -> III: Bishop 1st visit (Bishop sends back) ->
+// II return: Hill 2nd apparition -> IV: Miracle/roses -> III return: Bishop miracle reveal ->
+// V: Church -> VI: Philippines
 function postDlg(npc){
   const sn=G.scn;
-  if(npc.id==='ourLady1'&&sn==='hill'&&!G.flags.has('to_bishop')){
-    G.flags.add('to_bishop');
-    showNotif('✨',"Our Lady Has Spoken","She sends you to the Bishop's Palace in Mexico City. The long road begins...");
+
+  // After 1st apparition on hill -> go to Bishop (1st time)
+  if(npc.id==='ourLady1' && sn==='hill' && !G.flags.has('had_1st_vision') && !G.flags.has('bishop_1st_done')){
+    G.flags.add('had_1st_vision');
+    showNotif('✨','Our Lady Has Spoken',"She asks you to visit the Bishop in Mexico City. Deliver Her message.");
     setTimeout(()=>chgScene('bishop'),5000);
     return;
   }
-  if(npc.id==='bishop'&&sn==='bishop'&&!G.flags.has('bishop_1st_done')&&!G.flags.has('sb_sign_ready')){
+  // After Bishop 1st visit sends you back -> return to hill
+  if(npc.id==='bishop' && sn==='bishop' && G.flags.has('had_1st_vision') && !G.flags.has('bishop_1st_done')){
     G.flags.add('bishop_1st_done');
-    showNotif('⛪','The Bishop Asks for a Sign','Return to Tepeyac Hill — Our Lady will give you proof.');
+    showNotif('⛪','The Bishop Asks for a Sign','Return to Tepeyac Hill. Our Lady will provide proof for the Bishop.');
     setTimeout(()=>chgScene('hill'),5000);
     return;
   }
-  if(npc.id==='ourLady1'&&sn==='hill'&&G.flags.has('bishop_1st_done')&&!G.flags.has('to_miracle')){
+  // After 2nd apparition on hill -> go to miracle/roses scene
+  if(npc.id==='ourLady1' && sn==='hill' && G.flags.has('bishop_1st_done') && !G.flags.has('to_miracle')){
     G.flags.add('to_miracle');
-    showNotif('🌹',"Our Lady Sends You to the Summit","Gather the twelve roses — then return to the Bishop with the sign!");
+    showNotif('🌹','Our Lady Sends You to the Summit','Gather the twelve Castilian roses -- then return to the Bishop with the sign!');
     setTimeout(()=>chgScene('miracle'),5000);
     return;
   }
-  if(npc.id==='bishop'&&sn==='bishop'&&G.flags.has('sb_sign_ready')&&!G.flags.has('bishop_miracle_done')){
+  // After Bishop sees tilma miracle -> go to church chapter
+  if(npc.id==='bishop' && sn==='bishop' && G.flags.has('sb_sign_ready') && !G.flags.has('bishop_miracle_done')){
     G.flags.add('bishop_miracle_done');
     doFlash();
-    showNotif('✦ MIRACLE ✦','The Tilma Reveals Her Image!',"The roses fall. Our Lady's image blazes on Juan Diego's cloak. The Bishop weeps and kneels.");
+    showNotif('MIRACLE','The Tilma Reveals Her Image!','The roses fall from the tilma. Our Lady blazes on the cloth. The Bishop weeps and kneels.');
     setTimeout(()=>chgScene('church'),6500);
     return;
   }
+  // Church complete check on every NPC dialogue
   if(sn==='church') chkChurch();
-  if(npc.id==='singer'&&sn==='philippines'){doFlash();setTimeout(()=>{document.getElementById('finale').style.display='flex';},3000);}
-  updTasks(); updPips();
+  // Philippines finale
+  if(npc.id==='singer' && sn==='philippines'){
+    doFlash();
+    setTimeout(()=>{document.getElementById('finale').style.display='flex';},3000);
+  }
+  updTasks();updPips();
 }
 
-// ═══════════════ INTERACTION ═══════════════
+// ======= INTERACTION =======
 function doInteract(){
   if(G.dlg.active){advDlg();return;}
   let bN=null,bD=Infinity;
   for(const nm of G.npcMeshes){const d=G.pl.pos.distanceTo(nm.mesh.position);if(d<3.8&&d<bD){bD=d;bN=nm.data;}}
   if(bN){openDlg(bN);return;}
   let bC=null;bD=Infinity;
-  for(const cm of G.colMeshes){
-    if(G.flags.has(cm.data.id))continue;
-    const d=G.pl.pos.distanceTo(cm.mesh.position);
-    if(d<3.0&&d<bD){bD=d;bC=cm;}
-  }
+  for(const cm of G.colMeshes){if(G.flags.has(cm.data.id))continue;const d=G.pl.pos.distanceTo(cm.mesh.position);if(d<3.0&&d<bD){bD=d;bC=cm;}}
   if(bC) pickUp(bC);
 }
 function pickUp(cm){
-  if(G.flags.has(cm.data.id))return;
-  G.flags.add(cm.data.id); G.inv[cm.data.id]=(G.inv[cm.data.id]||0)+1;
+  if(G.flags.has(cm.data.id)) return;
+  G.flags.add(cm.data.id);G.inv[cm.data.id]=(G.inv[cm.data.id]||0)+1;
   scene.remove(cm.mesh);
   const ix=G.colMeshes.indexOf(cm);if(ix>=0)G.colMeshes.splice(ix,1);
   showNotif(cm.data.icon,cm.data.lbl,cm.data.desc);
-  playSfx(); grantQuestFlags(cm.data.id); updInv();
+  playSfx();grantItemFlag(cm.data.id);updInv();
   if(ROSES.includes(cm.data.id)){
     if(ROSES.every(id=>G.flags.has(id))&&!G.flags.has('qm1')){
       G.flags.add('qm1');G.flags.add('sb_sign_ready');
-      doFlash();showNotif('🌹','All 12 Roses Gathered!',"Twelve Castilian roses in the December frost — Her impossible sign is complete!");
+      doFlash();showNotif('🌹','All 12 Roses Gathered!','Twelve Castilian roses in December frost -- the impossible sign is complete!');
       updTasks();updPips();
     }
   }
   chkSceneDone();
+  chkChurch();
 }
-function grantQuestFlags(id){
-  for(const q of QS){
-    if(G.flags.has(q.f))continue;
-    if(q.t==='npc'&&'spoke_'+q.id===`spoke_${id}`)G.flags.add(q.f);
-    if(q.t==='item'&&q.id===id)G.flags.add(q.f);
-  }
+function grantNpcFlag(npcId){
+  for(const q of QS){if(q.t==='npc'&&q.id===npcId&&!G.flags.has(q.f)) G.flags.add(q.f);}
+  chkSceneDone();
+  chkChurch();
+  updTasks();updPips();
+}
+function grantItemFlag(itemId){
+  for(const q of QS){if(q.t==='item'&&q.id===itemId&&!G.flags.has(q.f)) G.flags.add(q.f);}
   updTasks();updPips();
 }
 function chkSceneDone(){
   const sn=G.scn;
-  if(sn==='village'&&['qv1','qv2','qv3','qv4','qv5'].every(f=>G.flags.has(f))&&!G.flags.has('v_done')){
-    G.flags.add('v_done');
-    showNotif('🌄','Village Complete!','The sky breaks pink over Tepeyac. Something is calling you to the hill...');
-    setTimeout(()=>chgScene('hill'),5500);
+  if(sn==='village'&&!G.flags.has('v_done')){
+    if(['qv1','qv2','qv3','qv4','qv5'].every(f=>G.flags.has(f))){
+      G.flags.add('v_done');
+      showNotif('🌄','Village Complete!','The sky breaks pink over Tepeyac. Something calls you up the hill...');
+      setTimeout(()=>chgScene('hill'),5500);
+    }
   }
-  if(sn==='miracle'&&['qm1','qm2','qm3','qm4'].every(f=>G.flags.has(f))&&!G.flags.has('m_done')){
-    G.flags.add('m_done');G.flags.add('sb_sign_ready');doFlash();
-    showNotif('✦','The Signs are Ready!','Return to the Bishop. Open your tilma only before him.');
-    setTimeout(()=>chgScene('bishop'),6000);
+  if(sn==='miracle'&&!G.flags.has('m_done')){
+    if(['qm1','qm2','qm3','qm4'].every(f=>G.flags.has(f))){
+      G.flags.add('m_done');if(!G.flags.has('sb_sign_ready'))G.flags.add('sb_sign_ready');
+      doFlash();showNotif('✦','All Signs Ready!','Return to the Bishop. Do not open your tilma until you stand before him.');
+      setTimeout(()=>chgScene('bishop'),6000);
+    }
   }
 }
 function chkChurch(){
-  if(['qc1','qc2','qc3','qc4'].every(f=>G.flags.has(f))&&!G.flags.has('c_done')){
+  if(G.scn!=='church'||G.flags.has('c_done')) return;
+  if(['qc1','qc2','qc3','qc4'].every(f=>G.flags.has(f))){
     G.flags.add('c_done');
-    showNotif('⛪','The Church is Complete!','Nine million souls converted. The faith now crosses the Pacific...');
+    showNotif('⛪','The Church is Complete!','Nine million souls converted in seven years. The faith crosses the Pacific...');
     setTimeout(()=>{document.getElementById('phsc').style.display='flex';},5500);
   }
 }
 
-// ═══════════════ EFFECTS ═══════════════
+// ======= EFFECTS =======
 function doFlash(){
-  const fl=document.getElementById('flash');fl.style.opacity='1';setTimeout(()=>fl.style.opacity='0',900);
-  G.glows.forEach(g=>{g.l.intensity=g.b*7;});setTimeout(()=>G.glows.forEach(g=>{g.l.intensity=g.b;}),1200);
+  const fl=document.getElementById('flash');fl.style.opacity='1';setTimeout(()=>{fl.style.opacity='0';},900);
+  G.glows.forEach(g=>{g.l.intensity=g.b*7;});setTimeout(()=>{G.glows.forEach(g=>{g.l.intensity=g.b;});},1200);
 }
 function chgScene(ns){
   const fo=document.getElementById('fade');fo.style.opacity='1';fo.style.pointerEvents='all';
@@ -1065,36 +1036,41 @@ function chgScene(ns){
 function beginPhil(){document.getElementById('phsc').style.display='none';chgScene('philippines');}
 function restartGame(){
   document.getElementById('finale').style.display='none';
-  G.flags=new Set();G.inv={};G.npcMem={};G.dlg.active=false;chgScene('village');
+  G.flags=new Set();G.inv={};G.npcMem={};
+  G.dlg={active:false,npc:null,line:0,full:'',done:false};
+  G.pl.mesh=null;
+  chgScene('village');
 }
 
-// ═══════════════ UI ═══════════════
+// ======= UI =======
 function updTasks(){
   const list=document.getElementById('tlist');list.innerHTML='';
   for(const q of QS.filter(q=>q.s===G.scn)){
-    const dn=G.flags.has(q.f);
-    const el=document.createElement('div');el.className='ti '+(dn?'dn':'act');
-    el.innerHTML=`<div class="tp"></div><span>${q.d}</span>`;list.appendChild(el);
+    const done=G.flags.has(q.f);
+    const el=document.createElement('div');el.className='ti '+(done?'dn':'act');
+    el.innerHTML='<div class="tp"></div><span>'+q.d+'</span>';
+    list.appendChild(el);
   }
 }
 function updInv(){
   const il=document.getElementById('ilist');il.innerHTML='';
   const ids=Object.keys(G.inv);
-  if(!ids.length){il.innerHTML='<div class="ie">— Empty —</div>';return;}
+  if(!ids.length){il.innerHTML='<div class="ie">-- Empty --</div>';return;}
   const all=Object.values(COLS).flat();
   for(const id of ids.slice(-6)){
     const df=all.find(c=>c.id===id);if(!df)continue;
     const el=document.createElement('div');el.className='ir';
-    el.innerHTML=`<span>${df.icon}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.65rem">${df.lbl.slice(0,18)}</span>`;
+    el.innerHTML='<span>'+df.icon+'</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.65rem">'+df.lbl.slice(0,18)+'</span>';
     il.appendChild(el);
   }
 }
 function updPips(){
   const row=document.getElementById('prow');row.innerHTML='';
-  const done=QS.filter(q=>G.flags.has(q.f)).length;
+  const doneCount=QS.filter(q=>G.flags.has(q.f)).length;
   for(let i=0;i<QS.length;i++){
-    const p=document.createElement('div');
-    p.className='pp2'+(G.flags.has(QS[i].f)?' dn':(i===done?' cur':''));row.appendChild(p);
+    const pip=document.createElement('div');
+    pip.className='pp2'+(G.flags.has(QS[i].f)?' dn':(i===doneCount?' cur':''));
+    row.appendChild(pip);
   }
 }
 let notifTO=null;
@@ -1103,33 +1079,29 @@ function showNotif(icon,title,body){
   const n=document.getElementById('notif');n.classList.add('on');clearTimeout(notifTO);notifTO=setTimeout(()=>n.classList.remove('on'),4800);
 }
 
-// ═══════════════ MAIN LOOP ═══════════════
-const camDes=new THREE.Vector3(), camLk=new THREE.Vector3();
+// ======= MAIN LOOP =======
+const camDes=new THREE.Vector3(),camLk=new THREE.Vector3();
 let lastT=0;
-
 function loop(now){
   requestAnimationFrame(loop);
-  if(!G.running)return;
+  if(!G.running) return;
   const dt=Math.min((now-lastT)/1000,0.05);lastT=now;G.animT+=dt;
 
-  // ── Movement ──
   if(!G.dlg.active){
     let mx=0,mz=0;
-    if(keys['KeyW']||keys['ArrowUp'])mz-=1;
-    if(keys['KeyS']||keys['ArrowDown'])mz+=1;
-    if(keys['KeyA']||keys['ArrowLeft'])mx-=1;
+    if(keys['KeyW']||keys['ArrowUp'])   mz-=1;
+    if(keys['KeyS']||keys['ArrowDown']) mz+=1;
+    if(keys['KeyA']||keys['ArrowLeft']) mx-=1;
     if(keys['KeyD']||keys['ArrowRight'])mx+=1;
-    if(Math.abs(joy.x)>0.12)mx+=joy.x;
-    if(Math.abs(joy.y)>0.12)mz+=joy.y;
-    const mv=mx!==0||mz!==0;
-    G.pl.moving=mv;
-    if(mv){
-      const a=Math.atan2(mx,mz), s=Math.round(a/(Math.PI/4))*(Math.PI/4);
-      const spd=5.5, bn=SC[G.scn].bn;
+    if(Math.abs(joy.x)>0.12) mx+=joy.x;
+    if(Math.abs(joy.y)>0.12) mz+=joy.y;
+    const moving=mx!==0||mz!==0;
+    G.pl.moving=moving;
+    if(moving){
+      const a=Math.atan2(mx,mz),s=Math.round(a/(Math.PI/4))*(Math.PI/4),spd=5.5,bn=SC[G.scn].bn;
       G.pl.pos.x=Math.max(-bn,Math.min(bn,G.pl.pos.x+Math.sin(s)*spd*dt));
       G.pl.pos.z=Math.max(-bn,Math.min(bn,G.pl.pos.z+Math.cos(s)*spd*dt));
-      G.pl.tAngle=-s;
-      G.pl.bobT+=dt*8;
+      G.pl.tAngle=-s;G.pl.bobT+=dt*8;
       if(G.pl.mesh){
         G.pl.mesh.position.y=Math.abs(Math.sin(G.pl.bobT))*0.06;
         const ll=G.pl.mesh.userData.ll,lr=G.pl.mesh.userData.lr;
@@ -1137,96 +1109,60 @@ function loop(now){
         if(lr)lr.rotation.x=-Math.sin(G.pl.bobT)*0.28;
       }
     } else {
-      if(G.pl.mesh)G.pl.mesh.position.y*=0.88;
+      if(G.pl.mesh) G.pl.mesh.position.y*=0.88;
     }
     if(G.pl.mesh){
       const ad=((G.pl.tAngle-G.pl.angle+Math.PI)%(Math.PI*2))-Math.PI;
       G.pl.angle+=ad*0.18;
-      G.pl.mesh.position.x=G.pl.pos.x;
-      G.pl.mesh.position.z=G.pl.pos.z;
-      G.pl.mesh.rotation.y=G.pl.angle;
+      G.pl.mesh.position.x=G.pl.pos.x;G.pl.mesh.position.z=G.pl.pos.z;G.pl.mesh.rotation.y=G.pl.angle;
     }
-    // Auto-collect
     for(const cm of [...G.colMeshes]){
-      if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<1.6)pickUp(cm);
+      if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<1.6) pickUp(cm);
     }
   }
 
-  // ── Auto-following camera ──
-  if(G.pl.moving){
-    const yd=(((-G.pl.tAngle+Math.PI)-G.cam.yaw+Math.PI)%(Math.PI*2))-Math.PI;
-    G.cam.yaw+=yd*0.045;
-  }
-  camDes.set(
-    G.pl.pos.x+Math.sin(G.cam.yaw)*G.cam.dist,
-    G.pl.pos.y+G.cam.h,
-    G.pl.pos.z+Math.cos(G.cam.yaw)*G.cam.dist
-  );
-  camera.position.lerp(camDes,0.07);
-  camLk.set(G.pl.pos.x,G.pl.pos.y+2.0,G.pl.pos.z);
-  camera.lookAt(camLk);
+  if(G.pl.moving){const t=-G.pl.tAngle+Math.PI,yd=((t-G.cam.yaw+Math.PI)%(Math.PI*2))-Math.PI;G.cam.yaw+=yd*0.045;}
+  camDes.set(G.pl.pos.x+Math.sin(G.cam.yaw)*G.cam.dist,G.pl.pos.y+G.cam.h,G.pl.pos.z+Math.cos(G.cam.yaw)*G.cam.dist);
+  camera.position.lerp(camDes,0.07);camLk.set(G.pl.pos.x,G.pl.pos.y+2.0,G.pl.pos.z);camera.lookAt(camLk);
 
-  // ── NPC animation ──
   for(const nm of G.npcMeshes){
     nm.mesh.position.y=nm.data.pos[1]+Math.sin(G.animT*1.4+nm.mesh.position.x)*0.038;
-    if(nm.data.isHoly){
-      nm.mesh.rotation.y=Math.sin(G.animT*0.38)*0.09;
-      nm.mesh.children.forEach(c=>{if(c.userData&&c.userData.ray&&c.material)c.material.opacity=0.07+Math.sin(G.animT*2.0+c.position.x*3)*0.06;});
-    } else if(!nm.data.isBishop){
-      const dx=G.pl.pos.x-nm.mesh.position.x,dz=G.pl.pos.z-nm.mesh.position.z;
-      nm.mesh.rotation.y=Math.atan2(dx,dz)+Math.PI;
-    }
+    if(nm.data.isHoly){nm.mesh.rotation.y=Math.sin(G.animT*0.38)*0.09;nm.mesh.children.forEach(c=>{if(c.userData&&c.userData.ray&&c.material)c.material.opacity=0.07+Math.sin(G.animT*2.0+c.position.x*3)*0.06;});}
+    else if(!nm.data.isBishop){const dx=G.pl.pos.x-nm.mesh.position.x,dz=G.pl.pos.z-nm.mesh.position.z;nm.mesh.rotation.y=Math.atan2(dx,dz)+Math.PI;}
   }
-
-  // ── Collectable animation ──
   for(const cm of G.colMeshes){
-    if(!G.flags.has(cm.data.id)){
-      cm.mesh.position.y=cm.by+0.42+Math.sin(G.animT*2.4+cm.mesh.position.x)*0.2;
-      cm.mesh.rotation.y+=dt*1.6;
-    }
+    if(!G.flags.has(cm.data.id)){cm.mesh.position.y=cm.by+0.42+Math.sin(G.animT*2.4+cm.mesh.position.x)*0.2;cm.mesh.rotation.y+=dt*1.6;}
   }
-
-  // ── Glow lights ──
   for(const gl of G.glows){
     gl.l.intensity=gl.b*(1+Math.sin(G.animT*gl.f)*0.16);
-    if(gl.fl)gl.l.position.y=gl.fy+Math.sin(G.animT*1.15)*0.32;
+    if(gl.fl) gl.l.position.y=gl.fy+Math.sin(G.animT*1.15)*0.32;
   }
-
-  // ── Particles ──
   if(G.parts){
     const p=G.parts.userData.pos,cnt=G.parts.userData.cnt;
-    for(let i=0;i<cnt;i++){
-      p[i*3+1]+=dt*(0.22+Math.sin(G.animT*0.5+i)*0.09);
-      if(p[i*3+1]>9)p[i*3+1]=0.4;
-      p[i*3]+=Math.sin(G.animT*0.28+i*0.42)*0.0025;
-    }
+    for(let i=0;i<cnt;i++){p[i*3+1]+=dt*(0.22+Math.sin(G.animT*0.5+i)*0.09);if(p[i*3+1]>9)p[i*3+1]=0.4;p[i*3]+=Math.sin(G.animT*0.28+i*0.42)*0.0025;}
     G.parts.geometry.attributes.position.needsUpdate=true;
   }
+  if(G.skyMat) G.skyMat.uniforms.time.value=G.animT;
 
-  // ── Sky ──
-  if(G.skyMat)G.skyMat.uniforms.time.value=G.animT;
-
-  // ── Proximity hint ──
-  const ph=document.getElementById('phint'), tb=document.getElementById('tbtn');
-  let nn=null,nc=null;
-  for(const nm of G.npcMeshes)if(G.pl.pos.distanceTo(nm.mesh.position)<3.8){nn=nm;break;}
-  if(!nn)for(const cm of G.colMeshes)if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<3.0){nc=cm;break;}
-  if(nn){ph.textContent='✟ TALK — '+nn.data.nm;ph.classList.add('on');tb.className='gn';}
-  else if(nc){ph.textContent='✦ PICK UP — '+nc.data.lbl;ph.classList.add('on');tb.className='gi';}
+  const ph=document.getElementById('phint'),tb=document.getElementById('tbtn');
+  let nearNPC=null,nearCol=null;
+  for(const nm of G.npcMeshes){if(G.pl.pos.distanceTo(nm.mesh.position)<3.8){nearNPC=nm;break;}}
+  if(!nearNPC){for(const cm of G.colMeshes){if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<3.0){nearCol=cm;break;}}}
+  if(nearNPC){ph.textContent='TALK -- '+nearNPC.data.nm;ph.classList.add('on');tb.className='gn';}
+  else if(nearCol){ph.textContent='PICK UP -- '+nearCol.data.lbl;ph.classList.add('on');tb.className='gi';}
   else{ph.classList.remove('on');tb.className='';}
 
   renderer.render(scene,camera);
 }
 
-// ═══════════════ START ═══════════════
+// ======= START =======
 function startGame(){
-  const intro=document.getElementById('intro');
-  intro.style.opacity='0';intro.style.pointerEvents='none';
-  setTimeout(()=>intro.style.display='none',2000);
+  const intro=document.getElementById('intro');intro.style.opacity='0';intro.style.pointerEvents='none';
+  setTimeout(()=>{intro.style.display='none';},2000);
   document.getElementById('hud').classList.add('on');
   G.running=true;
   buildScene('village');
-  showNotif('✟','Chapter I — The Village','Tepeyac, Mexico — December 1531. Speak with your neighbors, collect your belongings, and prepare for the journey.');
+  showNotif('✟','Chapter I -- The Village','Tepeyac, Mexico -- December 1531. Speak with your neighbors, gather your belongings, and prepare for the sacred journey.');
   try{initAudio();}catch(e){}
   lastT=performance.now();
   requestAnimationFrame(loop);
