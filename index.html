@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Juan Diego — Our Lady of Guadalupe</title>
+<title>Juan Diego -- Our Lady of Guadalupe</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=IM+Fell+English:ital,wght@0,400;1,400&family=Crimson+Pro:ital,wght@0,400;1,400&display=swap');
 :root{--gold:#D4A017;--gold2:#F5C842;--cream:#FDF5E6;--parchment:#F0DCA0;}
@@ -31,7 +31,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:20;visibility:hidden;}
 #hud.on{visibility:visible;}
-#topbar{position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(to bottom,rgba(4,2,0,0.96) 40%,transparent);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(12px,2.5vw,22px);}
+#topbar{position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(to bottom,rgba(4,2,0,0.96) 40%,transparent);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(12px,2.5vw,22px);gap:10px;}
+#progwrap{flex:1;max-width:220px;display:flex;flex-direction:column;gap:3px;align-items:center;}
+#proglbl{font-family:"Cinzel",serif;font-size:0.48rem;color:rgba(212,160,23,0.6);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+#progbar{width:100%;height:4px;background:rgba(212,160,23,0.15);border-radius:2px;overflow:hidden;}
+#progfill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width 0.6s ease;width:0%;}
 #gtitle{font-family:'Cinzel Decorative',serif;font-size:clamp(0.75rem,1.8vw,1.05rem);color:var(--gold);text-shadow:0 0 14px rgba(212,160,23,0.8);letter-spacing:2px;}
 #chinfo{text-align:right;}
 #chname{font-family:'IM Fell English',serif;font-style:italic;font-size:clamp(0.72rem,1.6vw,0.92rem);color:var(--parchment);text-shadow:0 2px 6px rgba(0,0,0,0.9);}
@@ -55,7 +59,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 #dlg{position:absolute;bottom:clamp(130px,18vh,150px);left:50%;transform:translateX(-50%);width:min(720px,92vw);background:rgba(4,2,0,0.96);border:2px solid rgba(212,160,23,0.7);padding:clamp(12px,2vh,17px) clamp(16px,3vw,24px) clamp(10px,1.5vh,13px);display:none;pointer-events:all;backdrop-filter:blur(10px);box-shadow:0 0 50px rgba(0,0,0,0.85),0 0 18px rgba(212,160,23,0.08);}
 #dlg::before{content:'';position:absolute;inset:3px;border:1px solid rgba(212,160,23,0.1);pointer-events:none;}
 #dsp{font-family:'Cinzel',serif;font-size:clamp(0.6rem,1.3vw,0.73rem);color:var(--gold);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 10px rgba(212,160,23,0.6);margin-bottom:7px;}
-#dtxt{font-family:'IM Fell English',serif;font-style:italic;font-size:clamp(0.86rem,1.9vw,1.04rem);color:var(--cream);line-height:1.68;text-shadow:0 1px 4px rgba(0,0,0,0.7);min-height:40px;}
+#dtxt{font-family:'IM Fell English',serif;font-style:italic;font-size:clamp(0.92rem,2.0vw,1.1rem);color:var(--cream);line-height:1.68;text-shadow:0 1px 4px rgba(0,0,0,0.7);min-height:40px;}
 #dh{font-family:'Cinzel',serif;font-size:0.58rem;color:rgba(212,160,23,0.48);text-align:right;margin-top:6px;animation:db 1.2s step-end infinite;}
 @keyframes db{0%,100%{opacity:1;}50%{opacity:0;}}
 /* Progress */
@@ -72,6 +76,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 /* Proximity hint */
 #phint{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);font-family:'Cinzel',serif;font-size:clamp(0.62rem,1.4vw,0.78rem);color:var(--gold);background:rgba(4,2,0,0.9);border:1px solid rgba(212,160,23,0.55);padding:5px 18px;letter-spacing:2px;pointer-events:none;z-index:55;opacity:0;transition:opacity 0.3s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
 #phint.on{opacity:1;}
+/* Lore badge */
+#lorebadge{position:fixed;bottom:clamp(100px,14vh,124px);left:clamp(18px,3.5vw,28px);max-width:min(200px,38vw);background:rgba(4,2,0,0.88);border:1px solid rgba(212,160,23,0.28);padding:7px 11px;font-family:"Crimson Pro",serif;font-size:clamp(0.6rem,1.2vw,0.72rem);color:rgba(240,220,160,0.7);line-height:1.5;display:none;z-index:25;backdrop-filter:blur(4px);}
+#lorebadge.on{display:block;}
+#lorebadge strong{font-family:"Cinzel",serif;font-size:0.55rem;color:var(--gold);display:block;margin-bottom:3px;letter-spacing:1px;}
 /* Audio */
 #abtn{position:fixed;top:clamp(58px,7vh,70px);right:clamp(10px,2vw,16px);font-family:'Cinzel',serif;font-size:0.68rem;color:rgba(212,160,23,0.38);cursor:pointer;z-index:60;pointer-events:all;transition:color 0.3s;letter-spacing:1px;padding:4px 8px;}
 #abtn:hover{color:var(--gold);}
@@ -94,6 +102,13 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 /* Skip button */
 #sbtn{position:fixed;bottom:clamp(100px,14vh,124px);right:clamp(36px,5.5vw,52px);width:clamp(40px,6vw,50px);height:clamp(40px,6vw,50px);border-radius:50%;background:radial-gradient(circle at 36% 30%,rgba(18,32,95,0.97),rgba(5,8,36,0.99));border:1.5px solid rgba(80,130,255,0.48);box-shadow:0 3px 12px rgba(0,0,0,0.72),0 0 12px rgba(80,130,255,0.18);cursor:pointer;z-index:60;pointer-events:all;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform 0.07s;color:rgba(100,158,255,0.9);font-family:'Cinzel',serif;}
 #sbtn:active{transform:scale(0.88);}
+/* Chapter card */
+#chcard{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
+#chcard.on{display:flex;}
+#chcardIcon{font-size:3rem;animation:lf 2s ease-in-out infinite;}
+#chcardTitle{font-family:"Cinzel Decorative",serif;font-size:clamp(1.2rem,3.5vw,2.4rem);color:var(--gold);text-shadow:0 0 40px rgba(212,160,23,0.9);text-align:center;line-height:1.3;max-width:min(600px,90vw);}
+#chcardSub{font-family:"Cinzel",serif;font-size:clamp(0.65rem,1.5vw,0.85rem);color:rgba(212,160,23,0.55);letter-spacing:3px;text-transform:uppercase;}
+#chcardLore{font-family:"IM Fell English",serif;font-style:italic;color:rgba(240,220,160,0.82);font-size:clamp(0.8rem,1.6vw,0.95rem);max-width:min(520px,86vw);text-align:center;line-height:1.75;margin-top:8px;}
 /* Philippines screen */
 #phsc{position:fixed;inset:0;z-index:400;background:linear-gradient(158deg,#001A58,#8B0000 52%,#7A6400);display:none;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,2vh,18px);padding:20px;}
 #phsc h1{font-family:'Cinzel Decorative',serif;font-size:clamp(1.3rem,3.5vw,2.6rem);color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,0.9);text-align:center;line-height:1.3;}
@@ -113,6 +128,8 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 <body>
 <canvas id="gc"></canvas>
 <div id="vig"></div>
+<div id="chcard"><div id="chcardIcon">✟</div><div id="chcardTitle"></div><div id="chcardSub"></div><div id="chcardLore"></div></div>
+<div id="lorebadge"><strong>HISTORICAL NOTE</strong><span id="loretxt"></span></div>
 <div id="flash"></div>
 <div id="fade"></div>
 
@@ -168,7 +185,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 <div class="ititle">Juan Diego</div>
 <div class="isub">Our Lady of Guadalupe</div>
 <div class="iyear">Tepeyac · Mexico · December 1531</div>
-<div class="idesc">Walk the sacred path. Speak with the people of Tepeyac. Receive Our Lady's apparition. Carry Her twelve roses to the Bishop — and witness the miracle that changed the New World.</div>
+<div class="idesc">Walk the sacred path. Speak with the people of Tepeyac. Receive Our Lady's apparition. Carry Her twelve roses to the Bishop -- and witness the miracle that changed the New World.</div>
 <button id="startBtn" onclick="startGame()">✟ Begin the Journey ✟</button>
 </div>
 
@@ -177,12 +194,14 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 <div id="hud">
 <div id="topbar">
   <div id="gtitle">✟ Juan Diego</div>
-  <div id="chinfo"><div id="chname">Chapter I — The Village</div><div id="chsub">Tepeyac, December 1531</div></div>
+  <div id="progwrap"><div id="proglbl">0 / 88 TASKS</div><div id="progbar"><div id="progfill"></div></div></div>
+    <div id="progwrap"><div id="proglbl">0 / 88 TASKS</div><div id="progbar"><div id="progfill"></div></div></div>
+  <div id="chinfo"><div id="chname">Chapter I -- The Village</div><div id="chsub">Tepeyac, December 1531</div></div>
 </div>
 <div id="tasks"><h3>⚑ Objectives</h3><div id="tlist"></div></div>
-<div id="inv"><h4>📜 Carried</h4><div id="ilist"><div class="ie">— Empty —</div></div></div>
+<div id="inv"><h4>📜 Carried</h4><div id="ilist"><div class="ie">-- Empty --</div></div></div>
 <div id="dlg">
-  <div id="dsp">—</div>
+  <div id="dsp">--</div>
   <div id="dtxt"></div>
   <div id="dh">◆ TALK to continue</div>
 </div>
@@ -235,8 +254,8 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 
 <div id="phsc">
   <h1>✟ The Faith Crosses the Pacific ✟</h1>
-  <h2>Our Lady of Guadalupe in the Philippines — 1601</h2>
-  <p>Nine million Nahua souls converted in seven years — the greatest mass conversion in history. Now the Augustinians carry Her image across the Pacific. You will play as <em>Fray Miguel</em>, establishing Her devotion in Makati, Manila.</p>
+  <h2>Our Lady of Guadalupe in the Philippines -- 1601</h2>
+  <p>Nine million Nahua souls converted in seven years -- the greatest mass conversion in history. Now the Augustinians carry Her image across the Pacific. You will play as <em>Fray Miguel</em>, establishing Her devotion in Makati, Manila.</p>
   <button class="pbtn" onclick="beginPhil()">✟ Begin the Philippine Mission ✟</button>
 </div>
 
@@ -244,59 +263,102 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 
 <div id="finale">
   <h1>✟ The Mission is Complete ✟</h1>
-  <p>Our Lady of Guadalupe's devotion is established in the Philippines. The Guadalupe Church in Makati stands to this day — the first on Asian soil. Every December 12, thousands carry candles to the Pasig River, which glows from shore to shore.</p>
+  <p>Our Lady of Guadalupe's devotion is established in the Philippines. The Guadalupe Church in Makati stands to this day -- the first on Asian soil. Every December 12, thousands carry candles to the Pasig River, which glows from shore to shore.</p>
   <p style="margin-top:10px;color:rgba(212,160,23,0.7);font-size:0.85rem">The tilma of Juan Diego remains inexplicably intact after nearly five centuries. No scientist has ever explained it. More pilgrims visit Tepeyac each year than any other Marian shrine on earth.</p>
   <button class="gbtn" onclick="restartGame()">✟ Begin Again ✟</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
+
+<script>
+// Global error logger (does NOT suppress - real errors must surface during debug)
+window.addEventListener('error', function(e){
+  console.error('Game error:', e.message, 'at', e.filename, e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e){
+  console.error('Unhandled promise rejection:', e.reason);
+});
+</script>
 
 <script>
 'use strict';
 
-// ======= RENDERER =======
-const canvas = document.getElementById('gc');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
-renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.physicallyCorrectLights = true;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
-renderer.outputEncoding = THREE.sRGBEncoding;
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, 0.1, 500);
-window.addEventListener('resize', () => {
-  renderer.setSize(innerWidth, innerHeight);
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-});
-
-// ======= STATE =======
+// ======= MODULE-SCOPE VARS (no THREE calls here) =======
+let renderer, scene, camera, camDes, camLk;
 const G = {
   transitioning:false,
   running:false, scn:'village', flags:new Set(), inv:{}, animT:0, npcMem:{},
-  pl:{ pos:new THREE.Vector3(0,0,6), mesh:null, angle:0, tAngle:0, bobT:0, moving:false },
+  pl:{ pos:null, mesh:null, angle:0, tAngle:0, bobT:0, moving:false },
   cam:{ yaw:0, dist:18, h:11.5 },
   dlg:{ active:false, npc:null, line:0, full:'', done:false },
   npcMeshes:[], colMeshes:[], glows:[], parts:null, skyMat:null,
 };
-
-// ======= INPUT =======
 const keys = {};
 const joy = {x:0, y:0};
-document.addEventListener('keydown', e => {
-  keys[e.code] = true;
-  if (e.code==='KeyE'||e.code==='Space'||e.code==='Enter') { e.preventDefault(); doInteract(); }
+let jOn=false, jTid=-1, jcx=0, jcy=0;
+let jb, jk;
+
+// ======= DEFERRED INIT -- runs after THREE.js is guaranteed loaded =======
+window.addEventListener('load', function(){
+  if(typeof THREE === 'undefined'){
+    document.body.innerHTML='<div style="position:fixed;inset:0;background:#0a0800;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#FFD700;font-family:serif;text-align:center;padding:40px"><h2 style="font-size:1.4rem">3D engine failed to load.</h2><p>Please check your internet connection and try again.</p><button onclick="location.reload()" style="margin-top:24px;padding:14px 32px;background:#8B6914;color:#fff;border:none;border-radius:4px;font-size:1rem;cursor:pointer">Reload</button></div>';
+    return;
+  }
+  const isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const canvas=document.getElementById('gc');
+  try{
+    renderer=new THREE.WebGLRenderer({canvas, antialias:!isMobile});
+  }catch(e){
+    document.body.innerHTML='<div style="position:fixed;inset:0;background:#0a0800;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#FFD700;font-family:serif;text-align:center;padding:40px"><h2>WebGL not supported.</h2><p>Please try a different browser.</p></div>';
+    return;
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,isMobile?1.5:2.0));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  try{renderer.physicallyCorrectLights=true;}catch(e){}
+  try{renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;}catch(e){}
+  try{renderer.outputEncoding=THREE.sRGBEncoding;}catch(e){}
+
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,0.1,500);
+  camDes=new THREE.Vector3();
+  camLk=new THREE.Vector3();
+  G.pl.pos=new THREE.Vector3(0,0,6);
+
+  window.addEventListener('resize',()=>{
+    if(!renderer||!camera)return;
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  jb=document.getElementById('jb');
+  jk=document.getElementById('jk');
+  setupInput();
+  setupJoystick();
+  setupTouchButtons();
 });
-document.addEventListener('keyup', e => { keys[e.code] = false; });
+
+function setupInput(){
+  document.addEventListener('keydown',e=>{
+    keys[e.code]=true;
+    if(G.dlg.active){
+      if(e.code==='Space'||e.code==='Enter'){
+        e.preventDefault();
+        if(!G.dlg.done){clearInterval(typeTmr);const dtxt=document.getElementById('dtxt');if(dtxt)dtxt.textContent=G.dlg.full;G.dlg.done=true;}
+        else{advDlg();}
+        return;
+      }
+      if(e.code==='KeyE'||e.code==='Escape'){e.preventDefault();closeDlg();return;}
+    }
+    if(e.code==='KeyE'||e.code==='Space'||e.code==='Enter'){e.preventDefault();doInteract();}
+    if(e.code==='KeyM'){toggleMusic();}
+  });
+  document.addEventListener('keyup',e=>{keys[e.code]=false;});
+}
 
 // ======= JOYSTICK =======
-const jb = document.getElementById('jb');
-const jk = document.getElementById('jk');
-let jOn=false, jTid=-1, jcx=0, jcy=0;
 function jRadius() { return jb.getBoundingClientRect().width/2; }
 function jCenter() { const r=jb.getBoundingClientRect(); jcx=r.left+r.width/2; jcy=r.top+r.height/2; }
 function jMove(cx,cy) {
@@ -307,12 +369,22 @@ function jMove(cx,cy) {
   else { joy.x=0; joy.y=0; }
 }
 function jReset() { jOn=false; jTid=-1; jk.style.transform='translate(-50%,-50%)'; joy.x=0; joy.y=0; }
-jb.addEventListener('touchstart',e=>{e.preventDefault();jCenter();jOn=true;jTid=e.changedTouches[0].identifier;jMove(e.changedTouches[0].clientX,e.changedTouches[0].clientY);},{passive:false});
-jb.addEventListener('mousedown',e=>{e.preventDefault();jCenter();jOn=true;jMove(e.clientX,e.clientY);});
-document.addEventListener('touchmove',e=>{if(!jOn)return;for(const t of e.changedTouches)if(t.identifier===jTid){jMove(t.clientX,t.clientY);break;}},{passive:false});
-document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===jTid){jReset();break;}},{passive:false});
-document.addEventListener('mousemove',e=>{if(jOn)jMove(e.clientX,e.clientY);});
-document.addEventListener('mouseup',()=>{if(jOn)jReset();});
+function setupJoystick(){
+  const jbEl=document.getElementById('jb');
+  if(!jbEl) return;
+  jbEl.addEventListener('touchstart',e=>{e.preventDefault();jCenter();jOn=true;jTid=e.changedTouches[0].identifier;jMove(e.changedTouches[0].clientX,e.changedTouches[0].clientY);},{passive:false});
+  jbEl.addEventListener('mousedown',e=>{e.preventDefault();jCenter();jOn=true;jMove(e.clientX,e.clientY);});
+  document.addEventListener('touchmove',e=>{if(!jOn)return;for(const t of e.changedTouches)if(t.identifier===jTid){jMove(t.clientX,t.clientY);break;}},{passive:false});
+  document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===jTid){jReset();break;}},{passive:false});
+  document.addEventListener('mousemove',e=>{if(jOn)jMove(e.clientX,e.clientY);});
+  document.addEventListener('mouseup',()=>{if(jOn)jReset();});
+}
+function setupTouchButtons(){
+  const tBtn=document.getElementById('tbtn');
+  const sBtn=document.getElementById('sbtn');
+  if(tBtn){tBtn.addEventListener('touchstart',e=>{e.preventDefault();tBtn.classList.add('pr');doInteract();},{passive:false});tBtn.addEventListener('touchend',e=>{e.preventDefault();tBtn.classList.remove('pr');},{passive:false});}
+  if(sBtn){sBtn.addEventListener('touchstart',e=>{e.preventDefault();sBtn.style.transform='scale(0.88)';advDlg();},{passive:false});sBtn.addEventListener('touchend',e=>{e.preventDefault();sBtn.style.transform='';},{passive:false});}
+}
 function tStart(e){e.preventDefault();document.getElementById('tbtn').classList.add('pr');doInteract();}
 function tEnd(e){e.preventDefault();document.getElementById('tbtn').classList.remove('pr');}
 function sStart(e){e.preventDefault();document.getElementById('sbtn').style.transform='scale(0.88)';advDlg();}
@@ -320,16 +392,16 @@ function sEnd(e){e.preventDefault();document.getElementById('sbtn').style.transf
 
 // ======= SCENE CONFIG (ASCII only - hyphens not em-dashes) =======
 const SC = {
-  village:     { name:'Chapter I -- The Village',                sub:'Tepeyac, Mexico -- December 1531',                st:0x3A1E06, sb:0x9B6828, fg:0xAA7830, fd:0.011, ac:0xFFD080, ai:0.55, dc:0xFFE8A0, di:2.6, dp:[18,32,12],  gc:0x3D6A18, sp:[0,0,6],  bn:19 },
-  hill:        { name:'Chapter II -- The Apparition on Tepeyac', sub:'Tepeyac Hill -- Four Apparitions, December 9-12, 1531',         st:0x020914, sb:0x0E1E3C, fg:0x182A4A, fd:0.009, ac:0x90B8E8, ai:0.38, dc:0xFFAA50, di:1.9, dp:[-12,22,16], gc:0x5A6A40, sp:[0,0,11], bn:20 },
-  bishop:      { name:"Chapter III -- The Bishop's Palace",      sub:'Mexico City -- Juan Diego Seeks the Bishop, December 9 to 11, 1531',           st:0x120900, sb:0x2C1A0A, fg:0x382010, fd:0.016, ac:0xFFB870, ai:0.52, dc:0xFFD090, di:2.1, dp:[10,28,14],  gc:0x8B6840, sp:[0,0,10], bn:14 },
-  miracle:     { name:'Chapter IV -- The Roses and the Tilma',   sub:'Tepeyac Summit -- December 12, 1531',             st:0x1A0500, sb:0x3A0E00, fg:0x5A2408, fd:0.010, ac:0xFF9840, ai:0.58, dc:0xFFAA30, di:2.9, dp:[0,36,6],    gc:0x506035, sp:[0,0,11], bn:19 },
-  church:      { name:'Chapter V -- The Church is Built',        sub:'Tepeyac -- 1533 A.D.',                            st:0x0A1C34, sb:0x1E3E62, fg:0x2E5080, fd:0.009, ac:0xB0CCFF, ai:0.53, dc:0xFFD890, di:2.2, dp:[14,30,10],  gc:0x4A3A22, sp:[0,0,10], bn:20 },
-  philippines: { name:'Chapter VI -- The Philippines, 1601 A.D.',sub:'Makati, Manila -- The Faith Crosses the Pacific', st:0x0A2040, sb:0x1050A0, fg:0x1A60A0, fd:0.007, ac:0x90D8FF, ai:0.58, dc:0xFFEE70, di:2.9, dp:[12,38,6],   gc:0x2A5A1A, sp:[0,0,8],  bn:21 },
-  nican:       { name:'Chapter IIIb -- The Nican Mopohua',      sub:'Mexico City -- The Sacred Account Written Down, 1545',   st:0x0D0800, sb:0x261505, fg:0x301A08, fd:0.018, ac:0xFFD080, ai:0.52, dc:0xFFE0A0, di:2.3, dp:[12,28,10],  gc:0x5A4A2A, sp:[0,0,9],  bn:13 },
-  tilma_study: { name:'Chapter IVb -- Study of the Sacred Image', sub:'Tepeyac -- The Tilma Examined, 1666 and 1979',           st:0x080508, sb:0x181018, fg:0x201420, fd:0.022, ac:0xD0C0FF, ai:0.62, dc:0xFFEE88, di:2.4, dp:[8,24,12],   gc:0x3A2A3A, sp:[0,0,9],  bn:13 },
-  conversions: { name:'Chapter Vb -- Nine Million Souls',          sub:'New Spain -- The Great Conversion, 1532 to 1541',        st:0x0A1808, sb:0x163020, fg:0x203028, fd:0.010, ac:0xA0FFB8, ai:0.48, dc:0xFFE880, di:2.6, dp:[16,32,12],  gc:0x2A5A30, sp:[0,0,9],  bn:18 },
-  hermit:      { name:"Chapter VIb -- The Hermit of Tepeyac",     sub:"Tepeyac Hill -- Juan Diego's Last Years, 1533 to 1548",  st:0x100C04, sb:0x241A06, fg:0x2C1E08, fd:0.014, ac:0xFFE0A0, ai:0.50, dc:0xFFCC60, di:2.0, dp:[14,26,10],  gc:0x3A5020, sp:[0,0,9],  bn:14 },
+  village:     { name:'Chapter I -- The Village',                sub:'Tepeyac, Mexico -- December 1531',                st:0x3A1E06, sb:0x9B6828, fg:0xAA7830, fd:0.011, ac:0xFFD080, ai:0.55, dc:0xFFE8A0, di:2.6, dp:[18,32,12],  gc:0x3D6A18, sp:[0,0,6],  bn:19 , lore:'Juan Diego Cuauhtlatoatzin was a 57-year-old widowed indigenous man who walked fifteen miles to Mass each day. His baptism name meant "He who speaks like an eagle." He was entirely unknown -- until December 9, 1531.'},
+  hill:        { name:'Chapter II -- The Apparition on Tepeyac', sub:'Tepeyac Hill -- Four Apparitions, December 9-12, 1531',         st:0x020914, sb:0x0E1E3C, fg:0x182A4A, fd:0.009, ac:0x90B8E8, ai:0.38, dc:0xFFAA50, di:1.9, dp:[-12,22,16], gc:0x5A6A40, sp:[0,0,11], bn:20 , lore:'Tepeyac Hill was already sacred to the indigenous people as the site of Tonantzin, "Our Mother." Our Lady appeared four times between December 9 and 12, 1531, each time speaking in Nahuatl -- the language of Juan Diego\'s people, not Spanish.'},
+  bishop:      { name:"Chapter III -- The Bishop's Palace",      sub:'Mexico City -- Juan Diego Seeks the Bishop, December 9 to 11, 1531',           st:0x120900, sb:0x2C1A0A, fg:0x382010, fd:0.016, ac:0xFFB870, ai:0.52, dc:0xFFD090, di:2.1, dp:[10,28,14],  gc:0x8B6840, sp:[0,0,10], bn:14 , lore:'Bishop Juan de Zumarraga was a Spanish Franciscan friar known for protecting indigenous people from abuse by colonial authorities. He was skeptical but never dismissive. He tested the vision carefully -- as the Church requires.'},
+  miracle:     { name:'Chapter IV -- The Roses and the Tilma',   sub:'Tepeyac Summit -- December 12, 1531',             st:0x1A0500, sb:0x3A0E00, fg:0x5A2408, fd:0.010, ac:0xFF9840, ai:0.58, dc:0xFFAA30, di:2.9, dp:[0,36,6],    gc:0x506035, sp:[0,0,11], bn:19 , lore:'The twelve Castilian roses were impossible: they were an out-of-season European variety, blooming on a cactus hill in December frost. When Juan Diego opened his cloak in the Bishop\'s palace, the image of Our Lady appeared simultaneously in Mexico City and at Juan Bernardino\'s bedside in Tepeyac.'},
+  church:      { name:'Chapter V -- The Church is Built',        sub:'Tepeyac -- 1533 A.D.',                            st:0x0A1C34, sb:0x1E3E62, fg:0x2E5080, fd:0.009, ac:0xB0CCFF, ai:0.53, dc:0xFFD890, di:2.2, dp:[14,30,10],  gc:0x4A3A22, sp:[0,0,10], bn:20 , lore:'The first hermitage at Tepeyac was completed in January 1532. Juan Diego served as its keeper until his death in 1548, spending his last sixteen years in prayer at the site. The original tilma has hung at Tepeyac continuously since 1533, nearly five centuries.'},
+  philippines: { name:'Chapter VI -- The Philippines, 1601 A.D.',sub:'Makati, Manila -- The Faith Crosses the Pacific', st:0x0A2040, sb:0x1050A0, fg:0x1A60A0, fd:0.007, ac:0x90D8FF, ai:0.58, dc:0xFFEE70, di:2.9, dp:[12,38,6],   gc:0x2A5A1A, sp:[0,0,8],  bn:21 , lore:'The image of Our Lady of Guadalupe reached the Philippines on a Spanish galleon in 1565. The church of Our Lady of Guadalupe in Makati, established in 1601, is one of the oldest continuously active parishes in the Philippines.', lore:'The image of Our Lady of Guadalupe reached the Philippines in 1565. The church of Our Lady of Guadalupe in Makati, established in 1601, is one of the oldest continuously active parishes in the Philippines.'},
+  nican:       { name:'Chapter IIIb -- The Nican Mopohua',      sub:'Mexico City -- The Sacred Account Written Down, 1545',   st:0x0D0800, sb:0x261505, fg:0x301A08, fd:0.018, ac:0xFFD080, ai:0.52, dc:0xFFE0A0, di:2.3, dp:[12,28,10],  gc:0x5A4A2A, sp:[0,0,9],  bn:13 , lore:'The Nican Mopohua ("Here It Is Told") was written by Antonio Valeriano around 1545 -- within living memory of the events. It is written in classical Nahuatl of the Aztec court. It is the primary source for the apparition account.'},
+  tilma_study: { name:'Chapter IVb -- Study of the Sacred Image', sub:'Tepeyac -- The Tilma Examined, 1666 and 1979',           st:0x080508, sb:0x181018, fg:0x201420, fd:0.022, ac:0xD0C0FF, ai:0.62, dc:0xFFEE88, di:2.4, dp:[8,24,12],   gc:0x3A2A3A, sp:[0,0,9],  bn:13 , lore:'The tilma has been scientifically examined by NASA researchers, Notre Dame, Cornell, and the 1936 Nobel Commission. No scientific consensus has been reached on the origin of the image, its pigments, or the cloth\'s remarkable five-century preservation.', lore:'The tilma has been scientifically examined by researchers from NASA, Notre Dame, Cornell, and the 1936 Nobel Commission. No scientific consensus has been reached on the origin of the image, its pigments, or the cloth\'s remarkable preservation.'},
+  conversions: { name:'Chapter Vb -- Nine Million Souls',          sub:'New Spain -- The Great Conversion, 1532 to 1541',        st:0x0A1808, sb:0x163020, fg:0x203028, fd:0.010, ac:0xA0FFB8, ai:0.48, dc:0xFFE880, di:2.6, dp:[16,32,12],  gc:0x2A5A30, sp:[0,0,9],  bn:18 , lore:'Between 1531 and 1541, approximately nine million indigenous people entered the Catholic faith -- roughly 3,000 per day. Historians note this occurred peacefully, without coercion, and is without precedent in the history of Christian missions.', lore:'Between 1531 and 1541, approximately nine million indigenous people entered the Catholic faith -- roughly 3,000 per day. Historians note this occurred peacefully, without coercion, and is without precedent in the history of Christian missions.'},
+  hermit:      { name:"Chapter VIb -- The Hermit of Tepeyac",     sub:"Tepeyac Hill -- Juan Diego's Last Years, 1533 to 1548",  st:0x100C04, sb:0x241A06, fg:0x2C1E08, fd:0.014, ac:0xFFE0A0, ai:0.50, dc:0xFFCC60, di:2.0, dp:[14,26,10],  gc:0x3A5020, sp:[0,0,9],  bn:14 , lore:'Juan Diego was beatified by Pope John Paul II in 1990 and canonized on July 31, 2002, before twelve million pilgrims in Mexico City -- one of the largest gatherings in human history. He is the first indigenous person from the Americas to be canonized.'},
 };
 
 // ======= NPC DATA (no smart quotes, no em-dashes) =======
@@ -384,7 +456,7 @@ const NPCS = {
     ]},
   ],
   bishop:[
-    {id:'doorman',pos:[0,0,11],col:0x3A2818,nm:"Doorman Rodrigo",lines:[
+    {id:'doorman',pos:[-4,0,9],col:0x3A2818,nm:"Doorman Rodrigo",lines:[
       {sp:'Doorman Rodrigo -- First Arrival',t:"Hold there. You cannot simply present yourself at the Bishop's door. This is the official residence of His Excellency the first Bishop of Mexico. State your name and your business clearly. You have a letter from a Franciscan friar? Then wait here. I will announce you."},
       {sp:'Rodrigo',t:"He will see you. The Bishop is a thorough man -- he hears everyone, decides carefully, and rarely makes hasty judgments. Whatever you tell him, tell it plainly. He respects plain speech. Do not embellish."},
       {sp:'Rodrigo -- On Your Second Visit',t:"You are back already. The Bishop told me: if the Indian returns, admit him at once and bring him directly to my study. I do not know what you said to him, but he has not stopped thinking about it. Go in. He is waiting."},
@@ -583,12 +655,14 @@ const NPCS = {
 const COLS = {
   village:[
     {id:'tamale',   pos:[3.5,0,4.5],  icon:'🌽',lbl:'Tamales for the Journey',  desc:'Food for the long walk to Tlatelolco -- fifteen miles each way',ec:0xD4A020},
-    {id:'manta',    pos:[-4,0,3.5],   icon:'🧣',lbl:'Tilma -- Ayate Cloak',      desc:'The coarse cactus-fiber cloak. One day it will bear the image of heaven.',ec:0xC4916A},
+    {id:'manta',    pos:[-4,0,3.5],   icon:'🧣',lbl:'Tilma -- Ayate Cloak',      desc:'The ayate -- a rough maguey-fiber cloak worn by poor indigenous men. One day it will bear the image of heaven.',ec:0xC4916A},
     {id:'rosary',   pos:[5.5,0,-4],   icon:'📿',lbl:'Rosary from Fray Tomas',    desc:'Prayer beads -- a gift from the Franciscan friar',ec:0x8B6914},
+    {id:'guadalupe_es',pos:[-6,0,-5], icon:'📖',lbl:'Guadalupe of Extremadura',  desc:'Zumarraga came from Extremadura, Spain -- home of the famous Black Madonna of Guadalupe. When Juan Diego repeated her name, the Bishop would have heard an echo of home.',ec:0x6B3A20},
   ],
   hill:[
     {id:'herbs',    pos:[-5.5,1,4],   icon:'🌿',lbl:'Sacred Mountain Herbs',     desc:'Plants blooming in the cold dawn air of Tepeyac Hill',ec:0x2E7A2E},
     {id:'birdsong', pos:[6,2,-5],     icon:'🎵',lbl:'Miraculous Birdsong',        desc:'A chorus sweeter than any instrument -- the sign that called Juan Diego',ec:0x4A7FC1},
+    {id:'starmantle',pos:[2,1.5,-9],  icon:'⭐',lbl:'The Stars of Her Mantle',    desc:'Astronomer Juan Hernandez Illescas (1983) mapped the 46 stars on the tilma: they match the winter sky over Mexico City at 10:26 AM on December 12, 1531 -- as seen from above, as if from heaven.',ec:0x0A0A3A},
   ],
   miracle:[
     {id:'rose1',  pos:[-5,1,-3.5],  icon:'🌹',lbl:'Rose 1 of 12', desc:'A Castilian rose -- impossibly blooming in Mexican December',ec:0xFF3366},
@@ -599,10 +673,10 @@ const COLS = {
     {id:'rose6',  pos:[3,1,-7],     icon:'🌹',lbl:'Rose 6 of 12', desc:'Half gathered -- six more remain',ec:0xFF3366},
     {id:'rose7',  pos:[-9,1,-2.5],  icon:'🌹',lbl:'Rose 7 of 12', desc:'Their perfume fills the cold morning air',ec:0xFF3366},
     {id:'rose8',  pos:[9,1,-2],     icon:'🌹',lbl:'Rose 8 of 12', desc:'Eight roses gathered in the tilma',ec:0xFF3366},
-    {id:'rose9',  pos:[0,1,-13],    icon:'🌹',lbl:'Rose 9 of 12', desc:"Near Our Lady's summit -- blessed",ec:0xFF3366},
+    {id:'rose9',  pos:[3,1,-12],    icon:'🌹',lbl:'Rose 9 of 12', desc:"Near Our Lady's summit -- blessed",ec:0xFF3366},
     {id:'rose10', pos:[-5.5,1,4],   icon:'🌹',lbl:'Rose 10 of 12',desc:'Two more to complete the twelve',ec:0xFF3366},
     {id:'rose11', pos:[5.5,1,4.5],  icon:'🌹',lbl:'Rose 11 of 12',desc:'The sacred number is nearly complete',ec:0xFF3366},
-    {id:'rose12', pos:[0,2,-15.5],  icon:'🌹',lbl:'Rose 12 of 12',desc:'TWELVE ROSES! The miraculous sign is complete!',ec:0xFF5588},
+    {id:'rose12', pos:[2,2,-14.5],  icon:'🌹',lbl:'Rose 12 of 12',desc:'TWELVE ROSES! The miraculous sign is complete!',ec:0xFF5588},
     {id:'ayate',  pos:[-4.5,0,7],   icon:'🌵',lbl:'Cactus Cloth -- Ayate',desc:'The humble cloth of Juan Diego -- chosen by heaven for a masterpiece',ec:0x8B6040},
   ],
   church:[
@@ -612,28 +686,29 @@ const COLS = {
   philippines:[
     {id:'sampaguita',  pos:[-6,0,4],    icon:'🌸',lbl:'Sampaguita Garland',       desc:"The sacred white flower of the Philippines for Our Lady's altar",ec:0xFFEECC},
     {id:'bamboo',      pos:[7,0,4.5],   icon:'🎋',lbl:'Bamboo for the Chapel',    desc:'Local bamboo to frame the first Philippine Guadalupe chapel',ec:0x4A8A4A},
-    {id:'novenaTxt',   pos:[0,0,9],     icon:'📿',lbl:'Tagalog Novena Text',       desc:'Nine-day prayers written in Tagalog for the Filipino faithful',ec:0x8B6914},
+    {id:'novenaTxt',   pos:[4,0,8],     icon:'📿',lbl:'Tagalog Novena Text',       desc:'Nine-day prayers written in Tagalog for the Filipino faithful',ec:0x8B6914},
     {id:'procCandles', pos:[-7.5,0,-3], icon:'🕯',lbl:'River Procession Candles', desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
     {id:'tilmaCopy',   pos:[7.5,0,-5],  icon:'🖼',lbl:'Blessed Tilma Copy',       desc:'A copy of the miraculous image -- to be enshrined in Manila',ec:0xD4A017},
   ],
   bishop:[
     {id:'epistle',    pos:[5,0,6],    icon:'📜',lbl:'Franciscan Letter of Introduction', desc:'The letter from Fray Tomas vouching for Juan Diego -- it opened the Bishop\'s door',ec:0xC8A040},
     {id:'gospel_bk',  pos:[-5,0,5],   icon:'📖',lbl:'Gospel Book from the Bishop',      desc:'A small Gospel book given to Juan Diego by Bishop Zumarraga -- to keep him strong on the return journey',ec:0x2A4A8A},
-    {id:'ep_seal',    pos:[0,0,8],    icon:'🪙',lbl:'Episcopal Seal of New Spain',       desc:'The wax seal of Bishop Juan de Zumarraga -- pressed onto every document authorizing the new Church in Mexico',ec:0xD4A017},
+    {id:'ep_seal',    pos:[3,0,7],    icon:'🪙',lbl:'Episcopal Seal of New Spain',       desc:'The wax seal of Bishop Juan de Zumarraga -- pressed onto every document authorizing the new Church in Mexico',ec:0xD4A017},
+    {id:'zumarg_letter',pos:[-5,0,-6], icon:'✉️',lbl:'Zumarraga\'s Letter to Spain',  desc:'Zumarraga wrote to King Charles I of Spain describing the apparition and the miracle of the tilma. He called it proof that God had not abandoned the New World.',ec:0xB8A080},
   ],
   nican:[
     {id:'nican_ms',      pos:[4,0,5],    icon:'📜',lbl:'Nican Mopohua Manuscript',    desc:'The original Nahuatl account by Antonio Valeriano, c.1545 -- the oldest written record of the apparitions',ec:0xC8A040},
     {id:'quill',         pos:[-5,0,4],   icon:'🪶',lbl:"Valeriano's Writing Quill",   desc:'The quill used to record the sacred words in classical Nahuatl -- the most important document in Mexican history',ec:0xE8E8D0},
     {id:'nahuatl_book',  pos:[5,0,-5],   icon:'📖',lbl:'Nahuatl Grammar Primer',      desc:'The grammar book Valeriano used at the Franciscan college at Tlatelolco where Juan Diego also heard Mass',ec:0x8B6040},
     {id:'ink_pot',       pos:[-4,0,-5],  icon:'🖋',lbl:'Ink Pot from Tlatelolco',     desc:'Iron gall ink -- the same used to copy the account that preserves the apparition for all time',ec:0x3A3A2A},
-    {id:'beeswax_nican', pos:[0,0,8],    icon:'🕯',lbl:'Chapel Beeswax Candle',       desc:'Burned at the shrine while Valeriano wrote -- the Nahuatl word for candle is the same as the word for prayer',ec:0xFFE080},
+    {id:'beeswax_nican', pos:[3,0,7],    icon:'🕯',lbl:'Chapel Beeswax Candle',       desc:'Burned at the shrine while Valeriano wrote -- the Nahuatl word for candle is the same as the word for prayer',ec:0xFFE080},
   ],
   tilma_study:[
     {id:'infrared_photo',pos:[4,0,5],    icon:'📷',lbl:'Infrared Photograph, 1979',   desc:"Dr. Callahan's infrared photograph -- no sizing, no brushstrokes, no underdrawing. Impossible for any human painter of any era.",ec:0x2A4A6A},
     {id:'fiber_sample',  pos:[-5,0,4],   icon:'🧵',lbl:'Ayate Fiber Sample',           desc:'A single thread of the cactus-fiber cloth -- analysis shows it should have rotted 450 years ago. It did not.',ec:0xD4B060},
     {id:'eye_magnified', pos:[5,0,-5],   icon:'👁',lbl:'Magnified Eye Study, 1981',    desc:"Dr. Tonsmann's 2500x enlargement showing 13 human figures reflected in the Virgin's eyes -- with the Purkinje-Sanson triple reflection of living corneas.",ec:0x6080A0},
     {id:'star_chart',    pos:[-4,0,-5],  icon:'⭐',lbl:'December 1531 Star Chart',     desc:"The constellations on the tilma's mantle match exactly the sky over Mexico at dawn on December 12, 1531 -- viewed from miles above the earth.",ec:0x2A2A5A},
-    {id:'pigment_vial',  pos:[0,0,8],    icon:'🎨',lbl:'Unknown Pigment Sample',       desc:'Nobel laureate Richard Kuhn, 1936: the pigments correspond to no known mineral, vegetable, or animal dye of any period.',ec:0x9A6080},
+    {id:'pigment_vial',  pos:[3,0,7],    icon:'🎨',lbl:'Unknown Pigment Sample',       desc:'Nobel laureate Richard Kuhn, 1936: the pigments correspond to no known mineral, vegetable, or animal dye of any period.',ec:0x9A6080},
   ],
   conversions:[
     {id:'baptism_record',pos:[5,0,6],    icon:'📋',lbl:'Baptism Record -- 14,000',    desc:"Fray Toribio's record of a single day on which 14,000 people received baptism. He lost count on many such days.",ec:0x4A7080},
@@ -647,7 +722,7 @@ const COLS = {
     {id:'broom_hermit',  pos:[-5,0,4],   icon:'🧹',lbl:"The Shrine Keeper's Broom",   desc:'Juan Diego swept the chapel floor every morning for 17 years. The last act of his life, witnesses say, was sweeping.',ec:0x7A5030},
     {id:'old_tilma2',    pos:[5,0,-5],   icon:'🌵',lbl:"Juan Diego's Ordinary Cloak", desc:"His everyday cloak -- he pointed to the spot where Our Lady arranged the roses with her own hands. Still tender about it, seventeen years later.",ec:0xC4916A},
     {id:'beatif_decree', pos:[-4,0,-5],  icon:'📜',lbl:'Beatification Decree, 1990',  desc:'Pope John Paul II beatified Juan Diego before the largest crowd ever assembled for a beatification -- at Tepeyac itself.',ec:0xD4A017},
-    {id:'canoniz_image', pos:[0,0,9],    icon:'👑',lbl:'Canonization Image, 2002',    desc:'Canonized July 31, 2002. Twelve million pilgrims attended. The Pope said: the whole world has been blessed through him.',ec:0xFFD700},
+    {id:'canoniz_image', pos:[4,0,8],    icon:'👑',lbl:'Canonization Image, 2002',    desc:'Canonized July 31, 2002. Twelve million pilgrims attended. The Pope said: the whole world has been blessed through him.',ec:0xFFD700},
   ],};
 const ROSES = ['rose1','rose2','rose3','rose4','rose5','rose6','rose7','rose8','rose9','rose10','rose11','rose12'];
 
@@ -664,8 +739,10 @@ const QS = [
   {s:'village',     f:'qv6', d:'Collect the rosary from Fray Tomas',           t:'item', id:'rosary'},
   {s:'village',     f:'qv7', d:'Speak with the merchant at the market',         t:'npc',  id:'merchant'},
   {s:'village',     f:'qv8', d:'Speak with Xochitl the village woman',          t:'npc',  id:'woman'},
+  {s:'village',     f:'qv9', d:'Read about Our Lady of Guadalupe in Extremadura', t:'item', id:'guadalupe_es'},
   {s:'hill',        f:'qh1', d:'Collect sacred herbs on the path',          t:'item', id:'herbs'},
   {s:'hill',        f:'qh2', d:'Hear the miraculous birdsong',              t:'item', id:'birdsong'},
+  {s:'hill',        f:'qh8', d:"Study the star-map on Our Lady's mantle",  t:'item', id:'starmantle'},
   {s:'hill',        f:'qh3', d:'Receive the First Apparition of Our Lady',  t:'npc',  id:'ourLady1'},
   {s:'bishop',      f:'qb1', d:"Speak with the Bishop's doorman",           t:'npc',  id:'doorman'},
   {s:'bishop',      f:'qb2', d:"Deliver Our Lady's message to the Bishop",  t:'npc',  id:'bishop'},
@@ -684,6 +761,7 @@ const QS = [
   {s:'bishop',      f:'qb6', d:'Collect the Franciscan letter of introduction', t:'item', id:'epistle'},
   {s:'bishop',      f:'qb7', d:'Collect the Gospel Book from Bishop Zumarraga', t:'item', id:'gospel_bk'},
   {s:'bishop',      f:'qb8', d:'Collect the episcopal seal of New Spain',     t:'item', id:'ep_seal'},
+  {s:'bishop',      f:'qb9', d:"Find Zumarraga's letter to King Charles of Spain", t:'item', id:'zumarg_letter'},
   {s:'church',      f:'qc1', d:"Hear Bishop Zumarraga's witness",           t:'npc',  id:'bishopChurch'},
   {s:'church',      f:'qc2', d:'Light the first candle at the chapel',      t:'item', id:'candle1'},
   {s:'church',      f:'qc3', d:'Place flowers at the tilma shrine',         t:'item', id:'flower1'},
@@ -754,6 +832,7 @@ function mStd(col,r,m,em,ei){
 
 // ======= SCENE BUILD =======
 function buildScene(sn){
+  if(!SC[sn]){ console.warn('Unknown scene:',sn); return; }
   // Arrays already reset by chgScene; only reset when called directly (restartGame)
   if(!G.transitioning){while(scene.children.length) scene.remove(scene.children[0]);G.npcMeshes=[];G.colMeshes=[];G.glows=[];G.parts=null;G.skyMat=null;}
   const C=SC[sn];
@@ -775,11 +854,11 @@ function buildScene(sn){
   const sun=new THREE.DirectionalLight(C.dc,C.di);
   sun.position.set(C.dp[0],C.dp[1],C.dp[2]);
   sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048);
-  sun.shadow.camera.near=0.5; sun.shadow.camera.far=110;
-  sun.shadow.camera.left=-32; sun.shadow.camera.right=32;
-  sun.shadow.camera.top=32; sun.shadow.camera.bottom=-32;
-  sun.shadow.bias=-0.0003; sun.shadow.normalBias=0.02;
+  sun.shadow.mapSize.set(4096,4096);
+  sun.shadow.camera.near=0.3; sun.shadow.camera.far=130;
+  sun.shadow.camera.left=-40; sun.shadow.camera.right=40;
+  sun.shadow.camera.top=40; sun.shadow.camera.bottom=-40;
+  sun.shadow.bias=-0.0002; sun.shadow.normalBias=0.015;
   scene.add(sun);
 
   buildGround(sn,C);
@@ -808,25 +887,38 @@ function buildScene(sn){
 
   buildParts(sn);
   G.cam.yaw=0;
-  camera.position.set(G.pl.pos.x,G.pl.pos.y+G.cam.h,G.pl.pos.z+G.cam.dist);
-  camera.lookAt(G.pl.pos.x,G.pl.pos.y+2,G.pl.pos.z);
+  // Set initial camera positioned properly with terrain
+  const initY=getTerrainY(C.sp[0],C.sp[2],sn);
+  G.pl.pos.y=initY;
+  camera.position.set(G.pl.pos.x,initY+G.cam.h,G.pl.pos.z+G.cam.dist);
+  camera.lookAt(G.pl.pos.x,initY+2,G.pl.pos.z);
 
   document.getElementById('chname').textContent=C.name;
   document.getElementById('chsub').textContent=C.sub;
   updTasks(); updInv(); updPips();
+  // Hide lore badge on new scene until player acts
+  const lb=document.getElementById('lorebadge');
+  if(lb) lb.classList.remove('on');
+  // Show chapter card (only if not the very first scene -- startGame already shows a notif)
+  if(G.flags.size > 0) showChapterCard(sn);
 }
 
 // ======= GROUND =======
+function getTerrainY(x,z,sn){
+  const hilly=(sn==='hill'||sn==='miracle'),flat=(sn==='bishop'||sn==='philippines');
+  let h=Math.sin(x*0.13)*0.65+Math.cos(z*0.11)*0.55+Math.sin(x*0.32+z*0.26)*0.28+Math.sin(x*0.58+z*0.48)*0.13;
+  if(hilly){const d=Math.hypot(x,z+9);h+=Math.max(0,(22-d)*0.38);}
+  if(flat) h*=0.3;
+  return h;
+}
+
 function buildGround(sn,C){
   const geo=new THREE.PlaneGeometry(150,150,90,90);
   const pa=geo.attributes.position;
-  const hilly=(sn==='hill'||sn==='miracle'), flat=(sn==='bishop'||sn==='philippines');
+  const flat=(sn==='bishop'||sn==='philippines');
   for(let i=0;i<pa.count;i++){
     const x=pa.getX(i),z=pa.getZ(i);
-    let h=Math.sin(x*0.13)*0.65+Math.cos(z*0.11)*0.55+Math.sin(x*0.32+z*0.26)*0.28+Math.sin(x*0.58+z*0.48)*0.13;
-    if(hilly){const d=Math.hypot(x,z+9);h+=Math.max(0,(22-d)*0.38);}
-    if(flat) h*=0.3;
-    pa.setZ(i,h);
+    pa.setZ(i,getTerrainY(x,z,sn));
   }
   geo.computeVertexNormals();
   const mesh=new THREE.Mesh(geo,mStd(C.gc,0.96,0));
@@ -834,18 +926,27 @@ function buildGround(sn,C){
   if(!flat){
     const dummy=new THREE.Object3D(), inst=new THREE.InstancedMesh(new THREE.ConeGeometry(0.06,0.4,4),mStd(sn==='philippines'?0x2A7020:0x2A5A10,0.92,0),500);
     inst.castShadow=true;
-    for(let i=0;i<500;i++){dummy.position.set((Math.random()-0.5)*80,0.18,(Math.random()-0.5)*80);dummy.rotation.y=Math.random()*Math.PI*2;dummy.scale.setScalar(0.55+Math.random()*0.9);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix);}
+    for(let i=0;i<500;i++){
+      const gx=(Math.random()-0.5)*80,gz=(Math.random()-0.5)*80;
+      const gy=getTerrainY(gx,gz,sn);
+      dummy.position.set(gx,gy+0.1,gz);
+      dummy.rotation.y=Math.random()*Math.PI*2;
+      dummy.scale.setScalar(0.55+Math.random()*0.9);
+      dummy.updateMatrix();
+      inst.setMatrixAt(i,dummy.matrix);
+    }
     inst.instanceMatrix.needsUpdate=true; scene.add(inst);
   }
 }
 
 // ======= ENVIRONMENT =======
 function buildEnv(sn){
+  try{
   if(sn==='village'){
     [[-13,0,-8],[-15,0,5],[13,0,-7],[15,0,4],[-5,0,-15],[5,0,-14],[0,0,-16],[-17,0,-2],[16,0,-2]].forEach(p=>bAdobe(p[0],p[1],p[2]));
-    for(let i=0;i<5;i++) bStall(-8+i*4,0,9);
+    for(let i=0;i<5;i++) bStall(-10+i*5,0,12);
     for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2,r=19+Math.random()*4;bTree(Math.cos(a)*r,0,Math.sin(a)*r,0.7+Math.random()*0.6);}
-    bCross(11,0,-5); bWell(0,0,8);
+    bCross(11,0,-5); bWell(6,0,8);
     [[-7,0,7],[7,0,7],[-7,0,-7],[7,0,-7]].forEach(p=>{
       bTorch(p[0],p[1],p[2]);
       const tl=new THREE.PointLight(0xFF7700,1.5,9);tl.position.set(p[0],2.3,p[2]);scene.add(tl);
@@ -853,7 +954,14 @@ function buildEnv(sn){
     });
   }
   if(sn==='hill'){
-    for(let i=0;i<30;i++){const a=Math.random()*Math.PI*2,r=5+Math.random()*15;bRock(Math.cos(a)*r,0,Math.sin(a)*r-7);}
+    // Place rocks AWAY from center path (path is x ~0, z 8 to -22)
+    for(let i=0;i<30;i++){
+      let rx,rz,tries=0;
+      do{ const a=Math.random()*Math.PI*2,r=6+Math.random()*14;
+          rx=Math.cos(a)*r; rz=Math.sin(a)*r-7; tries++;
+      } while(Math.abs(rx)<3.5 && tries<12);
+      bRock(rx,0,rz);
+    }
     for(let i=0;i<18;i++) bPathStone(Math.sin(i*0.45)*2.5,0.05,6-i*1.5);
     bCross(0,0,-22);
     const dl=new THREE.PointLight(0xFF8844,2.0,90);dl.position.set(-28,12,-35);scene.add(dl);
@@ -864,6 +972,9 @@ function buildEnv(sn){
     bPalace();
     for(let i=-3;i<=3;i+=1.5){if(Math.abs(i)>0.5) bColumn(i*4,0,-13);}
     bThrone(0,0,-11); bDoorFrame(0,0,13);
+    // Carpet path from entrance to bishop
+    const carpetGeo=new THREE.PlaneGeometry(2,24);const carpetMat=new THREE.MeshStandardMaterial({color:0x800000,roughness:0.85});
+    const carpet=new THREE.Mesh(carpetGeo,carpetMat);carpet.rotation.x=-Math.PI/2;carpet.position.set(0,0.03,-1);scene.add(carpet);
     const cl1=new THREE.PointLight(0xFFCC88,2.2,30);cl1.position.set(0,9,-5);scene.add(cl1);G.glows.push({l:cl1,b:2.2,f:0.4});
     const cl2=new THREE.PointLight(0xFFCC88,1.5,30);cl2.position.set(0,8,3);scene.add(cl2);G.glows.push({l:cl2,b:1.5,f:0.55});
   }
@@ -946,9 +1057,21 @@ function buildEnv(sn){
     const wl=new THREE.PointLight(0x4488FF,1.5,22);wl.position.set(-8,5,0);scene.add(wl);G.glows.push({l:wl,b:1.5,f:0.6,fl:true,fy:5});
     const yl=new THREE.PointLight(0xFFCC00,1.3,22);yl.position.set(8,5,0);scene.add(yl);G.glows.push({l:yl,b:1.3,f:0.9,fl:true,fy:5});
   }
+  }catch(e){console.warn('buildEnv error:',e);}
 }
 
 // ======= NPC MESH =======
+function buildNPCRing(nd){
+  // Ground glow ring for nearby NPCs
+  const geo=new THREE.RingGeometry(0.55,0.85,32);
+  const mat=new THREE.MeshBasicMaterial({color:0xFFD700,side:THREE.DoubleSide,transparent:true,opacity:0.0,depthWrite:false});
+  const ring=new THREE.Mesh(geo,mat);
+  ring.rotation.x=-Math.PI/2;
+  ring.position.y=0.03;
+  ring.userData.isRing=true;
+  return ring;
+}
+
 function buildNPC(nd){
   const g=new THREE.Group();
   if(nd.isHoly){
@@ -988,6 +1111,13 @@ function buildNPC(nd){
   }
   const sh=new THREE.Mesh(new THREE.CircleGeometry(0.55,14),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.28}));
   sh.rotation.x=-Math.PI/2; sh.position.y=0.02; g.add(sh);
+  // Interaction ring - glows gold when player is nearby
+  const intRing=new THREE.Mesh(
+    new THREE.RingGeometry(0.6,0.9,32),
+    new THREE.MeshBasicMaterial({color:0xFFD700,side:THREE.DoubleSide,transparent:true,opacity:0.0,depthWrite:false})
+  );
+  intRing.rotation.x=-Math.PI/2; intRing.position.y=0.04;
+  g.add(intRing); g.userData.intRing=intRing;
   g.userData.npcId=nd.id;
   return g;
 }
@@ -996,11 +1126,23 @@ function buildNPC(nd){
 function buildCol(cd){
   const g=new THREE.Group();
   const c=cd.ec||0xD4A017;
-  const mat=mStd(c,0.45,0.1,c,0.55);mat.transparent=true;mat.opacity=0.92;
-  g.add(new THREE.Mesh(new THREE.SphereGeometry(0.26,10,10),mat));
-  const pl=new THREE.PointLight(c,1.3,4.5);g.add(pl);
-  G.glows.push({l:pl,b:1.3,f:2.2+Math.random()*1.8});
-  g.userData.cid=cd.id;
+  // Outer glow halo
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(0.46,10,10),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:0.15,side:THREE.BackSide}));
+  g.add(halo);
+  // Main collectible orb
+  const mat=new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:0.55,metalness:0.3,roughness:0.3});
+  const orb=new THREE.Mesh(new THREE.SphereGeometry(0.3,16,16),mat);
+  orb.castShadow=true;
+  g.add(orb);
+  // Orbit ring
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.025,8,28),new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFFAA00,emissiveIntensity:0.9,metalness:0.9,roughness:0.05}));
+  ring.rotation.x=Math.PI/4;
+  g.add(ring);
+  // Light
+  const gl=new THREE.PointLight(c,1.6,4.5);
+  g.add(gl);
+  G.glows.push({l:gl,b:1.6,f:2.2+Math.random()*1.8});
+  g.userData.colId=cd.id;
   return g;
 }
 
@@ -1131,9 +1273,11 @@ function buildParts(sn){
 // ======= AUDIO =======
 let actx=null,mgain=null,mOn=true,drone=null,chantTO=null;
 function initAudio(){
-  actx=new(window.AudioContext||window.webkitAudioContext)();
-  mgain=actx.createGain();mgain.gain.value=0.13;mgain.connect(actx.destination);
-  playChant();
+  try{
+    actx=new(window.AudioContext||window.webkitAudioContext)();
+    mgain=actx.createGain();mgain.gain.value=0.13;mgain.connect(actx.destination);
+    playChant();
+  }catch(e){ console.warn('Audio init failed:',e); }
 }
 function playChant(){
   if(!actx||!mOn) return;
@@ -1254,16 +1398,40 @@ function postDlg(npc){
 function doInteract(){
   if(G.dlg.active){advDlg();return;}
   let bN=null,bD=Infinity;
-  for(const nm of G.npcMeshes){const d=G.pl.pos.distanceTo(nm.mesh.position);if(d<3.8&&d<bD){bD=d;bN=nm.data;}}
+  for(const nm of G.npcMeshes){const d=G.pl.pos.distanceTo(nm.mesh.position);if(d<4.2&&d<bD){bD=d;bN=nm.data;}}
   if(bN){openDlg(bN);return;}
   let bC=null;bD=Infinity;
   for(const cm of G.colMeshes){if(G.flags.has(cm.data.id))continue;const d=G.pl.pos.distanceTo(cm.mesh.position);if(d<3.0&&d<bD){bD=d;bC=cm;}}
   if(bC) pickUp(bC);
 }
+function spawnPickupBurst(pos){
+  for(let i=0;i<10;i++){
+    try{
+      const geo=new THREE.SphereGeometry(0.055,4,4);
+      const mat=new THREE.MeshBasicMaterial({color:[0xFFD700,0xFFAA00,0xFFFFAA][i%3],transparent:true,opacity:1.0});
+      const spark=new THREE.Mesh(geo,mat);
+      spark.position.copy(pos); spark.position.y+=0.4;
+      const ang=Math.random()*Math.PI*2;
+      const sp2=0.03+Math.random()*0.05;
+      const vx=Math.cos(ang)*sp2, vz=Math.sin(ang)*sp2, vy=0.05+Math.random()*0.05;
+      scene.add(spark);
+      let life=0;
+      const st=setInterval(()=>{
+        life++;
+        spark.position.x+=vx; spark.position.y+=vy-life*0.003; spark.position.z+=vz;
+        mat.opacity=Math.max(0,1-life/28);
+        if(life>=28){clearInterval(st);try{scene.remove(spark);geo.dispose();mat.dispose();}catch(e){}}
+      },16);
+    }catch(e){}
+  }
+}
+
 function pickUp(cm){
   if(G.flags.has(cm.data.id)) return;
   G.flags.add(cm.data.id);G.inv[cm.data.id]=(G.inv[cm.data.id]||0)+1;
+  try{spawnPickupBurst(cm.mesh.position);}catch(e){}
   scene.remove(cm.mesh);
+  try{if(cm.mesh.geometry)cm.mesh.geometry.dispose();}catch(e){}
   const ix=G.colMeshes.indexOf(cm);if(ix>=0)G.colMeshes.splice(ix,1);
   showNotif(cm.data.icon,cm.data.lbl,cm.data.desc);
   playSfx();grantItemFlag(cm.data.id);updInv();
@@ -1297,7 +1465,7 @@ function grantItemFlag(itemId){
 function chkSceneDone(){
   const sn=G.scn;
   if(sn==='village'&&!G.flags.has('v_done')){
-    if(['qv1','qv2','qv3','qv4','qv5','qv6','qv7','qv8'].every(f=>G.flags.has(f))){
+    if(['qv1','qv2','qv3','qv4','qv5','qv6','qv7','qv8','qv9'].every(f=>G.flags.has(f))){
       G.flags.add('v_done');
       showNotif('🌄','Village Complete!','The sky breaks pink over Tepeyac. Something calls you up the hill...');
       setTimeout(()=>chgScene('hill'),5500);
@@ -1313,7 +1481,7 @@ function chkSceneDone(){
   if(sn==='tilma_study'&&!G.flags.has('tilma_done')){
     if(['qt1','qt2','qt3','qt4','qt5','qt6','qt7','qt8','qt9','qt10','qt11'].every(f=>G.flags.has(f))){
       G.flags.add('tilma_done');
-      showNotif('👁','The Image Defies Explanation!','Five centuries of science -- no answer. Now return to Tepeyac Hill. Our Lady is waiting to give you the roses for the Bishop.');
+      showNotif('✨','Return to Tepeyac Hill -- Our Lady Awaits!','Five centuries of science -- no answer. Now return to Tepeyac Hill. Our Lady is waiting to give you the roses for the Bishop.');
       setTimeout(()=>chgScene('hill'),5500);
     }
   }
@@ -1371,10 +1539,33 @@ function chgScene(ns){
     G.npcMeshes=[];G.colMeshes=[];G.glows=[];G.parts=null;G.skyMat=null;
     G.npcMem={};
     buildScene(ns);
-    setTimeout(()=>{fo.style.opacity='0';fo.style.pointerEvents='none';showNotif('✟',SC[ns].name,SC[ns].sub);G.transitioning=false;},500);
+    setTimeout(()=>{fo.style.opacity='0';fo.style.pointerEvents='none';G.transitioning=false;showNotif('✟',SC[ns].name,SC[ns].sub);},500);
   },700);
 }
 function beginPhil(){document.getElementById('phsc').style.display='none';chgScene('philippines');}
+function showChapterCard(sn, cb){
+  const C=SC[sn]; if(!C) { if(cb) cb(); return; }
+  const card=document.getElementById('chcard');
+  const icon=document.getElementById('chcardIcon');
+  const ttl=document.getElementById('chcardTitle');
+  const sub=document.getElementById('chcardSub');
+  const lore=document.getElementById('chcardLore');
+  if(!card){ if(cb) cb(); return; }
+  // Icons per scene
+  const icons={village:'🌄',hill:'✨',bishop:'✟',nican:'📜',tilma_study:'🔬',miracle:'🌹',conversions:'🕊️',church:'⛪',hermit:'🙏',philippines:'🌺'};
+  icon.textContent = icons[sn]||'✟';
+  ttl.textContent = C.name;
+  sub.textContent = C.sub;
+  lore.textContent = C.lore||'';
+  card.classList.add('on');
+  card.style.opacity='0'; card.style.transition='opacity 0.5s';
+  setTimeout(()=>{ card.style.opacity='1'; }, 30);
+  setTimeout(()=>{
+    card.style.opacity='0';
+    setTimeout(()=>{ card.classList.remove('on'); if(cb) cb(); }, 500);
+  }, 3200);
+}
+
 function restartGame(){
   document.getElementById('finale').style.display='none';
   G.flags=new Set();G.inv={};G.npcMem={};
@@ -1390,6 +1581,21 @@ function updTasks(){
   const done_count=sceneQs.filter(q=>G.flags.has(q.f)).length;
   const h3=document.querySelector('#tasks h3');
   if(h3) h3.textContent='TASKS ('+done_count+'/'+sceneQs.length+')';
+  // Update global progress bar
+  const allDone=[...G.flags].filter(f=>QS.some(q=>q.f===f)).length;
+  const fill=document.getElementById('progfill');
+  const proglbl=document.getElementById('proglbl');
+  if(fill) fill.style.width=Math.round(allDone/QS.length*100)+'%';
+  if(proglbl) proglbl.textContent=allDone+' / '+QS.length+' TASKS';
+  // Show lore badge when scene has progress
+  if(done_count>0){
+    const C=SC[G.scn];
+    if(C&&C.lore){
+      const lb=document.getElementById('lorebadge');
+      const lt=document.getElementById('loretxt');
+      if(lb&&lt){lt.textContent=C.lore;lb.classList.add('on');}
+    }
+  }
   for(const q of sceneQs){
     const done=G.flags.has(q.f);
     const el=document.createElement('div');el.className='ti '+(done?'dn':'act');
@@ -1425,7 +1631,7 @@ function showNotif(icon,title,body){
 }
 
 // ======= MAIN LOOP =======
-const camDes=new THREE.Vector3(),camLk=new THREE.Vector3();
+
 let lastT=0;
 function loop(now){
   requestAnimationFrame(loop);
@@ -1443,18 +1649,17 @@ function loop(now){
     const moving=mx!==0||mz!==0;
     G.pl.moving=moving;
     if(moving){
-      const a=Math.atan2(mx,mz),s=Math.round(a/(Math.PI/4))*(Math.PI/4),spd=5.5,bn=SC[G.scn].bn;
-      G.pl.pos.x=Math.max(-bn,Math.min(bn,G.pl.pos.x+Math.sin(s)*spd*dt));
-      G.pl.pos.z=Math.max(-bn,Math.min(bn,G.pl.pos.z+Math.cos(s)*spd*dt));
-      G.pl.tAngle=-s;G.pl.bobT+=dt*8;
+      const len=Math.sqrt(mx*mx+mz*mz);if(len>0){mx/=len;mz/=len;}
+      const a=Math.atan2(mx,mz),spd=6.2,bn=SC[G.scn].bn;
+      G.pl.pos.x=Math.max(-bn,Math.min(bn,G.pl.pos.x+mx*spd*dt));
+      G.pl.pos.z=Math.max(-bn,Math.min(bn,G.pl.pos.z+mz*spd*dt));
+      G.pl.tAngle=-a;G.pl.bobT+=dt*8;
+      // Leg animation while walking
       if(G.pl.mesh){
-        G.pl.mesh.position.y=Math.abs(Math.sin(G.pl.bobT))*0.06;
         const ll=G.pl.mesh.userData.ll,lr=G.pl.mesh.userData.lr;
         if(ll)ll.rotation.x=Math.sin(G.pl.bobT)*0.28;
         if(lr)lr.rotation.x=-Math.sin(G.pl.bobT)*0.28;
       }
-    } else {
-      if(G.pl.mesh) G.pl.mesh.position.y*=0.88;
     }
     if(G.pl.mesh){
       const ad=((G.pl.tAngle-G.pl.angle+Math.PI)%(Math.PI*2))-Math.PI;
@@ -1462,21 +1667,42 @@ function loop(now){
       G.pl.mesh.position.x=G.pl.pos.x;G.pl.mesh.position.z=G.pl.pos.z;G.pl.mesh.rotation.y=G.pl.angle;
     }
     for(const cm of [...G.colMeshes]){
-      if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<1.6) pickUp(cm);
+      if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<1.8) pickUp(cm);
     }
   }
 
-  if(G.pl.moving){const t=-G.pl.tAngle+Math.PI,yd=((t-G.cam.yaw+Math.PI)%(Math.PI*2))-Math.PI;G.cam.yaw+=yd*0.045;}
+  // Terrain Y-follow: smoothly move player up/down hills
+  const tY=getTerrainY(G.pl.pos.x,G.pl.pos.z,G.scn);
+  G.pl.pos.y+=(tY-G.pl.pos.y)*0.22;
+  if(G.pl.mesh) G.pl.mesh.position.y=G.pl.pos.y+(G.pl.moving?Math.abs(Math.sin(G.pl.bobT))*0.06:G.pl.mesh.position.y*0.12);
+  // Camera: always gently drift behind player direction
+  const camTarget=-G.pl.tAngle+Math.PI;
+  const yd=((camTarget-G.cam.yaw+Math.PI)%(Math.PI*2))-Math.PI;
+  G.cam.yaw+=yd*(G.pl.moving?0.045:0.008);
   camDes.set(G.pl.pos.x+Math.sin(G.cam.yaw)*G.cam.dist,G.pl.pos.y+G.cam.h,G.pl.pos.z+Math.cos(G.cam.yaw)*G.cam.dist);
   camera.position.lerp(camDes,0.07);camLk.set(G.pl.pos.x,G.pl.pos.y+2.0,G.pl.pos.z);camera.lookAt(camLk);
 
   for(const nm of G.npcMeshes){
-    nm.mesh.position.y=nm.data.pos[1]+Math.sin(G.animT*1.4+nm.mesh.position.x)*0.038;
+    const npcGroundY=getTerrainY(nm.data.pos[0],nm.data.pos[2],G.scn);
+    nm.mesh.position.y=npcGroundY+nm.data.pos[1]+Math.sin(G.animT*1.4+nm.mesh.position.x)*0.038;
+    // Interaction ring proximity fade
+    const ir=nm.mesh.userData.intRing;
+    if(ir){
+      const dx=nm.mesh.position.x-G.pl.pos.x, dz=nm.mesh.position.z-G.pl.pos.z;
+      const dist=Math.sqrt(dx*dx+dz*dz);
+      const tgt=dist<4.0?0.5:0.0;
+      ir.material.opacity+=(tgt-ir.material.opacity)*0.1;
+      ir.rotation.z+=0.018;
+    }
     if(nm.data.isHoly){nm.mesh.rotation.y=Math.sin(G.animT*0.38)*0.09;nm.mesh.children.forEach(c=>{if(c.userData&&c.userData.ray&&c.material)c.material.opacity=0.07+Math.sin(G.animT*2.0+c.position.x*3)*0.06;});}
     else if(!nm.data.isBishop){const dx=G.pl.pos.x-nm.mesh.position.x,dz=G.pl.pos.z-nm.mesh.position.z;nm.mesh.rotation.y=Math.atan2(dx,dz)+Math.PI;}
   }
   for(const cm of G.colMeshes){
-    if(!G.flags.has(cm.data.id)){cm.mesh.position.y=cm.by+0.42+Math.sin(G.animT*2.4+cm.mesh.position.x)*0.2;cm.mesh.rotation.y+=dt*1.6;}
+    if(!G.flags.has(cm.data.id)){
+      const colGroundY=getTerrainY(cm.mesh.position.x,cm.mesh.position.z,G.scn);
+      cm.mesh.position.y=colGroundY+0.55+Math.sin(G.animT*2.4+cm.mesh.position.x)*0.2;
+      cm.mesh.rotation.y+=dt*1.6;
+    }
   }
   for(const gl of G.glows){
     gl.l.intensity=gl.b*(1+Math.sin(G.animT*gl.f)*0.16);
@@ -1491,13 +1717,13 @@ function loop(now){
 
   const ph=document.getElementById('phint'),tb=document.getElementById('tbtn');
   let nearNPC=null,nearCol=null;
-  for(const nm of G.npcMeshes){if(G.pl.pos.distanceTo(nm.mesh.position)<3.8){nearNPC=nm;break;}}
+  for(const nm of G.npcMeshes){if(G.pl.pos.distanceTo(nm.mesh.position)<4.2){nearNPC=nm;break;}}
   if(!nearNPC){for(const cm of G.colMeshes){if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<3.0){nearCol=cm;break;}}}
   if(nearNPC){ph.textContent='TALK -- '+nearNPC.data.nm;ph.classList.add('on');tb.className='gn';}
   else if(nearCol){ph.textContent='PICK UP -- '+nearCol.data.lbl;ph.classList.add('on');tb.className='gi';}
   else{ph.classList.remove('on');tb.className='';}
 
-  renderer.render(scene,camera);
+  try{ renderer.render(scene,camera); }catch(e){ console.warn('render err',e); }
 }
 
 // ======= START =======
