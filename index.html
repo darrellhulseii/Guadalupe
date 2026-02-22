@@ -123,7 +123,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cr
 #finale p{font-family:'IM Fell English',serif;font-style:italic;color:var(--parchment);font-size:clamp(0.82rem,1.8vw,1rem);max-width:min(600px,88vw);text-align:center;line-height:1.75;}
 .gbtn{font-family:'Cinzel Decorative',serif;font-size:clamp(0.62rem,1.4vw,0.8rem);padding:clamp(12px,2vh,16px) clamp(30px,5vw,50px);border:2px solid var(--gold);background:rgba(212,160,23,0.1);color:var(--gold);cursor:pointer;clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);transition:all 0.35s;letter-spacing:2px;animation:bg 2.5s ease-in-out infinite;}
 .gbtn:hover{background:rgba(212,160,23,0.22);transform:scale(1.04);}
+
+@media(max-width:400px){#dlg{width:98vw!important;font-size:0.85rem}#tasks{width:140px;font-size:0.72rem}#jb{width:100px!important;height:100px!important}#notif{max-width:96vw;padding:12px 14px}}
+@media(max-height:600px){#jb{width:90px!important;height:90px!important}#dlg{bottom:110px!important}}
 </style>
+
 </head>
 <body>
 <canvas id="gc"></canvas>
@@ -299,6 +303,7 @@ let jOn=false, jTid=-1, jcx=0, jcy=0;
 let jb, jk;
 
 // ======= DEFERRED INIT -- runs after THREE.js is guaranteed loaded =======
+window.requestAnimationFrame=window.requestAnimationFrame||window.webkitRequestAnimationFrame||function(cb){return setTimeout(cb,16);};
 window.addEventListener('load', function(){
   if(typeof THREE === 'undefined'){
     document.body.innerHTML='<div style="position:fixed;inset:0;background:#0a0800;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#FFD700;font-family:serif;text-align:center;padding:40px"><h2 style="font-size:1.4rem">3D engine failed to load.</h2><p>Please check your internet connection and try again.</p><button onclick="location.reload()" style="margin-top:24px;padding:14px 32px;background:#8B6914;color:#fff;border:none;border-radius:4px;font-size:1rem;cursor:pointer">Reload</button></div>';
@@ -654,75 +659,75 @@ const NPCS = {
 // ======= COLLECTABLES =======
 const COLS = {
   village:[
-    {id:'tamale',   pos:[3.5,0,4.5],  icon:'🌽',lbl:'Tamales for the Journey',  desc:'Food for the long walk to Tlatelolco -- fifteen miles each way',ec:0xD4A020},
-    {id:'manta',    pos:[-4,0,3.5],   icon:'🧣',lbl:'Tilma -- Ayate Cloak',      desc:'The ayate -- a rough maguey-fiber cloak worn by poor indigenous men. One day it will bear the image of heaven.',ec:0xC4916A},
-    {id:'rosary',   pos:[5.5,0,-4],   icon:'📿',lbl:'Rosary from Fray Tomas',    desc:'Prayer beads -- a gift from the Franciscan friar',ec:0x8B6914},
-    {id:'guadalupe_es',pos:[-6,0,-5], icon:'📖',lbl:'Guadalupe of Extremadura',  desc:'Zumarraga came from Extremadura, Spain -- home of the famous Black Madonna of Guadalupe. When Juan Diego repeated her name, the Bishop would have heard an echo of home.',ec:0x6B3A20},
+    {id:'tamale',   pos:[-11,0,-3],  icon:'🌽',lbl:'Tamales for the Journey',  desc:'Food for the long walk to Tlatelolco -- fifteen miles each way',ec:0xD4A020},
+    {id:'manta',    pos:[11,0,-3],   icon:'🧣',lbl:'Tilma -- Ayate Cloak',      desc:'The ayate -- a rough maguey-fiber cloak worn by poor indigenous men. One day it will bear the image of heaven.',ec:0xC4916A},
+    {id:'rosary',   pos:[11,0,3],   icon:'📿',lbl:'Rosary from Fray Tomas',    desc:'Prayer beads -- a gift from the Franciscan friar',ec:0x8B6914},
+    {id:'guadalupe_es',pos:[-11,0,3], icon:'📖',lbl:'Guadalupe of Extremadura',  desc:'Zumarraga came from Extremadura, Spain -- home of the famous Black Madonna of Guadalupe. When Juan Diego repeated her name, the Bishop would have heard an echo of home.',ec:0x6B3A20},
   ],
   hill:[
-    {id:'herbs',    pos:[-5.5,1,4],   icon:'🌿',lbl:'Sacred Mountain Herbs',     desc:'Plants blooming in the cold dawn air of Tepeyac Hill',ec:0x2E7A2E},
-    {id:'birdsong', pos:[6,2,-5],     icon:'🎵',lbl:'Miraculous Birdsong',        desc:'A chorus sweeter than any instrument -- the sign that called Juan Diego',ec:0x4A7FC1},
-    {id:'starmantle',pos:[2,1.5,-9],  icon:'⭐',lbl:'The Stars of Her Mantle',    desc:'Astronomer Juan Hernandez Illescas (1983) mapped the 46 stars on the tilma: they match the winter sky over Mexico City at 10:26 AM on December 12, 1531 -- as seen from above, as if from heaven.',ec:0x0A0A3A},
+    {id:'herbs',    pos:[-10,0,0],   icon:'🌿',lbl:'Sacred Mountain Herbs',     desc:'Plants blooming in the cold dawn air of Tepeyac Hill',ec:0x2E7A2E},
+    {id:'birdsong', pos:[10,0,-3],     icon:'🎵',lbl:'Miraculous Birdsong',        desc:'A chorus sweeter than any instrument -- the sign that called Juan Diego',ec:0x4A7FC1},
+    {id:'starmantle',pos:[-8,0,-10],  icon:'⭐',lbl:'The Stars of Her Mantle',    desc:'Astronomer Juan Hernandez Illescas (1983) mapped the 46 stars on the tilma: they match the winter sky over Mexico City at 10:26 AM on December 12, 1531 -- as seen from above, as if from heaven.',ec:0x0A0A3A},
   ],
   miracle:[
-    {id:'rose1',  pos:[-5,1,-3.5],  icon:'🌹',lbl:'Rose 1 of 12', desc:'A Castilian rose -- impossibly blooming in Mexican December',ec:0xFF3366},
-    {id:'rose2',  pos:[4.5,1,-5.5], icon:'🌹',lbl:'Rose 2 of 12', desc:'Fresh and fragrant despite the frost',ec:0xFF3366},
-    {id:'rose3',  pos:[-7.5,1,-6],  icon:'🌹',lbl:'Rose 3 of 12', desc:"Heaven's gift on a frozen hillside",ec:0xFF3366},
-    {id:'rose4',  pos:[7,1,-4.5],   icon:'🌹',lbl:'Rose 4 of 12', desc:'Each rose a proof of Her love',ec:0xFF3366},
-    {id:'rose5',  pos:[-3.5,1,-8],  icon:'🌹',lbl:'Rose 5 of 12', desc:'Blooming on bare winter rock',ec:0xFF3366},
-    {id:'rose6',  pos:[3,1,-7],     icon:'🌹',lbl:'Rose 6 of 12', desc:'Half gathered -- six more remain',ec:0xFF3366},
-    {id:'rose7',  pos:[-9,1,-2.5],  icon:'🌹',lbl:'Rose 7 of 12', desc:'Their perfume fills the cold morning air',ec:0xFF3366},
-    {id:'rose8',  pos:[9,1,-2],     icon:'🌹',lbl:'Rose 8 of 12', desc:'Eight roses gathered in the tilma',ec:0xFF3366},
-    {id:'rose9',  pos:[3,1,-12],    icon:'🌹',lbl:'Rose 9 of 12', desc:"Near Our Lady's summit -- blessed",ec:0xFF3366},
-    {id:'rose10', pos:[-5.5,1,4],   icon:'🌹',lbl:'Rose 10 of 12',desc:'Two more to complete the twelve',ec:0xFF3366},
-    {id:'rose11', pos:[5.5,1,4.5],  icon:'🌹',lbl:'Rose 11 of 12',desc:'The sacred number is nearly complete',ec:0xFF3366},
-    {id:'rose12', pos:[2,2,-14.5],  icon:'🌹',lbl:'Rose 12 of 12',desc:'TWELVE ROSES! The miraculous sign is complete!',ec:0xFF5588},
-    {id:'ayate',  pos:[-4.5,0,7],   icon:'🌵',lbl:'Cactus Cloth -- Ayate',desc:'The humble cloth of Juan Diego -- chosen by heaven for a masterpiece',ec:0x8B6040},
+    {id:'rose1',  pos:[-10,0,-4],  icon:'🌹',lbl:'Rose 1 of 12', desc:'A Castilian rose -- impossibly blooming in Mexican December',ec:0xFF3366},
+    {id:'rose2',  pos:[10,0,-4], icon:'🌹',lbl:'Rose 2 of 12', desc:'Fresh and fragrant despite the frost',ec:0xFF3366},
+    {id:'rose3',  pos:[-8,0,-8],  icon:'🌹',lbl:'Rose 3 of 12', desc:"Heaven's gift on a frozen hillside",ec:0xFF3366},
+    {id:'rose4',  pos:[8,0,-8],   icon:'🌹',lbl:'Rose 4 of 12', desc:'Each rose a proof of Her love',ec:0xFF3366},
+    {id:'rose5',  pos:[-4,0,-11],  icon:'🌹',lbl:'Rose 5 of 12', desc:'Blooming on bare winter rock',ec:0xFF3366},
+    {id:'rose6',  pos:[4,0,-11],     icon:'🌹',lbl:'Rose 6 of 12', desc:'Half gathered -- six more remain',ec:0xFF3366},
+    {id:'rose7',  pos:[-12,0,-2],  icon:'🌹',lbl:'Rose 7 of 12', desc:'Their perfume fills the cold morning air',ec:0xFF3366},
+    {id:'rose8',  pos:[12,0,-2],     icon:'🌹',lbl:'Rose 8 of 12', desc:'Eight roses gathered in the tilma',ec:0xFF3366},
+    {id:'rose9',  pos:[-6,0,2],    icon:'🌹',lbl:'Rose 9 of 12', desc:"Near Our Lady's summit -- blessed",ec:0xFF3366},
+    {id:'rose10', pos:[6,0,2],   icon:'🌹',lbl:'Rose 10 of 12',desc:'Two more to complete the twelve',ec:0xFF3366},
+    {id:'rose11', pos:[0,0,-14],  icon:'🌹',lbl:'Rose 11 of 12',desc:'The sacred number is nearly complete',ec:0xFF3366},
+    {id:'rose12', pos:[0,0,4],  icon:'🌹',lbl:'Rose 12 of 12',desc:'TWELVE ROSES! The miraculous sign is complete!',ec:0xFF5588},
+    {id:'ayate',  pos:[-11,0,1],   icon:'🌵',lbl:'Cactus Cloth -- Ayate',desc:'The humble cloth of Juan Diego -- chosen by heaven for a masterpiece',ec:0x8B6040},
   ],
   church:[
-    {id:'candle1', pos:[-4.5,0,-6], icon:'🕯',lbl:'First Chapel Candle',  desc:'The first candle lit at the new chapel of Tepeyac -- 1533',ec:0xFFE080},
-    {id:'flower1', pos:[4.5,0,-6],  icon:'💐',lbl:'First Offering Flowers',desc:'Flowers placed at the foot of the miraculous tilma',ec:0xD4522A},
+    {id:'candle1', pos:[-3,0,-7], icon:'🕯',lbl:'First Chapel Candle',  desc:'The first candle lit at the new chapel of Tepeyac -- 1533',ec:0xFFE080},
+    {id:'flower1', pos:[3,0,-7],  icon:'💐',lbl:'First Offering Flowers',desc:'Flowers placed at the foot of the miraculous tilma',ec:0xD4522A},
   ],
   philippines:[
-    {id:'sampaguita',  pos:[-6,0,4],    icon:'🌸',lbl:'Sampaguita Garland',       desc:"The sacred white flower of the Philippines for Our Lady's altar",ec:0xFFEECC},
-    {id:'bamboo',      pos:[7,0,4.5],   icon:'🎋',lbl:'Bamboo for the Chapel',    desc:'Local bamboo to frame the first Philippine Guadalupe chapel',ec:0x4A8A4A},
-    {id:'novenaTxt',   pos:[4,0,8],     icon:'📿',lbl:'Tagalog Novena Text',       desc:'Nine-day prayers written in Tagalog for the Filipino faithful',ec:0x8B6914},
-    {id:'procCandles', pos:[-7.5,0,-3], icon:'🕯',lbl:'River Procession Candles', desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
-    {id:'tilmaCopy',   pos:[7.5,0,-5],  icon:'🖼',lbl:'Blessed Tilma Copy',       desc:'A copy of the miraculous image -- to be enshrined in Manila',ec:0xD4A017},
+    {id:'sampaguita',  pos:[11,0,2],    icon:'🌸',lbl:'Sampaguita Garland',       desc:"The sacred white flower of the Philippines for Our Lady's altar",ec:0xFFEECC},
+    {id:'bamboo',      pos:[-11,0,2],   icon:'🎋',lbl:'Bamboo for the Chapel',    desc:'Local bamboo to frame the first Philippine Guadalupe chapel',ec:0x4A8A4A},
+    {id:'novenaTxt',   pos:[11,0,-3],     icon:'📿',lbl:'Tagalog Novena Text',       desc:'Nine-day prayers written in Tagalog for the Filipino faithful',ec:0x8B6914},
+    {id:'procCandles', pos:[-11,0,-3], icon:'🕯',lbl:'River Procession Candles', desc:'Candles for the December 12 river procession on the Pasig',ec:0xFFE080},
+    {id:'tilmaCopy',   pos:[0,0,6],  icon:'🖼',lbl:'Blessed Tilma Copy',       desc:'A copy of the miraculous image -- to be enshrined in Manila',ec:0xD4A017},
   ],
   bishop:[
-    {id:'epistle',    pos:[5,0,6],    icon:'📜',lbl:'Franciscan Letter of Introduction', desc:'The letter from Fray Tomas vouching for Juan Diego -- it opened the Bishop\'s door',ec:0xC8A040},
-    {id:'gospel_bk',  pos:[-5,0,5],   icon:'📖',lbl:'Gospel Book from the Bishop',      desc:'A small Gospel book given to Juan Diego by Bishop Zumarraga -- to keep him strong on the return journey',ec:0x2A4A8A},
-    {id:'ep_seal',    pos:[3,0,7],    icon:'🪙',lbl:'Episcopal Seal of New Spain',       desc:'The wax seal of Bishop Juan de Zumarraga -- pressed onto every document authorizing the new Church in Mexico',ec:0xD4A017},
-    {id:'zumarg_letter',pos:[-5,0,-6], icon:'✉️',lbl:'Zumarraga\'s Letter to Spain',  desc:'Zumarraga wrote to King Charles I of Spain describing the apparition and the miracle of the tilma. He called it proof that God had not abandoned the New World.',ec:0xB8A080},
+    {id:'epistle',    pos:[13,0,3],    icon:'📜',lbl:'Franciscan Letter of Introduction', desc:'The letter from Fray Tomas vouching for Juan Diego -- it opened the Bishop\'s door',ec:0xC8A040},
+    {id:'gospel_bk',  pos:[-13,0,3],   icon:'📖',lbl:'Gospel Book from the Bishop',      desc:'A small Gospel book given to Juan Diego by Bishop Zumarraga -- to keep him strong on the return journey',ec:0x2A4A8A},
+    {id:'ep_seal',    pos:[10,0,-5],    icon:'🪙',lbl:'Episcopal Seal of New Spain',       desc:'The wax seal of Bishop Juan de Zumarraga -- pressed onto every document authorizing the new Church in Mexico',ec:0xD4A017},
+    {id:'zumarg_letter',pos:[-10,0,-5], icon:'✉️',lbl:'Zumarraga\'s Letter to Spain',  desc:'Zumarraga wrote to King Charles I of Spain describing the apparition and the miracle of the tilma. He called it proof that God had not abandoned the New World.',ec:0xB8A080},
   ],
   nican:[
-    {id:'nican_ms',      pos:[4,0,5],    icon:'📜',lbl:'Nican Mopohua Manuscript',    desc:'The original Nahuatl account by Antonio Valeriano, c.1545 -- the oldest written record of the apparitions',ec:0xC8A040},
-    {id:'quill',         pos:[-5,0,4],   icon:'🪶',lbl:"Valeriano's Writing Quill",   desc:'The quill used to record the sacred words in classical Nahuatl -- the most important document in Mexican history',ec:0xE8E8D0},
-    {id:'nahuatl_book',  pos:[5,0,-5],   icon:'📖',lbl:'Nahuatl Grammar Primer',      desc:'The grammar book Valeriano used at the Franciscan college at Tlatelolco where Juan Diego also heard Mass',ec:0x8B6040},
-    {id:'ink_pot',       pos:[-4,0,-5],  icon:'🖋',lbl:'Ink Pot from Tlatelolco',     desc:'Iron gall ink -- the same used to copy the account that preserves the apparition for all time',ec:0x3A3A2A},
-    {id:'beeswax_nican', pos:[3,0,7],    icon:'🕯',lbl:'Chapel Beeswax Candle',       desc:'Burned at the shrine while Valeriano wrote -- the Nahuatl word for candle is the same as the word for prayer',ec:0xFFE080},
+    {id:'nican_ms',      pos:[10,0,6],    icon:'📜',lbl:'Nican Mopohua Manuscript',    desc:'The original Nahuatl account by Antonio Valeriano, c.1545 -- the oldest written record of the apparitions',ec:0xC8A040},
+    {id:'quill',         pos:[-10,0,7],   icon:'🪶',lbl:"Valeriano's Writing Quill",   desc:'The quill used to record the sacred words in classical Nahuatl -- the most important document in Mexican history',ec:0xE8E8D0},
+    {id:'nahuatl_book',  pos:[10,0,-6],   icon:'📖',lbl:'Nahuatl Grammar Primer',      desc:'The grammar book Valeriano used at the Franciscan college at Tlatelolco where Juan Diego also heard Mass',ec:0x8B6040},
+    {id:'ink_pot',       pos:[-10,0,-6],  icon:'🖋',lbl:'Ink Pot from Tlatelolco',     desc:'Iron gall ink -- the same used to copy the account that preserves the apparition for all time',ec:0x3A3A2A},
+    {id:'beeswax_nican', pos:[0,0,6],    icon:'🕯',lbl:'Chapel Beeswax Candle',       desc:'Burned at the shrine while Valeriano wrote -- the Nahuatl word for candle is the same as the word for prayer',ec:0xFFE080},
   ],
   tilma_study:[
-    {id:'infrared_photo',pos:[4,0,5],    icon:'📷',lbl:'Infrared Photograph, 1979',   desc:"Dr. Callahan's infrared photograph -- no sizing, no brushstrokes, no underdrawing. Impossible for any human painter of any era.",ec:0x2A4A6A},
-    {id:'fiber_sample',  pos:[-5,0,4],   icon:'🧵',lbl:'Ayate Fiber Sample',           desc:'A single thread of the cactus-fiber cloth -- analysis shows it should have rotted 450 years ago. It did not.',ec:0xD4B060},
-    {id:'eye_magnified', pos:[5,0,-5],   icon:'👁',lbl:'Magnified Eye Study, 1981',    desc:"Dr. Tonsmann's 2500x enlargement showing 13 human figures reflected in the Virgin's eyes -- with the Purkinje-Sanson triple reflection of living corneas.",ec:0x6080A0},
-    {id:'star_chart',    pos:[-4,0,-5],  icon:'⭐',lbl:'December 1531 Star Chart',     desc:"The constellations on the tilma's mantle match exactly the sky over Mexico at dawn on December 12, 1531 -- viewed from miles above the earth.",ec:0x2A2A5A},
-    {id:'pigment_vial',  pos:[3,0,7],    icon:'🎨',lbl:'Unknown Pigment Sample',       desc:'Nobel laureate Richard Kuhn, 1936: the pigments correspond to no known mineral, vegetable, or animal dye of any period.',ec:0x9A6080},
+    {id:'infrared_photo',pos:[10,0,6],    icon:'📷',lbl:'Infrared Photograph, 1979',   desc:"Dr. Callahan's infrared photograph -- no sizing, no brushstrokes, no underdrawing. Impossible for any human painter of any era.",ec:0x2A4A6A},
+    {id:'fiber_sample',  pos:[-10,0,7],   icon:'🧵',lbl:'Ayate Fiber Sample',           desc:'A single thread of the cactus-fiber cloth -- analysis shows it should have rotted 450 years ago. It did not.',ec:0xD4B060},
+    {id:'eye_magnified', pos:[10,0,-6],   icon:'👁',lbl:'Magnified Eye Study, 1981',    desc:"Dr. Tonsmann's 2500x enlargement showing 13 human figures reflected in the Virgin's eyes -- with the Purkinje-Sanson triple reflection of living corneas.",ec:0x6080A0},
+    {id:'star_chart',    pos:[-10,0,-6],  icon:'⭐',lbl:'December 1531 Star Chart',     desc:"The constellations on the tilma's mantle match exactly the sky over Mexico at dawn on December 12, 1531 -- viewed from miles above the earth.",ec:0x2A2A5A},
+    {id:'pigment_vial',  pos:[0,0,6],    icon:'🎨',lbl:'Unknown Pigment Sample',       desc:'Nobel laureate Richard Kuhn, 1936: the pigments correspond to no known mineral, vegetable, or animal dye of any period.',ec:0x9A6080},
   ],
   conversions:[
-    {id:'baptism_record',pos:[5,0,6],    icon:'📋',lbl:'Baptism Record -- 14,000',    desc:"Fray Toribio's record of a single day on which 14,000 people received baptism. He lost count on many such days.",ec:0x4A7080},
-    {id:'codex_conv',    pos:[-6,0,5],   icon:'📜',lbl:'Conversion Codex',             desc:'An indigenous pictorial record of mass baptisms -- the scribes could not write fast enough to record every name.',ec:0xC8A040},
-    {id:'cross_new',     pos:[6,0,-4],   icon:'✝',lbl:'Mission Cross',                desc:'One of thousands of crosses erected as the faith spread through nine million souls in nine years after the apparition.',ec:0xD4A017},
-    {id:'catechism_nahua',pos:[-5,0,-5], icon:'📗',lbl:'Nahuatl Catechism',            desc:"The catechism translated into Nahuatl by Fray Bernardino. Our Lady's language became the Church's language in New Spain.",ec:0x406830},
-    {id:'tlacuilo_art',  pos:[0,0,-11],  icon:'🎨',lbl:'Tlacuilo Painting of Her',    desc:'An indigenous artist copy of the tilma image, made entirely in the pre-Columbian pictorial style -- she belongs to both worlds.',ec:0xD46030},
+    {id:'baptism_record',pos:[10,0,6],    icon:'📋',lbl:'Baptism Record -- 14,000',    desc:"Fray Toribio's record of a single day on which 14,000 people received baptism. He lost count on many such days.",ec:0x4A7080},
+    {id:'codex_conv',    pos:[-10,0,8],   icon:'📜',lbl:'Conversion Codex',             desc:'An indigenous pictorial record of mass baptisms -- the scribes could not write fast enough to record every name.',ec:0xC8A040},
+    {id:'cross_new',     pos:[10,0,-6],   icon:'✝',lbl:'Mission Cross',                desc:'One of thousands of crosses erected as the faith spread through nine million souls in nine years after the apparition.',ec:0xD4A017},
+    {id:'catechism_nahua',pos:[-10,0,-6], icon:'📗',lbl:'Nahuatl Catechism',            desc:"The catechism translated into Nahuatl by Fray Bernardino. Our Lady's language became the Church's language in New Spain.",ec:0x406830},
+    {id:'tlacuilo_art',  pos:[0,0,6],  icon:'🎨',lbl:'Tlacuilo Painting of Her',    desc:'An indigenous artist copy of the tilma image, made entirely in the pre-Columbian pictorial style -- she belongs to both worlds.',ec:0xD46030},
   ],
   hermit:[
-    {id:'prayer_mat',    pos:[4,0,5],    icon:'🧎',lbl:"Juan Diego's Prayer Mat",     desc:'Worn thin by seventeen years of pre-dawn prayer. He knelt on this mat every morning of his life as shrine keeper.',ec:0x8B6040},
-    {id:'broom_hermit',  pos:[-5,0,4],   icon:'🧹',lbl:"The Shrine Keeper's Broom",   desc:'Juan Diego swept the chapel floor every morning for 17 years. The last act of his life, witnesses say, was sweeping.',ec:0x7A5030},
-    {id:'old_tilma2',    pos:[5,0,-5],   icon:'🌵',lbl:"Juan Diego's Ordinary Cloak", desc:"His everyday cloak -- he pointed to the spot where Our Lady arranged the roses with her own hands. Still tender about it, seventeen years later.",ec:0xC4916A},
-    {id:'beatif_decree', pos:[-4,0,-5],  icon:'📜',lbl:'Beatification Decree, 1990',  desc:'Pope John Paul II beatified Juan Diego before the largest crowd ever assembled for a beatification -- at Tepeyac itself.',ec:0xD4A017},
-    {id:'canoniz_image', pos:[4,0,8],    icon:'👑',lbl:'Canonization Image, 2002',    desc:'Canonized July 31, 2002. Twelve million pilgrims attended. The Pope said: the whole world has been blessed through him.',ec:0xFFD700},
+    {id:'prayer_mat',    pos:[10,0,6],    icon:'🧎',lbl:"Juan Diego's Prayer Mat",     desc:'Worn thin by seventeen years of pre-dawn prayer. He knelt on this mat every morning of his life as shrine keeper.',ec:0x8B6040},
+    {id:'broom_hermit',  pos:[-10,0,7],   icon:'🧹',lbl:"The Shrine Keeper's Broom",   desc:'Juan Diego swept the chapel floor every morning for 17 years. The last act of his life, witnesses say, was sweeping.',ec:0x7A5030},
+    {id:'old_tilma2',    pos:[10,0,-6],   icon:'🌵',lbl:"Juan Diego's Ordinary Cloak", desc:"His everyday cloak -- he pointed to the spot where Our Lady arranged the roses with her own hands. Still tender about it, seventeen years later.",ec:0xC4916A},
+    {id:'beatif_decree', pos:[-10,0,-6],  icon:'📜',lbl:'Beatification Decree, 1990',  desc:'Pope John Paul II beatified Juan Diego before the largest crowd ever assembled for a beatification -- at Tepeyac itself.',ec:0xD4A017},
+    {id:'canoniz_image', pos:[0,0,6],    icon:'👑',lbl:'Canonization Image, 2002',    desc:'Canonized July 31, 2002. Twelve million pilgrims attended. The Pope said: the whole world has been blessed through him.',ec:0xFFD700},
   ],};
 const ROSES = ['rose1','rose2','rose3','rose4','rose5','rose6','rose7','rose8','rose9','rose10','rose11','rose12'];
 
@@ -731,97 +736,97 @@ const ROSES = ['rose1','rose2','rose3','rose4','rose5','rose6','rose7','rose8','
 // -> Chapter III cont: Hill 2nd vision -> Chapter IV: Miracle/roses
 // -> Chapter III return: Bishop miracle reveal -> Chapter V: Church -> Chapter VI: Philippines
 const QS = [
-  {s:'village',     f:'qv1', d:'Speak with the Village Elder',             t:'npc',  id:'elder'},
-  {s:'village',     f:'qv2', d:'Collect tamales for the journey',           t:'item', id:'tamale'},
-  {s:'village',     f:'qv3', d:'Pick up your tilma cloak',                  t:'item', id:'manta'},
-  {s:'village',     f:'qv4', d:'Visit cousin Juan Bernardino',              t:'npc',  id:'cousin'},
-  {s:'village',     f:'qv5', d:'Speak with Fray Tomas, OFM',               t:'npc',  id:'friar'},
-  {s:'village',     f:'qv6', d:'Collect the rosary from Fray Tomas',           t:'item', id:'rosary'},
-  {s:'village',     f:'qv7', d:'Speak with the merchant at the market',         t:'npc',  id:'merchant'},
-  {s:'village',     f:'qv8', d:'Speak with Xochitl the village woman',          t:'npc',  id:'woman'},
-  {s:'village',     f:'qv9', d:'Read about Our Lady of Guadalupe in Extremadura', t:'item', id:'guadalupe_es'},
-  {s:'hill',        f:'qh1', d:'Collect sacred herbs on the path',          t:'item', id:'herbs'},
-  {s:'hill',        f:'qh2', d:'Hear the miraculous birdsong',              t:'item', id:'birdsong'},
+  {s:'village',     f:'qv1', d:'Speak with the Village Elder.',             t:'npc',  id:'elder'},
+  {s:'village',     f:'qv2', d:'Collect tamales for the journey.',           t:'item', id:'tamale'},
+  {s:'village',     f:'qv3', d:'Pick up your tilma cloak.',                  t:'item', id:'manta'},
+  {s:'village',     f:'qv4', d:'Visit cousin Juan Bernardino.',              t:'npc',  id:'cousin'},
+  {s:'village',     f:'qv5', d:'Speak with Fray Tomas, OFM.',               t:'npc',  id:'friar'},
+  {s:'village',     f:'qv6', d:'Collect the rosary from Fray Tomas.',           t:'item', id:'rosary'},
+  {s:'village',     f:'qv7', d:'Speak with the merchant at the market.',         t:'npc',  id:'merchant'},
+  {s:'village',     f:'qv8', d:'Speak with Xochitl the village woman.',          t:'npc',  id:'woman'},
+  {s:'village',     f:'qv9', d:'Read about Our Lady of Guadalupe in Extremadura.', t:'item', id:'guadalupe_es'},
+  {s:'hill',        f:'qh1', d:'Collect sacred herbs on the path.',          t:'item', id:'herbs'},
+  {s:'hill',        f:'qh2', d:'Hear the miraculous birdsong.',              t:'item', id:'birdsong'},
   {s:'hill',        f:'qh8', d:"Study the star-map on Our Lady's mantle",  t:'item', id:'starmantle'},
-  {s:'hill',        f:'qh3', d:'Receive the First Apparition of Our Lady',  t:'npc',  id:'ourLady1'},
+  {s:'hill',        f:'qh3', d:'Receive the First Apparition of Our Lady.',  t:'npc',  id:'ourLady1'},
   {s:'bishop',      f:'qb1', d:"Speak with the Bishop's doorman",           t:'npc',  id:'doorman'},
   {s:'bishop',      f:'qb2', d:"Deliver Our Lady's message to the Bishop",  t:'npc',  id:'bishop'},
-  {s:'hill',        f:'qh4', d:'Dec 9 Evening -- Our Lady Comforts You',    t:'npc',  id:'ourLady1'},
-  {s:'hill',        f:'qh5', d:'Speak with shepherd Tlacatzin on the hill', t:'npc',  id:'shepherd'},
+  {s:'hill',        f:'qh4', d:'Dec 9 Evening -- Our Lady Comforts You.',    t:'npc',  id:'ourLady1'},
+  {s:'hill',        f:'qh5', d:'Speak with shepherd Tlacatzin on the hill.', t:'npc',  id:'shepherd'},
   {s:'hill',        f:'qh6', d:"Hear from the Bishop's servant who tried to follow you", t:'npc', id:'spy_servant'},
   {s:'hill',        f:'qh7', d:"Speak with Elder Cuauhtemoc about Tepeyac's sacred history", t:'npc', id:'tepeyac_elder'},
-  {s:'miracle',     f:'qm1', d:'Collect all 12 Castilian roses',            t:'roses'},
-  {s:'miracle',     f:'qm2', d:'Collect the ayate cactus cloth',            t:'item', id:'ayate'},
+  {s:'miracle',     f:'qm1', d:'Collect all 12 Castilian roses.',            t:'roses'},
+  {s:'miracle',     f:'qm2', d:'Collect the ayate cactus cloth.',            t:'item', id:'ayate'},
   {s:'miracle',     f:'qm3', d:"Receive Our Lady's final instructions",     t:'npc',  id:'ourLady2'},
   {s:'miracle',     f:'qm4', d:"Witness Juan Bernardino's miraculous healing",t:'npc',id:'cousin2'},
-  {s:'miracle',     f:'qm5', d:'Hear Tlacaelel -- he smelled roses where no roses grow', t:'npc', id:'rose_witness'},
-  {s:'bishop',      f:'qb3', d:'Present the roses and tilma to the Bishop', t:'npc',  id:'bishop'},
-  {s:'bishop',      f:'qb4', d:'Speak with the palace guard Luis',           t:'npc',  id:'guard'},
-  {s:'bishop',      f:'qb5', d:'Hear church official Don Pedro',             t:'npc',  id:'official'},
-  {s:'bishop',      f:'qb6', d:'Collect the Franciscan letter of introduction', t:'item', id:'epistle'},
-  {s:'bishop',      f:'qb7', d:'Collect the Gospel Book from Bishop Zumarraga', t:'item', id:'gospel_bk'},
-  {s:'bishop',      f:'qb8', d:'Collect the episcopal seal of New Spain',     t:'item', id:'ep_seal'},
+  {s:'miracle',     f:'qm5', d:'Hear Tlacaelel -- he smelled roses where no roses grow.', t:'npc', id:'rose_witness'},
+  {s:'bishop',      f:'qb3', d:'Present the roses and tilma to the Bishop.', t:'npc',  id:'bishop'},
+  {s:'bishop',      f:'qb4', d:'Speak with the palace guard Luis.',           t:'npc',  id:'guard'},
+  {s:'bishop',      f:'qb5', d:'Hear church official Don Pedro.',             t:'npc',  id:'official'},
+  {s:'bishop',      f:'qb6', d:'Collect the Franciscan letter of introduction.', t:'item', id:'epistle'},
+  {s:'bishop',      f:'qb7', d:'Collect the Gospel Book from Bishop Zumarraga.', t:'item', id:'gospel_bk'},
+  {s:'bishop',      f:'qb8', d:'Collect the episcopal seal of New Spain.',     t:'item', id:'ep_seal'},
   {s:'bishop',      f:'qb9', d:"Find Zumarraga's letter to King Charles of Spain", t:'item', id:'zumarg_letter'},
   {s:'church',      f:'qc1', d:"Hear Bishop Zumarraga's witness",           t:'npc',  id:'bishopChurch'},
-  {s:'church',      f:'qc2', d:'Light the first candle at the chapel',      t:'item', id:'candle1'},
-  {s:'church',      f:'qc3', d:'Place flowers at the tilma shrine',         t:'item', id:'flower1'},
-  {s:'church',      f:'qc4', d:'Hear from the first pilgrims',              t:'npc',  id:'pilgrim'},
-  {s:'church',      f:'qc5', d:'Speak with Juan Diego -- guardian of the shrine', t:'npc',  id:'juanOld'},
+  {s:'church',      f:'qc2', d:'Light the first candle at the chapel.',      t:'item', id:'candle1'},
+  {s:'church',      f:'qc3', d:'Place flowers at the tilma shrine.',         t:'item', id:'flower1'},
+  {s:'church',      f:'qc4', d:'Hear from the first pilgrims.',              t:'npc',  id:'pilgrim'},
+  {s:'church',      f:'qc5', d:'Speak with Juan Diego -- guardian of the shrine.', t:'npc',  id:'juanOld'},
   {s:'church',      f:'qc6', d:"Hear Catalina's eyewitness account of the tilma miracle", t:'npc', id:'palace_witness'},
-  {s:'church',      f:'qc7', d:'Speak with Fray Martin -- architect of the first chapel', t:'npc', id:'architect_chapel'},
-  {s:'philippines', f:'qp1', d:'Meet Datu Panginoon -- Filipino chieftain', t:'npc',  id:'chieftain'},
-  {s:'philippines', f:'qp2', d:'Gather sampaguita flowers for the altar',   t:'item', id:'sampaguita'},
-  {s:'philippines', f:'qp3', d:'Collect bamboo for the chapel',             t:'item', id:'bamboo'},
-  {s:'philippines', f:'qp4', d:'Meet Fray Rodrigo de Santiago, OSA',        t:'npc',  id:'friarPh'},
-  {s:'philippines', f:'qp5', d:'Write the Tagalog novena prayers',          t:'item', id:'novenaTxt'},
-  {s:'philippines', f:'qp6', d:'Teach Dona Maria Panganiban',               t:'npc',  id:'laywoman'},
-  {s:'philippines', f:'qp7', d:'Prepare river procession candles',          t:'item', id:'procCandles'},
-  {s:'philippines', f:'qp8', d:'Enshrine the blessed tilma copy',           t:'item', id:'tilmaCopy'},
+  {s:'church',      f:'qc7', d:'Speak with Fray Martin -- architect of the first chapel.', t:'npc', id:'architect_chapel'},
+  {s:'philippines', f:'qp1', d:'Meet Datu Panginoon -- Filipino chieftain.', t:'npc',  id:'chieftain'},
+  {s:'philippines', f:'qp2', d:'Gather sampaguita flowers for the altar.',   t:'item', id:'sampaguita'},
+  {s:'philippines', f:'qp3', d:'Collect bamboo for the chapel.',             t:'item', id:'bamboo'},
+  {s:'philippines', f:'qp4', d:'Meet Fray Rodrigo de Santiago, OSA.',        t:'npc',  id:'friarPh'},
+  {s:'philippines', f:'qp5', d:'Write the Tagalog novena prayers.',          t:'item', id:'novenaTxt'},
+  {s:'philippines', f:'qp6', d:'Teach Dona Maria Panganiban.',               t:'npc',  id:'laywoman'},
+  {s:'philippines', f:'qp7', d:'Prepare river procession candles.',          t:'item', id:'procCandles'},
+  {s:'philippines', f:'qp8', d:'Enshrine the blessed tilma copy.',           t:'item', id:'tilmaCopy'},
   {s:'philippines', f:'qp9', d:"Receive the Governor's land grant",         t:'npc',  id:'governor'},
   {s:'philippines', f:'qp10',d:"Hear Cantora Rosa's Tagalog hymn -- Finale",t:'npc', id:'singer'},
-  {s:'nican',      f:'qn1', d:'Meet Antonio Valeriano, author of the Nican Mopohua', t:'npc',  id:'valeriano'},
-  {s:'nican',      f:'qn2', d:'Collect the original Nican Mopohua manuscript',         t:'item', id:'nican_ms'},
-  {s:'nican',      f:'qn3', d:'Speak with Fray Bernardino de Sahagun, OFM',            t:'npc',  id:'fray_sahag'},
+  {s:'nican',      f:'qn1', d:'Meet Antonio Valeriano, author of the Nican Mopohua.', t:'npc',  id:'valeriano'},
+  {s:'nican',      f:'qn2', d:'Collect the original Nican Mopohua manuscript.',         t:'item', id:'nican_ms'},
+  {s:'nican',      f:'qn3', d:'Speak with Fray Bernardino de Sahagun, OFM.',            t:'npc',  id:'fray_sahag'},
   {s:'nican',      f:'qn4', d:"Collect Valeriano's writing quill",                     t:'item', id:'quill'},
-  {s:'nican',      f:'qn5', d:'Hear the Nahua copyist Don Juan de Zumarro',            t:'npc',  id:'scholar_zumarro'},
-  {s:'nican',      f:'qn6', d:'Collect the Nahuatl grammar primer',                    t:'item', id:'nahuatl_book'},
+  {s:'nican',      f:'qn5', d:'Hear the Nahua copyist Don Juan de Zumarro.',            t:'npc',  id:'scholar_zumarro'},
+  {s:'nican',      f:'qn6', d:'Collect the Nahuatl grammar primer.',                    t:'item', id:'nahuatl_book'},
   {s:'nican',      f:'qn7', d:"Read the Brother Scribe's copy of the account",         t:'npc',  id:'nican_scroll'},
-  {s:'nican',      f:'qn8', d:'Collect the iron gall ink pot used to write the account', t:'item', id:'ink_pot'},
-  {s:'nican',      f:'qn9', d:'Collect the chapel candle that burned while Valeriano wrote', t:'item', id:'beeswax_nican'},
-  {s:'nican',      f:'qn10',d:'Speak with Nahua historian Don Fernando de Alva Ixtlilxochitl', t:'npc', id:'scholar_lasso'},
+  {s:'nican',      f:'qn8', d:'Collect the iron gall ink pot used to write the account.', t:'item', id:'ink_pot'},
+  {s:'nican',      f:'qn9', d:'Collect the chapel candle that burned while Valeriano wrote.', t:'item', id:'beeswax_nican'},
+  {s:'nican',      f:'qn10',d:'Speak with Nahua historian Don Fernando de Alva Ixtlilxochitl.', t:'npc', id:'scholar_lasso'},
   {s:'tilma_study',f:'qt1', d:"Hear Dr. Callahan's infrared findings, 1979",           t:'npc',  id:'callahan'},
-  {s:'tilma_study',f:'qt2', d:'Collect the 1979 infrared photograph',                  t:'item', id:'infrared_photo'},
-  {s:'tilma_study',f:'qt3', d:'Hear Jody Brant Smith on the star-map of the tilma',   t:'npc',  id:'smith_jody'},
-  {s:'tilma_study',f:'qt4', d:'Collect the December 1531 star chart',                  t:'item', id:'star_chart'},
+  {s:'tilma_study',f:'qt2', d:'Collect the 1979 infrared photograph.',                  t:'item', id:'infrared_photo'},
+  {s:'tilma_study',f:'qt3', d:'Hear Jody Brant Smith on the star-map of the tilma.',   t:'npc',  id:'smith_jody'},
+  {s:'tilma_study',f:'qt4', d:'Collect the December 1531 star chart.',                  t:'item', id:'star_chart'},
   {s:'tilma_study',f:'qt5', d:"Hear Dr. Tonsmann on the Virgin's eyes, 1981",         t:'npc',  id:'tonesman'},
-  {s:'tilma_study',f:'qt6', d:'Collect the magnified eye study',                       t:'item', id:'eye_magnified'},
+  {s:'tilma_study',f:'qt6', d:'Collect the magnified eye study.',                       t:'item', id:'eye_magnified'},
   {s:'tilma_study',f:'qt7', d:"Hear Archbishop Montufar's 1556 inquiry",              t:'npc',  id:'bishop_montufar'},
-  {s:'tilma_study',f:'qt8', d:'Collect the unknown pigment sample',                    t:'item', id:'pigment_vial'},
-  {s:'tilma_study',f:'qt9', d:'Collect the ayate fiber sample analyzed by Nobel laureate Kuhn', t:'item', id:'fiber_sample'},
-  {s:'tilma_study',f:'qt10',d:'Hear Prof. Camps-Ribera on the unknown pigments and ageless cloth', t:'npc', id:'guerrero_art'},
-  {s:'tilma_study',f:'qt11',d:'Hear the anonymous 1936 Nobel commission research scientist',    t:'npc', id:'microscopist'},
-  {s:'conversions',f:'qv6', d:'Hear Fray Motolinia on nine million baptisms',          t:'npc',  id:'friar_zumarro2'},
-  {s:'conversions',f:'qv7', d:'Collect the baptism record of 14,000 souls',            t:'item', id:'baptism_record'},
-  {s:'conversions',f:'qv8', d:'Speak with Cacique Tlapalteotl -- why he converted',   t:'npc',  id:'chief_convert'},
-  {s:'conversions',f:'qv9', d:'Collect the Nahuatl catechism',                         t:'item', id:'catechism_nahua'},
-  {s:'conversions',f:'qv10',d:"Hear Bishop Zumarraga's final testimony",               t:'npc',  id:'friar_witness'},
-  {s:'conversions',f:'qv11',d:'Collect the indigenous tlacuilo painting of Her',       t:'item', id:'tlacuilo_art'},
-  {s:'conversions',f:'qv12',d:'Collect the indigenous pictorial conversion codex',        t:'item', id:'codex_conv'},
-  {s:'conversions',f:'qv13',d:'Collect one of the thousand mission crosses erected across New Spain', t:'item', id:'cross_new'},
-  {s:'conversions',f:'qv14',d:'Speak with midwife Dona Xochicueitl -- her conversion story',   t:'npc',  id:'midwife_convert'},
-  {s:'conversions',f:'qv15',d:'Read Fray Torquemada on the incomparable conversion',           t:'npc',  id:'historian_conv'},
-  {s:'conversions',f:'qv16',d:'Speak with Catechist Maria de la Cruz',                         t:'npc',  id:'catechist_woman'},
-  {s:'hermit',     f:'qhe1',d:'Speak with Juan Diego in his final years',              t:'npc',  id:'juan_hermit'},
+  {s:'tilma_study',f:'qt8', d:'Collect the unknown pigment sample.',                    t:'item', id:'pigment_vial'},
+  {s:'tilma_study',f:'qt9', d:'Collect the ayate fiber sample analyzed by Nobel laureate Kuhn.', t:'item', id:'fiber_sample'},
+  {s:'tilma_study',f:'qt10',d:'Hear Prof. Camps-Ribera on the unknown pigments and ageless cloth.', t:'npc', id:'guerrero_art'},
+  {s:'tilma_study',f:'qt11',d:'Hear the anonymous 1936 Nobel commission research scientist.',    t:'npc', id:'microscopist'},
+  {s:'conversions',f:'qco1', d:'Hear Fray Motolinia on nine million baptisms.',          t:'npc',  id:'friar_zumarro2'},
+  {s:'conversions',f:'qco2', d:'Collect the baptism record of 14,000 souls.',            t:'item', id:'baptism_record'},
+  {s:'conversions',f:'qco3', d:'Speak with Cacique Tlapalteotl -- why he converted.',   t:'npc',  id:'chief_convert'},
+  {s:'conversions',f:'qco4', d:'Collect the Nahuatl catechism.',                         t:'item', id:'catechism_nahua'},
+  {s:'conversions',f:'qco5',d:"Hear Bishop Zumarraga's final testimony",               t:'npc',  id:'friar_witness'},
+  {s:'conversions',f:'qco6',d:'Collect the indigenous tlacuilo painting of Her.',       t:'item', id:'tlacuilo_art'},
+  {s:'conversions',f:'qco7',d:'Collect the indigenous pictorial conversion codex.',        t:'item', id:'codex_conv'},
+  {s:'conversions',f:'qco8',d:'Collect one of the thousand mission crosses erected across New Spain.', t:'item', id:'cross_new'},
+  {s:'conversions',f:'qco9',d:'Speak with midwife Dona Xochicueitl -- her conversion story.',   t:'npc',  id:'midwife_convert'},
+  {s:'conversions',f:'qco10',d:'Read Fray Torquemada on the incomparable conversion.',           t:'npc',  id:'historian_conv'},
+  {s:'conversions',f:'qco11',d:'Speak with Catechist Maria de la Cruz.',                         t:'npc',  id:'catechist_woman'},
+  {s:'hermit',     f:'qhe1',d:'Speak with Juan Diego in his final years.',              t:'npc',  id:'juan_hermit'},
   {s:'hermit',     f:'qhe2',d:"Collect Juan Diego's worn prayer mat",                  t:'item', id:'prayer_mat'},
-  {s:'hermit',     f:'qhe3',d:'Hear from the pilgrim seeking healing',                 t:'npc',  id:'pilgrim_sick'},
+  {s:'hermit',     f:'qhe3',d:'Hear from the pilgrim seeking healing.',                 t:'npc',  id:'pilgrim_sick'},
   {s:'hermit',     f:'qhe4',d:"Collect Juan Diego's shrine keeper's broom",            t:'item', id:'broom_hermit'},
-  {s:'hermit',     f:'qhe5',d:'Hear Fray Valadez interview Juan Diego',                t:'npc',  id:'friar_hermit'},
-  {s:'hermit',     f:'qhe6',d:'Collect the beatification decree, 1990',                t:'item', id:'beatif_decree'},
-  {s:'hermit',     f:'qhe7',d:'Read the passage from Antonio Socci',                   t:'npc',  id:'socci_quote'},
-  {s:'hermit',     f:'qhe8',d:'Read the passage from Francis Johnston',                t:'npc',  id:'johnston_quote'},
+  {s:'hermit',     f:'qhe5',d:'Hear Fray Valadez interview Juan Diego.',                t:'npc',  id:'friar_hermit'},
+  {s:'hermit',     f:'qhe6',d:'Collect the beatification decree, 1990.',                t:'item', id:'beatif_decree'},
+  {s:'hermit',     f:'qhe7',d:'Read the passage from Antonio Socci.',                   t:'npc',  id:'socci_quote'},
+  {s:'hermit',     f:'qhe8',d:'Read the passage from Francis Johnston.',                t:'npc',  id:'johnston_quote'},
   {s:'hermit',     f:'qhe9',d:"Hear neighbor Cihuatl's account of Juan Diego's final years", t:'npc', id:'neighbor_hermit'},
   {s:'hermit',     f:'qhe10',d:"Collect Juan Diego's everyday cloak from the morning of the miracle", t:'item', id:'old_tilma2'},
-  {s:'hermit',     f:'qhe11',d:'Collect the 2002 canonization image -- 12 million pilgrims attended', t:'item', id:'canoniz_image'},];
+  {s:'hermit',     f:'qhe11',d:'Collect the 2002 canonization image -- 12 million pilgrims attended.', t:'item', id:'canoniz_image'},];
 
 // ======= MATERIAL HELPER =======
 function mStd(col,r,m,em,ei){
@@ -854,7 +859,8 @@ function buildScene(sn){
   const sun=new THREE.DirectionalLight(C.dc,C.di);
   sun.position.set(C.dp[0],C.dp[1],C.dp[2]);
   sun.castShadow=true;
-  sun.shadow.mapSize.set(4096,4096);
+  const isMob=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  sun.shadow.mapSize.set(isMob?2048:4096,isMob?2048:4096);
   sun.shadow.camera.near=0.3; sun.shadow.camera.far=130;
   sun.shadow.camera.left=-40; sun.shadow.camera.right=40;
   sun.shadow.camera.top=40; sun.shadow.camera.bottom=-40;
@@ -890,8 +896,10 @@ function buildScene(sn){
   // Set initial camera positioned properly with terrain
   const initY=getTerrainY(C.sp[0],C.sp[2],sn);
   G.pl.pos.y=initY;
-  camera.position.set(G.pl.pos.x,initY+G.cam.h,G.pl.pos.z+G.cam.dist);
-  camera.lookAt(G.pl.pos.x,initY+2,G.pl.pos.z);
+  if(camera){
+    camera.position.set(G.pl.pos.x,initY+G.cam.h,G.pl.pos.z+G.cam.dist);
+    camera.lookAt(G.pl.pos.x,initY+2,G.pl.pos.z);
+  }
 
   document.getElementById('chname').textContent=C.name;
   document.getElementById('chsub').textContent=C.sub;
@@ -917,7 +925,7 @@ function buildGround(sn,C){
   const pa=geo.attributes.position;
   const flat=(sn==='bishop'||sn==='philippines');
   for(let i=0;i<pa.count;i++){
-    const x=pa.getX(i),z=pa.getZ(i);
+    const x=pa.getX(i),z=pa.getY(i); // PlaneGeometry: after -PI/2 rotation, local Y = world Z
     pa.setZ(i,getTerrainY(x,z,sn));
   }
   geo.computeVertexNormals();
@@ -928,7 +936,7 @@ function buildGround(sn,C){
     inst.castShadow=true;
     for(let i=0;i<500;i++){
       const gx=(Math.random()-0.5)*80,gz=(Math.random()-0.5)*80;
-      const gy=getTerrainY(gx,gz,sn);
+      const gy=getTerrainY(gx,gz,sn); // gy is world Y, grass stands on terrain
       dummy.position.set(gx,gy+0.1,gz);
       dummy.rotation.y=Math.random()*Math.PI*2;
       dummy.scale.setScalar(0.55+Math.random()*0.9);
@@ -944,7 +952,7 @@ function buildEnv(sn){
   try{
   if(sn==='village'){
     [[-13,0,-8],[-15,0,5],[13,0,-7],[15,0,4],[-5,0,-15],[5,0,-14],[0,0,-16],[-17,0,-2],[16,0,-2]].forEach(p=>bAdobe(p[0],p[1],p[2]));
-    for(let i=0;i<5;i++) bStall(-10+i*5,0,12);
+    [-10,-5,5,10].forEach(x=>bStall(x,0,12));
     for(let i=0;i<18;i++){const a=(i/18)*Math.PI*2,r=19+Math.random()*4;bTree(Math.cos(a)*r,0,Math.sin(a)*r,0.7+Math.random()*0.6);}
     bCross(11,0,-5); bWell(6,0,8);
     [[-7,0,7],[7,0,7],[-7,0,-7],[7,0,-7]].forEach(p=>{
@@ -954,14 +962,9 @@ function buildEnv(sn){
     });
   }
   if(sn==='hill'){
-    // Place rocks AWAY from center path (path is x ~0, z 8 to -22)
-    for(let i=0;i<30;i++){
-      let rx,rz,tries=0;
-      do{ const a=Math.random()*Math.PI*2,r=6+Math.random()*14;
-          rx=Math.cos(a)*r; rz=Math.sin(a)*r-7; tries++;
-      } while(Math.abs(rx)<3.5 && tries<12);
-      bRock(rx,0,rz);
-    }
+    // Rocks placed safely away from center path (x=0 corridor, z +8 to -22)
+    const hillRockSeeds=[[8,2],[-8,1],[12,-4],[-12,-3],[6,-8],[-6,-9],[10,-12],[-10,-11],[4,-15],[-4,-14],[8,-18],[-8,-17],[14,-6],[-14,-5],[6,6],[-7,6],[11,-20],[-11,-19],[5,-2],[-5,-1],[9,-7],[-9,-6],[13,-14],[-13,-13],[7,-3],[-7,-4],[11,-8],[-11,-9],[9,4],[-9,5]];
+    hillRockSeeds.forEach(s=>bRock(s[0],0,s[1]));
     for(let i=0;i<18;i++) bPathStone(Math.sin(i*0.45)*2.5,0.05,6-i*1.5);
     bCross(0,0,-22);
     const dl=new THREE.PointLight(0xFF8844,2.0,90);dl.position.set(-28,12,-35);scene.add(dl);
@@ -1274,6 +1277,7 @@ function buildParts(sn){
 let actx=null,mgain=null,mOn=true,drone=null,chantTO=null;
 function initAudio(){
   try{
+    if(actx) return;
     actx=new(window.AudioContext||window.webkitAudioContext)();
     mgain=actx.createGain();mgain.gain.value=0.13;mgain.connect(actx.destination);
     playChant();
@@ -1316,33 +1320,44 @@ function toggleMusic(){
 // ======= DIALOGUE =======
 let typeTmr=null;
 function openDlg(npc){
-  if(G.dlg.active) return;
+  if(G.dlg.active||!npc||!npc.lines||npc.lines.length===0) return;
+  const dlgEl=document.getElementById('dlg');
+  if(!dlgEl) return;
   const sl=G.npcMem[npc.id]||0;
   G.dlg={active:true,npc,line:sl,full:'',done:false};
-  document.getElementById('dlg').style.display='block';
+  dlgEl.style.display='block';
   showLine(npc,sl);
 }
 function showLine(npc,idx){
   if(idx>=npc.lines.length) idx=npc.lines.length-1;
   const ln=npc.lines[idx];
-  document.getElementById('dsp').textContent=ln.sp;
-  G.dlg.full=ln.t;G.dlg.done=false;
-  let ci=0;clearInterval(typeTmr);
-  document.getElementById('dtxt').textContent='';
-  typeTmr=setInterval(()=>{ci++;document.getElementById('dtxt').textContent=G.dlg.full.slice(0,ci);if(ci>=G.dlg.full.length){clearInterval(typeTmr);G.dlg.done=true;}},18);
+  const dspEl=document.getElementById('dsp');
+  if(dspEl) dspEl.textContent=ln.sp||(npc&&npc.nm?'-- '+npc.nm+' --':'--');
+  G.dlg.full=ln.t||'';G.dlg.done=false;
+  let ci=0;if(typeTmr!==null){clearInterval(typeTmr);typeTmr=null;}
+  const dtxtEl=document.getElementById('dtxt');
+  if(dtxtEl) dtxtEl.textContent='';
+  typeTmr=setInterval(()=>{
+    ci++;
+    if(dtxtEl) dtxtEl.textContent=G.dlg.full.slice(0,ci);
+    if(ci>=G.dlg.full.length){clearInterval(typeTmr);typeTmr=null;G.dlg.done=true;}
+  },18);
 }
 function advDlg(){
   if(!G.dlg.active) return;
-  if(!G.dlg.done){clearInterval(typeTmr);document.getElementById('dtxt').textContent=G.dlg.full;G.dlg.done=true;return;}
+  if(!G.dlg.done){if(typeTmr!==null){clearInterval(typeTmr);typeTmr=null;}const dt=document.getElementById('dtxt');if(dt)dt.textContent=G.dlg.full;G.dlg.done=true;return;}
   const npc=G.dlg.npc,next=G.dlg.line+1;
   if(next<npc.lines.length){G.dlg.line=next;G.npcMem[npc.id]=next;showLine(npc,next);}
   else closeDlg(npc);
 }
 function closeDlg(npc){
-  G.dlg.active=false;clearInterval(typeTmr);
-  document.getElementById('dlg').style.display='none';
+  npc=npc||G.dlg.npc; // allow no-arg call from keyboard handler
+  G.dlg.active=false;
+  if(typeTmr!==null){clearInterval(typeTmr);typeTmr=null;}
+  const dlgEl=document.getElementById('dlg');
+  if(dlgEl) dlgEl.style.display='none';
+  if(!npc) return;
   G.npcMem[npc.id]=0;
-  // Always grant -- grantNpcFlag's scene filter and !flags.has(q.f) prevent double-grant
   grantNpcFlag(npc.id);
   postDlg(npc);
 }
@@ -1352,6 +1367,7 @@ function closeDlg(npc){
 // II return: Hill 2nd apparition -> IV: Miracle/roses -> III return: Bishop miracle reveal ->
 // V: Church -> VI: Philippines
 function postDlg(npc){
+  if(!npc) return;
   const sn=G.scn;
 
   // After 1st apparition on hill -> go to Bishop (1st time)
@@ -1372,7 +1388,8 @@ function postDlg(npc){
   // Requires had_1st_vision + bishop_1st_done (full round trip confirmed)
   if(npc.id==='ourLady1' && sn==='hill' && G.flags.has('had_1st_vision') && G.flags.has('bishop_1st_done') && !G.flags.has('to_miracle')){
     G.flags.add('to_miracle');
-    showNotif('🌹','Our Lady Sends You to the Summit','December 12: Gather the twelve Castilian roses from the hilltop -- then return to the Bishop with the sign that cannot be made by human hands!');
+    G.flags.add('qm1'); // Rose quest auto-starts
+    showNotif('🌹','Our Lady Sends You to the Summit','December 12 -- Gather the twelve Castilian roses from the hilltop. Return to the Bishop with the sign that cannot be made by human hands.');
     setTimeout(()=>chgScene('miracle'),5500);
     return;
   }
@@ -1386,11 +1403,8 @@ function postDlg(npc){
   }
   // Church complete check on every NPC dialogue
   if(sn==='church') chkChurch();
-  // Philippines finale
-  if(npc.id==='singer' && sn==='philippines'){
-    doFlash();
-    setTimeout(()=>{document.getElementById('finale').style.display='flex';},3000);
-  }
+  // Philippines completion - handled by chkSceneDone
+  if(sn==='philippines') chkSceneDone();
   updTasks();updPips();
 }
 
@@ -1405,6 +1419,7 @@ function doInteract(){
   if(bC) pickUp(bC);
 }
 function spawnPickupBurst(pos){
+  if(!scene) return;
   for(let i=0;i<10;i++){
     try{
       const geo=new THREE.SphereGeometry(0.055,4,4);
@@ -1437,8 +1452,8 @@ function pickUp(cm){
   playSfx();grantItemFlag(cm.data.id);updInv();
   if(ROSES.includes(cm.data.id)){
     if(ROSES.every(id=>G.flags.has(id))&&!G.flags.has('qm1')){
-      G.flags.add('qm1');G.flags.add('sb_sign_ready');
-      doFlash();showNotif('🌹','All 12 Roses Gathered!','Twelve Castilian roses in December frost -- the impossible sign is complete!');
+      G.flags.add('qm1');
+      doFlash();showNotif('🌹','All 12 Roses Gathered!','Twelve Castilian roses in December frost. Now seek Our Lady at the summit for Her final blessing before returning to the Bishop.');
       updTasks();updPips();
     }
   }
@@ -1450,7 +1465,7 @@ const QUEST_PREREQS = {qh4:'bishop_1st_done', qb3:'sb_sign_ready'};
 function grantNpcFlag(npcId){
   for(const q of QS){
     if(q.t==='npc'&&q.id===npcId&&q.s===G.scn&&!G.flags.has(q.f)){
-      const pre=QUEST_PREREQS[q.f];
+      const pre=typeof QUEST_PREREQS!=='undefined'?QUEST_PREREQS[q.f]:null;
       if(!pre||G.flags.has(pre)) G.flags.add(q.f);
     }
   }
@@ -1459,8 +1474,13 @@ function grantNpcFlag(npcId){
   updTasks();updPips();
 }
 function grantItemFlag(itemId){
-  for(const q of QS){if(q.t==='item'&&q.id===itemId&&q.s===G.scn&&!G.flags.has(q.f)) G.flags.add(q.f);}
-  updTasks();updPips();
+  let granted=false;
+  for(const q of QS){
+    if((q.t==='item'||q.t==='roses')&&q.id===itemId&&q.s===G.scn&&!G.flags.has(q.f)){
+      G.flags.add(q.f); granted=true;
+    }
+  }
+  if(granted){updTasks();updPips();chkSceneDone();chkChurch();}
 }
 function chkSceneDone(){
   const sn=G.scn;
@@ -1493,7 +1513,7 @@ function chkSceneDone(){
     }
   }
   if(sn==='conversions'&&!G.flags.has('conv_done')){
-    if(['qv6','qv7','qv8','qv9','qv10','qv11','qv12','qv13','qv14','qv15','qv16'].every(f=>G.flags.has(f))){
+    if(['qco1','qco2','qco3','qco4','qco5','qco6','qco7','qco8','qco9','qco10','qco11'].every(f=>G.flags.has(f))){
       G.flags.add('conv_done');
       showNotif('✟','Nine Million Souls!','The greatest conversion in history. Now see the chapel they built at Tepeyac -- and visit Juan Diego in his last years.');
       setTimeout(()=>chgScene('church'),5500);
@@ -1506,12 +1526,21 @@ function chkSceneDone(){
       setTimeout(()=>{document.getElementById('phsc').style.display='flex';},5500);
     }
   }
+  if(sn==='philippines'&&!G.flags.has('ph_done')){
+    if(['qp1','qp2','qp3','qp4','qp5','qp6','qp7','qp8','qp9','qp10'].every(f=>G.flags.has(f))){
+      G.flags.add('ph_done');
+      doFlash();
+      showNotif('🌸','Faith Crosses the Pacific!','The image of Our Lady of Guadalupe has reached the Philippines. The journey of Juan Diego now spans the world.');
+      setTimeout(()=>{document.getElementById('finale').style.display='flex';},4000);
+    }
+  }
 }
 
 function chkChurch(){
   if(G.scn!=='church'||G.flags.has('c_done')) return;
   if(['qc1','qc2','qc3','qc4','qc5','qc6','qc7'].every(f=>G.flags.has(f))){
     G.flags.add('c_done');
+    updTasks();updPips();
     showNotif('⛪','The Church is Complete!','Nine million souls converted in seven years. Now visit Juan Diego in his final years as hermit of Tepeyac...');
     setTimeout(()=>chgScene('hermit'),5500);
   }
@@ -1519,11 +1548,13 @@ function chkChurch(){
 
 // ======= EFFECTS =======
 function doFlash(){
-  const fl=document.getElementById('flash');fl.style.opacity='1';setTimeout(()=>{fl.style.opacity='0';},900);
+  const fl=document.getElementById('flash');
+  if(!fl) return;
+  fl.style.opacity='1';setTimeout(()=>{fl.style.opacity='0';},900);
   G.glows.forEach(g=>{g.l.intensity=g.b*7;});setTimeout(()=>{G.glows.forEach(g=>{g.l.intensity=g.b;});},1200);
 }
 function chgScene(ns){
-  if(G.transitioning) return;
+  if(G.transitioning||!scene||!renderer) return;
   G.transitioning=true;
   const fo=document.getElementById('fade');fo.style.opacity='1';fo.style.pointerEvents='all';
   setTimeout(()=>{
@@ -1570,13 +1601,17 @@ function restartGame(){
   document.getElementById('finale').style.display='none';
   G.flags=new Set();G.inv={};G.npcMem={};
   G.dlg={active:false,npc:null,line:0,full:'',done:false};
-  G.pl.mesh=null;
+  G.pl.mesh=null; G.pl.angle=0; G.pl.tAngle=0; G.pl.bobT=0; G.pl.moving=false;
+  G.scn='village';
+  if(G.pl.pos) G.pl.pos.set(0,0,6); else G.pl.pos=new THREE.Vector3(0,0,6);
   chgScene('village');
 }
 
 // ======= UI =======
 function updTasks(){
-  const list=document.getElementById('tlist');list.innerHTML='';
+  const list=document.getElementById('tlist');
+  if(!list) return;
+  list.innerHTML='';
   const sceneQs=QS.filter(q=>q.s===G.scn);
   const done_count=sceneQs.filter(q=>G.flags.has(q.f)).length;
   const h3=document.querySelector('#tasks h3');
@@ -1604,7 +1639,9 @@ function updTasks(){
   }
 }
 function updInv(){
-  const il=document.getElementById('ilist');il.innerHTML='';
+  const il=document.getElementById('ilist');
+  if(!il) return;
+  il.innerHTML='';
   const ids=Object.keys(G.inv);
   if(!ids.length){il.innerHTML='<div class="ie">-- Empty --</div>';return;}
   const all=Object.values(COLS).flat();
@@ -1626,8 +1663,12 @@ function updPips(){
 }
 let notifTO=null;
 function showNotif(icon,title,body){
-  document.getElementById('ni').textContent=icon;document.getElementById('nt').textContent=title;document.getElementById('nb').textContent=body;
-  const n=document.getElementById('notif');n.classList.add('on');clearTimeout(notifTO);notifTO=setTimeout(()=>n.classList.remove('on'),4800);
+  const ni=document.getElementById('ni'),nt=document.getElementById('nt'),nb=document.getElementById('nb'),n=document.getElementById('notif');
+  if(!n) return;
+  if(ni) ni.textContent=icon;
+  if(nt) nt.textContent=title;
+  if(nb) nb.textContent=body;
+  n.classList.add('on');clearTimeout(notifTO);notifTO=setTimeout(()=>n.classList.remove('on'),4800);
 }
 
 // ======= MAIN LOOP =======
@@ -1635,7 +1676,7 @@ function showNotif(icon,title,body){
 let lastT=0;
 function loop(now){
   requestAnimationFrame(loop);
-  if(!G.running) return;
+  if(!G.running||!G.pl.pos) return;
   const dt=Math.min((now-lastT)/1000,0.05);lastT=now;G.animT+=dt;
 
   if(!G.dlg.active){
@@ -1666,25 +1707,27 @@ function loop(now){
       G.pl.angle+=ad*0.18;
       G.pl.mesh.position.x=G.pl.pos.x;G.pl.mesh.position.z=G.pl.pos.z;G.pl.mesh.rotation.y=G.pl.angle;
     }
-    for(const cm of [...G.colMeshes]){
+    if(G.pl.pos) for(const cm of [...G.colMeshes]){
       if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<1.8) pickUp(cm);
     }
   }
 
   // Terrain Y-follow: smoothly move player up/down hills
   const tY=getTerrainY(G.pl.pos.x,G.pl.pos.z,G.scn);
-  G.pl.pos.y+=(tY-G.pl.pos.y)*0.22;
+  G.pl.pos.y+=(tY-G.pl.pos.y)*0.35;
   if(G.pl.mesh) G.pl.mesh.position.y=G.pl.pos.y+(G.pl.moving?Math.abs(Math.sin(G.pl.bobT))*0.06:G.pl.mesh.position.y*0.12);
   // Camera: always gently drift behind player direction
   const camTarget=-G.pl.tAngle+Math.PI;
   const yd=((camTarget-G.cam.yaw+Math.PI)%(Math.PI*2))-Math.PI;
   G.cam.yaw+=yd*(G.pl.moving?0.045:0.008);
-  camDes.set(G.pl.pos.x+Math.sin(G.cam.yaw)*G.cam.dist,G.pl.pos.y+G.cam.h,G.pl.pos.z+Math.cos(G.cam.yaw)*G.cam.dist);
+  const camTY=getTerrainY(G.pl.pos.x+Math.sin(G.cam.yaw)*G.cam.dist,G.pl.pos.z+Math.cos(G.cam.yaw)*G.cam.dist,G.scn);
+  camDes.set(G.pl.pos.x+Math.sin(G.cam.yaw)*G.cam.dist,Math.max(camTY+2,G.pl.pos.y+G.cam.h),G.pl.pos.z+Math.cos(G.cam.yaw)*G.cam.dist);
   camera.position.lerp(camDes,0.07);camLk.set(G.pl.pos.x,G.pl.pos.y+2.0,G.pl.pos.z);camera.lookAt(camLk);
 
   for(const nm of G.npcMeshes){
     const npcGroundY=getTerrainY(nm.data.pos[0],nm.data.pos[2],G.scn);
-    nm.mesh.position.y=npcGroundY+nm.data.pos[1]+Math.sin(G.animT*1.4+nm.mesh.position.x)*0.038;
+    const npcYBase=nm.data.isHoly ? npcGroundY+nm.data.pos[1] : npcGroundY;
+    nm.mesh.position.y=npcYBase+Math.sin(G.animT*1.4+nm.mesh.position.x)*0.038;
     // Interaction ring proximity fade
     const ir=nm.mesh.userData.intRing;
     if(ir){
@@ -1719,15 +1762,18 @@ function loop(now){
   let nearNPC=null,nearCol=null;
   for(const nm of G.npcMeshes){if(G.pl.pos.distanceTo(nm.mesh.position)<4.2){nearNPC=nm;break;}}
   if(!nearNPC){for(const cm of G.colMeshes){if(!G.flags.has(cm.data.id)&&G.pl.pos.distanceTo(cm.mesh.position)<3.0){nearCol=cm;break;}}}
-  if(nearNPC){ph.textContent='TALK -- '+nearNPC.data.nm;ph.classList.add('on');tb.className='gn';}
-  else if(nearCol){ph.textContent='PICK UP -- '+nearCol.data.lbl;ph.classList.add('on');tb.className='gi';}
-  else{ph.classList.remove('on');tb.className='';}
+  if(ph){
+    if(nearNPC){ph.textContent='TALK -- '+nearNPC.data.nm;ph.classList.add('on');if(tb)tb.className='gn';}
+    else if(nearCol){ph.textContent='PICK UP -- '+nearCol.data.lbl;ph.classList.add('on');if(tb)tb.className='gi';}
+    else{ph.classList.remove('on');if(tb)tb.className='';}
+  }
 
-  try{ renderer.render(scene,camera); }catch(e){ console.warn('render err',e); }
+  if(renderer&&scene&&camera) try{ renderer.render(scene,camera); }catch(e){ console.warn('render err',e); }
 }
 
 // ======= START =======
 function startGame(){
+  if(!renderer||!scene||!camera){console.error('Game not initialized - try reloading');return;}
   const intro=document.getElementById('intro');intro.style.opacity='0';intro.style.pointerEvents='none';
   setTimeout(()=>{intro.style.display='none';},2000);
   document.getElementById('hud').classList.add('on');
